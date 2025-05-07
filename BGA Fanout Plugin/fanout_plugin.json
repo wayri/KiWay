@@ -1,5 +1,5 @@
 {
-  "name": "Fan Out Pads with GUI",
+  "name": "Fan Out - BGA",
   "description": "Fans out pads from selected footprints using vias and configurable traces.",
   "version": "1.0.0",
   "author": "Wayri-jvr",
