@@ -1,13 +1,32 @@
 {
-    "name": "Fan Out Pads with GUI",
-    "description": "Fans out pads from selected footprints using via and trace configuration.",
-    "version": "1.0.0",
-    "author": "Your Name",
-    "license": "MIT",
-    "url": "https://github.com/yourusername/FanOutPlugin",
-    "download_url": "https://github.com/yourusername/FanOutPlugin/archive/refs/heads/main.zip",
-    "dependencies": [],
-    "keywords": ["routing", "fanout", "vias", "pcbnew"],
-    "plugin_class": "plugin.FanOutPlugin"
-  }
-  
+  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "name": "Fanout Plugin",
+  "description": "Plugin for KiCAD v9 and above, for fanning out BGA packages",
+  "description_full": "BGA package fanout plugin;",
+  "identifier": "com.github.wayri.FanOutPlugin",
+  "type": "plugin",
+  "author": {
+      "name": "Wayri",
+      "contact": {
+          "web": "https://github.com/wayri"
+      }
+  },
+  "maintainer": {
+      "name": "Wayri",
+      "contact": {
+          "web": "https://github.com/wayri"
+      }
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "resources": {
+      "homepage": "https://github.com/wayri/KiCAD_Plugins/tree/develop"
+  },
+  "versions": [
+      {
+          "version": "1.0",
+          "status": "development",
+          "kicad_version": "8.0",
+          "download_url": "https://github.com/wayri/KiCAD_Plugins/blob/develop/BGA%20Fanout%20Plugin/release/FanOutPlugin.zip"
+      }
+  ]
+}
