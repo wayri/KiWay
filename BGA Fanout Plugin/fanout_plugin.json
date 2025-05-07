@@ -1,0 +1,13 @@
+{
+    "name": "Fan Out Pads with GUI",
+    "description": "Fans out pads from selected footprints using via and trace configuration.",
+    "version": "1.0.0",
+    "author": "Your Name",
+    "license": "MIT",
+    "url": "https://github.com/yourusername/FanOutPlugin",
+    "download_url": "https://github.com/yourusername/FanOutPlugin/archive/refs/heads/main.zip",
+    "dependencies": [],
+    "keywords": ["routing", "fanout", "vias", "pcbnew"],
+    "plugin_class": "plugin.FanOutPlugin"
+  }
+  
