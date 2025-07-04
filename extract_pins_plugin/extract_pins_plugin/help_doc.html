@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KiCad Pin Extractor Plugin Help</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        ol {
+            list-style-type: decimal;
+            margin-left: 20px;
+        }
+        code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        strong {
+            color: #e74c3c;
+        }
+        .note {
+            background-color: #ecf0f1;
+            border-left: 5px solid #3498db;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        .example-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>KiCad Pin Extraction Plugin with GUI</h1>
+
+    <p>This plugin allows you to extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly Markdown and CSV formats. It provides robust filtering, flexible sorting, and customizable output options.</p>
+
+    <h2>Features:</h2>
+
+    <h3>1. Dynamic Selection & Details</h3>
+    <ul>
+        <li>The plugin dialog opens immediately when launched, even if no components are initially selected on the PCB.</li>
+        <li>You can <strong>select/deselect components directly in the KiCad PCB editor</strong> while this dialog is open.</li>
+        <li>Use the "<strong>Refresh Selection from PCB</strong>" button within the dialog to update the list of components displayed in the dialog's "Selected Components" panel based on your current PCB selection.</li>
+        <li>Click on any component's reference designator in the "Selected Components" list to view its detailed properties (Reference, Value, Footprint Name, Description, Layer, Position, Rotation, and custom properties like 'connector-type') in the "Selected Component Details" panel for quick review.</li>
+        <li><strong>Multi-select from PCB</strong>: If this checkbox is enabled, clicking "Refresh Selection from PCB" will *add* newly selected components from the PCB to the existing list in the dialog, rather than replacing the entire list. This allows you to build a cumulative selection.</li>
+        <li><strong>Remove Selected from List</strong>: This button allows you to remove one or more items that you have selected within the dialog's "Selected Components" list. Use standard click, Ctrl+click, or Shift+click to select multiple items in the list before clicking this button.</li>
+    </ul>
+
+    <h3>2. Flexible Export Options (Buttons)</h3>
+    <ul>
+        <li><strong>Export Selected</strong>: Exports data for <em>only</em> the components currently displayed in the "Selected Components" list (i.e., those that were selected on the PCB and refreshed into the dialog). This button is automatically enabled/disabled based on whether components are in the "Selected Components" list.</li>
+        <li><strong>Export 'J's</strong>: Exports data for <em>all</em> components on the entire PCB whose Reference Designator starts with the letter 'J' (e.g., J1, J2, JUMP1, J_CONN).</li>
+        <li><strong>Export Connectors (by Type)</strong>: Exports data for <em>all</em> components on the entire PCB that have a custom property named "<code>connector-type</code>" whose value matches any of the comma-separated types you define in the "Connector Type Filter" field (e.g., "harness,backplane").</li>
+    </ul>
+
+    <h3>3. Advanced Filtering Options (Text Inputs with Auto-Suggest)</h3>
+    <p class="note">These filters apply to the "Export 'J's" and "Export Connectors (by Type)" options. The filter fields now provide auto-suggestions populated from data currently present on your board.</p>
+
+    <h4>Footprint Name Filter:</h4>
+    <ul>
+        <li><strong>Purpose</strong>: Filter components based on their full Footprint Name.</li>
+        <li><strong>How it Works</strong>: Enter a partial or full string. Only components whose full footprint name (e.g., <code>Connector_IDC:IDC-34_2x17_P2.54mm_Horizontal</code>) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing footprint names on your board.</li>
+        <li><strong>Auto-Suggest Content:</strong> All unique full footprint names found on your current PCB (e.g., "<code>Package_SO:SOIC-8_W3.9mm</code>", "<code>Resistor_SMD:R_0603_1608Metric</code>", "<code>Connector_Generic:CONN_01x02</code>").</li>
+    </ul>
+    <div class="example-box">
+        <strong>Example:</strong>
+        <p>If you type <code>SOIC</code>, it might include components like <code>Package_SO:SOIC-8_W3.9mm</code>.</p>
+        <p>If you type <code>IDC-34</code>, it might include <code>Connector_IDC:IDC-34_2x17_P2.54mm</code>.</p>
+    </div>
+
+    <h4>Value Filter:</h4>
+    <ul>
+        <li><strong>Purpose</strong>: Filter components based on their 'Value' field.</li>
+        <li><strong>How it Works</strong>: Enter a partial or full string. Only components whose 'Value' field (e.g., <code>10k</code>, <code>0.1uF</code>, <code>LED</code>) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing values on your board.</li>
+        <li><strong>Auto-Suggest Content:</strong> All unique component values found on your current PCB (e.g., "<code>10k</code>", "<code>0.1uF</code>", "<code>ATMEGA328P</code>", "<code>CONN_1x03</code>").</li>
+    </ul>
+    <div class="example-box">
+        <strong>Example:</strong>
+        <p>If you type <code>100n</code>, it might include capacitors with value <code>100nF</code>.</p>
+        <p>If you type <code>CONN</code>, it might include generic connectors with value <code>CONN_1x02</code>.</p>
+    </div>
+
+    <h4>Net Name Filter (any pin):</h4>
+    <ul>
+        <li><strong>Purpose</strong>: Filter components based on their connected net names.</li>
+        <li><strong>How it Works</strong>: Enter a partial or full string. Only components that have <em>any</em> pin connected to a net whose name contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing net names on your board.</li>
+        <li><strong>Auto-Suggest Content:</strong> All unique net names found on your current PCB (e.g., "<code>VCC</code>", "<code>GND</code>", "<code>SCL</code>", "<code>Net-(R1-Pad1)</code>", "<code>/USB_DP</code>").</li>
+    </ul>
+    <div class="example-box">
+        <strong>Example:</strong>
+        <p>If you type <code>VCC</code>, it might include all components connected to <code>VCC</code>, <code>VCC_3V3</code>, etc.</p>
+        <p>If you type <code>SCL</code>, it might include components on your I2C clock line.</p>
+        <p>If you type <code>Net-(J1-Pin1)</code>, it will filter for components connected to that specific auto-generated net name.</p>
+    </div>
+
+    <h4>Connector Type Filter (comma-sep):</h4>
+    <ul>
+        <li><strong>Purpose</strong>: Filter components based on their custom "<code>connector-type</code>" property. This filter is primarily used by the "<strong>Export Connectors (by Type)</strong>" button.</li>
+        <li><strong>How it Works</strong>: Enter one or more values, separated by commas (e.g., <code>harness,backplane</code>). Only components that have a custom property named "<code>connector-type</code>" whose value (case-insensitive) exactly matches <em>any</em> of the comma-separated entries you provide will be included. The field provides auto-suggestions of existing "connector-type" values found on your board.</li>
+        <li><strong>Auto-Suggest Content:</strong> All unique values of the custom property "<code>connector-type</code>" found on your current PCB (e.g., "<code>harness</code>", "<code>backplane</code>", "<code>power_conn</code>", "<code>board2board</code>").</li>
+    </ul>
+    <div class="example-box">
+        <strong>Example:</strong>
+        <p>If a component has a custom property <code>connector-type</code> with value <code>harness</code>, and you type <code>harness</code> into the filter, it will be included.</p>
+        <p>If you type <code>power,board2board</code>, it will include components with <code>connector-type: power</code> OR <code>connector-type: board2board</code>.</p>
+    </div>
+
+    <h3>4. Output Customization Checkboxes</h3>
+    <ul>
+        <li><strong>Sort Components by Reference (A-Z)</strong>: If checked, the exported Markdown and CSV tables will list components alphabetically by their reference designator (e.g., C1, C2, J1, U1). If unchecked, they will appear in the order they were processed (typically discovery order).</li>
+        <li><strong>Highlight Same Nets in Markdown Output</strong>: If checked, net names in the Markdown output's "Pin Details" tables will be color-coded. Pads connected to the same net will have their net name displayed in a unique, automatically assigned color. This visual distinction requires a Markdown viewer that supports inline HTML styling (e.g., VS Code, GitHub).</li>
+        <li><strong>Include [Property Name]</strong>: A series of checkboxes allowing you to choose exactly which general properties (Reference, Value, Footprint Name, etc.) and pin details (Pad Name/Number, Net Name) are included as columns in the Markdown and CSV output files.</li>
+    </ul>
+
+    <h3>5. Progress Feedback</h3>
+    <ul>
+        <li>A progress bar and status text will indicate the plugin's activity during lengthy export operations, providing visual feedback.</li>
+    </ul>
+
+    <h2>How to Use:</h2>
+    <ol>
+        <li><strong>Open your KiCad PCB design</strong> in the PCB Editor.</li>
+        <li>(Optional) <strong>Select one or more components</strong> directly on your PCB that you might want to export data for using the "Export Selected" option.</li>
+        <li>Go to <strong><code>Tools -> External Plugins -> Extract Component Pins with GUI</code></strong> in the KiCad PCB Editor.</li>
+        <li>The plugin dialog will open. You can now interact with both KiCad and the dialog simultaneously.</li>
+        <li><strong>To Update the Dialog's List:</strong> If you select or deselect components on your PCB after the dialog is open, click the "<strong>Refresh Selection from PCB</strong>" button in the dialog. The list in the dialog will update to reflect your current PCB selection.</li>
+        <li><strong>To View Component Details:</strong> Click on any component's reference designator in the "Selected Components" list within the dialog. Its detailed properties will appear on the right.</li>
+        <li><strong>Apply Filters:</strong> Enter text into the "Footprint Name Filter", "Value Filter", "Net Name Filter", or "Connector Type Filter" fields as needed. Filters apply to the "Export 'J's" and "Export Connectors (by Type)" options. These fields now offer auto-suggestions from your board's data.</li>
+        <li><strong>Choose Output Options:</strong> Select the "Sort Components by Reference", "Highlight Same Nets in Markdown Output", and specific "Include [Property Name]" checkboxes as desired.</li>
+        <li><strong>Select Export Type:</strong> Click one of the export buttons:
+            <ul>
+                <li>"<strong>Export Selected</strong>" to export data for components currently visible in the dialog's list, applying common filters (except 'Connector Type' filter) and sorting.</li>
+                <li>"<strong>Export 'J's</strong>" to export data for all components on the entire PCB whose reference starts with 'J', applying other filters and sorting.</li>
+                <li>"<strong>Export Connectors (by Type)</strong>" to export components based on the "connector-type" field and filter, applying other filters and sorting.</li>
+            </ul>
+        </li>
+        <li><strong>Save Files:</strong> You will be prompted twice to save the generated Markdown (.md) file and CSV (.csv) file. Choose your desired location and filenames.</li>
+        <li><strong>Close Dialog:</strong> Click the "Close" button when you are finished.</li>
+    </ol>
+
+    <h2>Output Files:</h2>
+    <ul>
+        <li><strong>Markdown (.md):</strong> This file is designed for human readability and easy sharing.
+            <ul>
+                <li>Each exported component gets its own dedicated section with a heading (e.g., <code>## Component: J1</code>).</li>
+                <li>"General Properties" and "Pin Details" tables are included based on your "Include" column selections.</li>
+                <li>Net names will be color-coded if the option was selected.</li>
+            </ul>
+        </li>
+        <li><strong>CSV (.csv):</strong> This file is designed for structured data analysis in spreadsheet programs (e.g., Excel, Google Sheets, LibreOffice Calc).
+            <ul>
+                <li>It's a flattened table, where each row represents a single pin.</li>
+                <li>Component details are repeated for each pin belonging to that component, with columns chosen by your "Include" selections.</li>
+                <li>This format is ideal for filtering, sorting, and further data processing.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Future Enhancements (Suggestions):</h2>
+    <p>Consider adding these features to make the plugin even more powerful:</p>
+    <ul>
+        <li><strong>Export to Excel (XLSX):</strong> Direct export to a structured Excel file, potentially with multiple sheets for different data views, which is often preferred for professional data analysis.</li>
+        <li><strong>Configuration Saving:</strong> Implement saving and loading of user preferences (e.g., checkbox states, filter values) between KiCad sessions.</li>
+        <li><strong>Integration with Schematic Data:</strong> (Advanced) Directly access and include data from the schematic symbols (e.g., full datasheet links, manufacturer part numbers that aren't pushed to footprints) for a truly comprehensive report.</li>
+        <li><strong>Custom Property Selection:</strong> Allow the user to define and select *any* custom properties they want to include in the output, not just "connector-type".</li>
+        <li><strong>Netlist Export:</strong> Option to export a simplified netlist for the selected components.</li>
+    </ul>
+</body>
+</html>
