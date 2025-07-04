@@ -22,7 +22,8 @@ class ExtractPinsPlugin(pcbnew.ActionPlugin):
         self.description = "Opens a GUI to extract pin data and highlight nets from selected footprints."
         self.show_toolbar_button = True # Set to True to display a button on the toolbar
         # Define the path to the optional icon file. It should be in the same directory.
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'epp_favicon.png')
+        self.version = "1.1.0"
 
     def Run(self):
         """
