@@ -1,26 +1,26 @@
 {
-    "api_version": "1.0.0",
-    "name": "Wayri's KiCAD Plugin Repository", 
-    "preferred_install_root": "plugins", 
-    "plugins": [
-      {
-        "id": "extract_pins_plugin", 
-        "name": "KiCad Pin Extractor with GUI", 
-        "description": "A powerful plugin to extract pin and component data into Markdown and CSV formats, with filtering, sorting, and highlighting.",
-        "images": [
-          "https://github.com/wayri/KiCAD_Plugins/blob/develop/extract_pins_plugin/epp_favicon.png" 
-        ],
-        "tags": ["export", "bom", "documentation", "connectors", "utility", "pin"], 
-        "versions": [
-          {
-            "version": "1.1.0",
-            "kicad_version": "9.0.0", 
-            "status": "stable",
-            "release_date": "2025-07-01", 
-            "download_url": "https://github.com/wayri/KiCAD_Plugins/blob/develop/releases/extract_pins_plugin-1.1.0.zip", 
-            "install_size": 120000 
-          }
-        ]
-      }
-    ]
-  }
+  "api_version": "1.0.0",
+  "name": "Wayri's KiCAD Plugin Repository",
+  "preferred_install_root": "plugins",
+  "plugins": [
+    {
+      "id": "extract_pins_plugin",
+      "name": "KiCad Pin Extractor with GUI",
+      "description": "A powerful plugin to extract pin and component data into Markdown and CSV formats, with filtering, sorting, and highlighting.",
+      "images": [
+        "https://raw.githubusercontent.com/wayri/KiCAD_Plugins/develop/extract_pins_plugin/epp_favicon.png"
+      ],
+      "tags": ["export", "bom", "documentation", "connectors", "utility", "pin"],
+      "versions": [
+        {
+          "version": "1.1.0",
+          "kicad_version": "9.0.0",
+          "status": "stable",
+          "release_date": "2025-07-01",
+          "download_url": "https://raw.githubusercontent.com/wayri/KiCAD_Plugins/develop/releases/extract_pins_plugin-1.1.0.zip",
+          "install_size": 0.1
+        }
+      ]
+    }
+  ]
+}
