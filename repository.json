@@ -17,7 +17,7 @@
           "kicad_version": "9.0.0",
           "status": "stable",
           "release_date": "2025-07-01",
-          "download_url": "https://github.com/wayri/KiCAD_Plugins/releases/download/v1.1.0/extract_pins_plugin-1.1.0.zip",
+          "download_url": "https://raw.githubusercontent.com/wayri/KiCAD_Plugins/develop/releases/extract_pins_plugin-1.1.0.zip",
           "install_size": 0.1
         }
       ]
