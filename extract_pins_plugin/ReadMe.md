@@ -1,5 +1,7 @@
 # KiCad Pin Extraction Plugin with GUI
-![Icon](https://github.com/wayri/KiCAD_Plugins/blob/develop/extract_pins_plugin/extract_pins_plugin_favicon.png)
+![](https://github.com/wayri/KiCAD_Plugins/blob/develop/extract_pins_plugin/epp_favicon.png)
+
+---
 This plugin allows you to extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly **Markdown** and **CSV** formats. It provides robust filtering, flexible sorting, and customizable output options.
 
 ---
