@@ -4,6 +4,20 @@ This plugin allows you to extract detailed pin and property information from com
 
 ---
 
+## Installation
+
+The current method for installation is a bit manual, it is as follows;
+
+! - Ensure that KiCAD API is enabled (Got to Preferences Menu->Preferences->Plugins->CheckBox)
+! - Also ensure the python API is detected automatically, if not provide a path to it (generally the automatic button should suffice)
+
+1. Next got to PCB Editor, Go to Tools->Plugins->Open Plugin Directory
+2. Now Copy and paste the Pin Extraction Plugin (extract_pins_plugin folder) into the plugin directory
+3. Now go back to KiCAD and go to Tool->Plugins->Refresh Plugins
+4. Now Check if the Plugin Has Appeared in the Plugin Menu/Plugin Toolbar (its a blue icon on white background with a IC with pins and an arrow pointing down)
+5. If it is visible, you are now ready to use the plugin, See Further below on how to use the plugin
+
+
 ## Features
 
 ### 1. Dynamic Selection & Details
