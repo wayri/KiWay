@@ -1,4 +1,4 @@
-# plugin_dialog.py (with Multi-Selection & Remove Button)
+# plugin_dialog.py (Final Fix: Footprint Name Filter Completely Removed)
 
 import wx
 import pcbnew
@@ -21,7 +21,8 @@ class PluginDialog(wx.Dialog):
         self.board = pcbnew.GetBoard()
         self.all_board_footprints = self.board.GetFootprints()
 
-        self.all_footprint_names = sorted(list(set(str(fp.GetFPID()) for fp in self.all_board_footprints)))
+        # --- Data for Auto-Suggest Comboboxes (Collected once on init) ---
+        # self.all_footprint_names is REMOVED as the filter is gone
         self.all_values = sorted(list(set(fp.GetValue() for fp in self.all_board_footprints if fp.GetValue())))
         
         all_nets = set()
@@ -38,6 +39,7 @@ class PluginDialog(wx.Dialog):
 
         self.all_net_names = sorted(list(all_nets))
         self.all_connector_types = sorted(list(all_connector_types))
+        # --- End Data for Auto-Suggest ---
 
         self.current_display_footprints = []
 
@@ -59,15 +61,13 @@ class PluginDialog(wx.Dialog):
         list_vbox = wx.BoxSizer(wx.VERTICAL)
 
         list_vbox.Add(wx.StaticText(list_panel, label="Selected Components:"), 0, wx.ALL | wx.EXPAND, 3)
-        # --- NEW: Use wx.LC_EXTENDED for multi-selection ---
-        self.footprint_list_ctrl = wx.ListCtrl(list_panel, style=wx.LC_REPORT | wx.LC_NO_HEADER)
+        self.footprint_list_ctrl = wx.ListCtrl(list_panel, style=wx.LC_REPORT | wx.LC_NO_HEADER) 
         self.footprint_list_ctrl.InsertColumn(0, "Reference")
         self.footprint_list_ctrl.SetColumnWidth(0, 150)
         self.footprint_list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnListItemSelected)
 
         list_vbox.Add(self.footprint_list_ctrl, 1, wx.ALL | wx.EXPAND, 3)
 
-        # --- NEW: Selection Control Buttons and Checkbox ---
         selection_control_hbox = wx.BoxSizer(wx.HORIZONTAL)
 
         self.multi_select_checkbox = wx.CheckBox(list_panel, label="Multi-select from PCB")
@@ -83,7 +83,6 @@ class PluginDialog(wx.Dialog):
         selection_control_hbox.Add(remove_button, 0, wx.ALL, 3)
 
         list_vbox.Add(selection_control_hbox, 0, wx.EXPAND | wx.ALL, 3)
-        # --- END NEW Selection Control ---
 
         list_panel.SetSizer(list_vbox)
         top_hbox.Add(list_panel, 1, wx.EXPAND | wx.ALL, 3)
@@ -91,7 +90,7 @@ class PluginDialog(wx.Dialog):
         details_panel = wx.Panel(panel)
         details_vbox = wx.BoxSizer(wx.VERTICAL)
         details_vbox.Add(wx.StaticText(details_panel, label="Selected Component Details:"), 0, wx.ALL | wx.EXPAND, 3)
-        self.details_text_ctrl = wx.TextCtrl(details_panel, size=(250, -1), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+        self.details_text_ctrl = wx.TextCtrl(details_panel, size=(250, -1), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL) 
         details_vbox.Add(self.details_text_ctrl, 1, wx.ALL | wx.EXPAND, 3)
         details_panel.SetSizer(details_vbox)
         top_hbox.Add(details_panel, 1, wx.EXPAND | wx.ALL, 3)
@@ -101,11 +100,13 @@ class PluginDialog(wx.Dialog):
 
         filters_panel = wx.StaticBoxSizer(wx.StaticBox(panel, label="Filters (Apply to 'J's & 'Connectors' Exports)"),
                                            wx.VERTICAL)
-        grid_filters = wx.GridSizer(4, 2, 3, 3)
+        # --- Adjusted GridSizer for 3 filter rows (Value, Net Name, Connector Type) ---
+        grid_filters = wx.GridSizer(3, 2, 3, 3) 
 
-        grid_filters.Add(wx.StaticText(panel, label="Footprint Name Filter:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.fp_name_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_footprint_names, style=wx.CB_DROPDOWN)
-        grid_filters.Add(self.fp_name_filter_ctrl, 0, wx.EXPAND)
+        # --- REMOVED: Footprint Name Filter row definition ---
+        # grid_filters.Add(wx.StaticText(panel, label="Footprint Name Filter:"), 0, wx.ALIGN_CENTER_VERTICAL)
+        # self.fp_name_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_footprint_names, style=wx.CB_DROPDOWN)
+        # grid_filters.Add(self.fp_name_filter_ctrl, 0, wx.EXPAND)
 
         grid_filters.Add(wx.StaticText(panel, label="Value Filter:"), 0, wx.ALIGN_CENTER_VERTICAL)
         self.value_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_values, style=wx.CB_DROPDOWN)
@@ -131,8 +132,9 @@ class PluginDialog(wx.Dialog):
         options_panel.Add(self.sort_by_reference_checkbox, 0, wx.ALL, 3)
 
         self.output_column_checkboxes = {}
+        # --- REMOVED "Footprint Name" from General Properties list ---
         column_checkbox_data = {
-            "General Properties": ["Reference", "Value", "Footprint Name", "Description", "Layer", "Position", "Rotation",
+            "General Properties": ["Reference", "Value", "Description", "Layer", "Position", "Rotation",
                                    "Connector Type"],
             "Pin Details": ["Pad Name/Number", "Net Name"]
         }
@@ -219,13 +221,11 @@ class PluginDialog(wx.Dialog):
         self.footprint_list_ctrl.SetColumnWidth(0, 150)
         self.current_display_footprints = footprints_list
 
-        # Add items to the list control
         for i, fp in enumerate(self.current_display_footprints):
             self.footprint_list_ctrl.InsertItem(i, fp.GetReference())
         
-        self.details_text_ctrl.SetValue("") # Clear details when list updates
+        self.details_text_ctrl.SetValue("")
 
-        # Enable/Disable "Export Selected" button based on list content
         self.export_selected_button.Enable(bool(footprints_list))
 
 
@@ -241,16 +241,12 @@ class PluginDialog(wx.Dialog):
         
         if self.multi_select_checkbox.IsChecked():
             print("DEBUG: Multi-select mode enabled. Merging selections.")
-            # Convert current display list to a set for efficient merging (removes duplicates)
-            existing_footprints_set = {fp.GetReference(): fp for fp in self.current_display_footprints}
+            existing_footprints_dict = {fp.GetReference(): fp for fp in self.current_display_footprints}
             
-            # Add newly selected footprints, overwriting if reference already exists
             for fp in newly_selected_from_pcb:
-                existing_footprints_set[fp.GetReference()] = fp
+                existing_footprints_dict[fp.GetReference()] = fp
             
-            # Convert back to a list (order might not be preserved from original selection, but sorted later if needed)
-            # Re-sort to maintain consistent order if user desires (by reference is common)
-            merged_footprints_list = sorted(existing_footprints_set.values(), key=lambda f: f.GetReference())
+            merged_footprints_list = sorted(existing_footprints_dict.values(), key=lambda f: f.GetReference())
             
             self._update_footprint_list_display(merged_footprints_list)
             wx.MessageBox(f"Merged selection. Added {len(newly_selected_from_pcb)} new items. Total: {len(merged_footprints_list)}.", 
@@ -286,7 +282,6 @@ class PluginDialog(wx.Dialog):
         print("DEBUG: OnRemoveSelectedFromList called.")
         items_to_remove_indices = []
         
-        # Get all selected items from the ListCtrl
         idx = self.footprint_list_ctrl.GetFirstSelected()
         while idx != wx.NOT_FOUND:
             items_to_remove_indices.append(idx)
@@ -296,8 +291,6 @@ class PluginDialog(wx.Dialog):
             wx.MessageBox("No items selected in the list to remove.", "No Selection", wx.OK | wx.ICON_INFORMATION)
             return
 
-        # Create a new list containing only the items NOT selected for removal
-        # Iterate backwards to ensure indices remain valid during deletion from ListCtrl
         new_current_display_footprints = []
         removed_count = 0
         for i in range(len(self.current_display_footprints)):
@@ -327,7 +320,7 @@ class PluginDialog(wx.Dialog):
         properties["Value"] = fp.GetValue()
 
         footprint_id = fp.GetFPID()
-        properties["Footprint Name"] = str(footprint_id)
+        properties["Footprint Name"] = str(footprint_id) # Footprint name is still extracted for display in details
 
         description = fp.GetLibDescription()
         properties["Description"] = description if description and description != "No description" else "N/A"
@@ -466,13 +459,16 @@ class PluginDialog(wx.Dialog):
         """
         filtered = list(footprints_list)
 
-        fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower()
+        # --- REMOVED: fp_name_filter_text processing ---
+        # fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower()
+
         value_filter_text = self.value_filter_ctrl.GetValue().strip().lower()
         net_name_filter_text = self.net_name_filter_ctrl.GetValue().strip().lower()
 
-        if fp_name_filter_text:
-            filtered = [fp for fp in filtered if str(fp.GetFPID()).lower().find(fp_name_filter_text) != -1]
-            print(f"DEBUG: Applied FP Name filter '{fp_name_filter_text}'. Found {len(filtered)} FPs.")
+        # --- REMOVED: Footprint Name filter application ---
+        # if fp_name_filter_text:
+        #     filtered = [fp for fp in filtered if str(fp.GetFPID()).lower().find(fp_name_filter_text) != -1]
+        #     print(f"DEBUG: Applied FP Name filter '{fp_name_filter_text}'. Found {len(filtered)} FPs.")
 
         if value_filter_text:
             filtered = [fp for fp in filtered if fp.GetValue().lower().find(value_filter_text) != -1]
@@ -496,8 +492,9 @@ class PluginDialog(wx.Dialog):
         Returns a list of column names that are checked by the user for output.
         """
         selected_cols = []
+        # --- REMOVED "Footprint Name" from all_possible_columns ---
         all_possible_columns = [
-            "Reference", "Value", "Footprint Name", "Description", "Layer",
+            "Reference", "Value", "Description", "Layer",
             "Position", "Rotation", "Connector Type",
             "Pad Name/Number", "Net Name"
         ]
@@ -520,7 +517,8 @@ class PluginDialog(wx.Dialog):
             footprint_value = footprint.GetValue()
 
             footprint_id = footprint.GetFPID()
-            footprint_full_name = str(footprint_id)
+            # --- Footprint Name is still extracted here for internal use (e.g., in details panel) ---
+            footprint_full_name = str(footprint_id) 
 
             footprint_description = footprint.GetLibDescription()
 
@@ -535,7 +533,7 @@ class PluginDialog(wx.Dialog):
             general_properties = {
                 "Reference": footprint_ref,
                 "Value": footprint_value,
-                "Footprint Name": footprint_full_name,
+                "Footprint Name": footprint_full_name, # Still included in general_properties for internal use
                 "Description": footprint_description if footprint_description and footprint_description != "No description" else "N/A",
                 "Layer": footprint_layer,
                 "Position": f"({footprint_pos.x / 1000000.0:.2f}mm, {footprint_pos.y / 1000000.0:.2f}mm)",
