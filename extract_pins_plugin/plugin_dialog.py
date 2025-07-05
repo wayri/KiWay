@@ -1,4 +1,19 @@
-# plugin_dialog.py (More Compact GUI - Fixed Layout)
+# plugin_dialog.py 
+"""
+EXTRACT PINS PLUGIN
+
+@author - Wayri (Yawar)
+@version - 1.1.0
+@date - 1-07-2025
+
+
+ALLOWS USER TO EXTRACT ALL THE NET NAMES IN MARKDOWN OR CSV FORMAT FROM CONNECTORS LIKE J1, J2 ETC, OR USER SELECTIONS OR ANY COMPONENT
+THE CONTROLS ALLOW FOR DEFINING CUSTOM TYPES OF CONNECTORS USING "CONNECTOR-TYPE" AND THEN USING SELECTION FILTER
+
+THE EXPORTED DATA CAN BE VIEWED USING A MARKDOWN VIEWER
+
+THIS PLUGIN IS PROVIDED AS IS WITHOUT ANY GUARANTEE OR WARRANTY.
+"""
 
 import wx
 import pcbnew
@@ -565,16 +580,8 @@ class PluginDialog(wx.Dialog):
         """
         filtered = list(footprints_list)
 
-        # Footprint Name Filter is removed from GUI, so no self.fp_name_filter_ctrl
-        # fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower() 
-
         value_filter_text = self.value_filter_ctrl.GetValue().strip().lower()
         net_name_filter_text = self.net_name_filter_ctrl.GetValue().strip().lower()
-
-        # Removed Footprint Name filter application
-        # if fp_name_filter_text:
-        #     filtered = [fp for fp in filtered if str(fp.GetFPID()).lower().find(fp_name_filter_text) != -1]
-        #     print(f"DEBUG: Applied FP Name filter '{fp_name_filter_text}'. Found {len(filtered)} FPs.")
 
         if value_filter_text:
             filtered = [fp for fp in filtered if fp.GetValue().lower().find(value_filter_text) != -1]
@@ -830,103 +837,7 @@ class PluginDialog(wx.Dialog):
             except Exception as e:
                 wx.MessageBox(f"Error saving file:\n{e}", "Error", wx.OK | wx.ICON_ERROR)
 
-    def _generate_board_drawing_svg(self, footprints_to_highlight, output_svg_path):
-        """
-        Generates an SVG drawing of the board outline and highlights specified footprints.
-        Saves the SVG to the given output_svg_path.
-        """
-        print(f"DEBUG: Generating SVG drawing to {output_svg_path}")
-        
-        board_bbox = self.board.ComputeBoundingBox(False)
-        
-        if board_bbox.GetWidth() <= 0 or board_bbox.GetHeight() <= 0:
-            board_bbox = pcbnew.EDA_RECT(0, 0, 100000000, 100000000) # 100mm x 100mm in nm
-            print("DEBUG: Board bounding box is empty or invalid, using default 100x100mm.")
-
-        SCALE_FACTOR = 1.0 / 100000.0 
-        
-        svg_width_nm = board_bbox.GetWidth()
-        svg_height_nm = board_bbox.GetHeight()
-        
-        svg_width_px = svg_width_nm * SCALE_FACTOR
-        svg_height_px = svg_height_nm * SCALE_FACTOR
-
-        svg_content = f"""<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="{svg_width_px:.2f}px" height="{svg_height_px:.2f}px" viewBox="0 0 {svg_width_nm} {svg_height_nm}"
-     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<rect width="100%" height="100%" fill="#FFFFFF"/> <!-- White background -->
-<g transform="translate({-board_bbox.GetX()}, {-board_bbox.GetY()})"> <!-- Translate to origin -->
-"""
-        print("DEBUG: Drawing Edge.Cuts...")
-        edge_cuts_color = "#000000" # Black
-        edge_cuts_width_svg = 0.5 # 0.5mm stroke for SVG outline
-        
-        drawn_edge_cuts = False
-        for drawing in self.board.GetDrawings():
-            if drawing.GetLayer() == pcbnew.Edge_Cuts:
-                drawn_edge_cuts = True
-                if isinstance(drawing, pcbnew.PCB_SHAPE):
-                    if drawing.GetShape() == pcbnew.S_SEGMENT: # Line segment
-                        start = drawing.GetStart()
-                        end = drawing.GetEnd()
-                        svg_content += f'<line x1="{start.x}" y1="{start.y}" x2="{end.x}" y2="{end.y}" ' \
-                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
-                    elif drawing.GetShape() == pcbnew.S_ARC: # Arc - approximate with line for simplicity
-                        start = drawing.GetStart()
-                        end = drawing.GetEnd()
-                        svg_content += f'<line x1="{start.x}" y1="{start.y}" x2="{end.x}" y2="{end.y}" ' \
-                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
-                    elif drawing.GetShape() == pcbnew.S_CIRCLE:
-                        center = drawing.GetCenter()
-                        radius = drawing.GetRadius()
-                        svg_content += f'<circle cx="{center.x}" cy="{center.y}" r="{radius}" ' \
-                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none"/>\n'
-                    elif drawing.GetShape() == pcbnew.S_RECT:
-                        p1 = drawing.GetStart()
-                        p2 = drawing.GetEnd()
-                        x = min(p1.x, p2.x)
-                        y = min(p1.y, p2.y)
-                        width = abs(p1.x - p2.x)
-                        height = abs(p1.y - p2.y)
-                        svg_content += f'<rect x="{x}" y="{y}" width="{width}" height="{height}" ' \
-                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none"/>\n'
-                
-        if not drawn_edge_cuts:
-            print("DEBUG: No Edge.Cuts drawings found. Drawing a default rectangle for visibility.")
-            svg_content += f'<rect x="{board_bbox.GetX()}" y="{board_bbox.GetY()}" ' \
-                           f'width="{board_bbox.GetWidth()}" height="{board_bbox.GetHeight()}" ' \
-                           f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none" stroke-dasharray="200000,100000"/>\n'
-
-        print("DEBUG: Drawing highlighted footprints...")
-        highlight_color = "#FF0000" # Red for connectors
-        text_height_nm = 500000 # Approx 0.5mm text height
-
-        for fp in footprints_to_highlight:
-            ref = fp.GetReference()
-            
-            fp_bbox = fp.GetBoundingBox()
-            fp_x = fp_bbox.GetX()
-            fp_y = fp_bbox.GetY()
-            fp_width = fp_bbox.GetWidth()
-            fp_height = fp_bbox.GetHeight()
-
-            svg_content += f'<rect x="{fp_x}" y="{fp_y}" width="{fp_width}" height="{fp_height}" ' \
-                           f'fill="{highlight_color}" fill-opacity="0.3" stroke="{highlight_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
-            
-            text_x = fp_x + fp_width / 2
-            text_y = fp_y + fp_height / 2 
-            
-            svg_content += f'<text x="{text_x}" y="{text_y}" font-family="Arial" font-size="{text_height_nm}" ' \
-                           f'fill="#000000" text-anchor="middle" dominant-baseline="middle">{ref}</text>\n'
-
-        svg_content += """</g>
-</svg>"""
-        
-        with open(output_svg_path, 'w', encoding='utf-8') as f:
-            f.write(svg_content)
-        print(f"DEBUG: SVG saved to {output_svg_path}. File size: {os.path.getsize(output_svg_path)} bytes.")
-
+   
     def OnGenerateConnectorReport(self, event):
         print("DEBUG: OnGenerateConnectorReport method called.")
         
