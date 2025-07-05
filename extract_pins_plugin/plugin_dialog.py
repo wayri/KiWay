@@ -1,4 +1,4 @@
-# plugin_dialog.py (Final Fix: Footprint Name Filter Completely Removed)
+# plugin_dialog.py (More Compact GUI - Fixed Layout)
 
 import wx
 import pcbnew
@@ -7,6 +7,7 @@ from io import StringIO
 import random
 import os
 import webbrowser
+import re
 
 class PluginDialog(wx.Dialog):
     """
@@ -15,14 +16,21 @@ class PluginDialog(wx.Dialog):
     """
 
     def __init__(self, parent, initial_selected_footprints):
-        super(PluginDialog, self).__init__(parent, title="KiCad Pin Extractor", size=(800, 550))
+        """
+        Initializes the dialog window.
+
+        Args:
+            parent: The parent wx.Window (can be None for a top-level dialog,
+                    or pcbnew.GetBoard().GetParentWindow() for more strict parenting).
+            initial_selected_footprints: A list of pcbnew.FOOTPRINT objects selected initially.
+        """
+        # --- Adjusted initial size for much more compact layout ---
+        super(PluginDialog, self).__init__(parent, title="KiCad Pin Extractor", size=(750, 480)) # Significantly smaller
         print("DEBUG: PluginDialog __init__ called.")
 
         self.board = pcbnew.GetBoard()
         self.all_board_footprints = self.board.GetFootprints()
 
-        # --- Data for Auto-Suggest Comboboxes (Collected once on init) ---
-        # self.all_footprint_names is REMOVED as the filter is gone
         self.all_values = sorted(list(set(fp.GetValue() for fp in self.all_board_footprints if fp.GetValue())))
         
         all_nets = set()
@@ -39,7 +47,6 @@ class PluginDialog(wx.Dialog):
 
         self.all_net_names = sorted(list(all_nets))
         self.all_connector_types = sorted(list(all_connector_types))
-        # --- End Data for Auto-Suggest ---
 
         self.current_display_footprints = []
 
@@ -60,139 +67,146 @@ class PluginDialog(wx.Dialog):
         list_panel = wx.Panel(panel)
         list_vbox = wx.BoxSizer(wx.VERTICAL)
 
-        list_vbox.Add(wx.StaticText(list_panel, label="Selected Components:"), 0, wx.ALL | wx.EXPAND, 3)
-        self.footprint_list_ctrl = wx.ListCtrl(list_panel, style=wx.LC_REPORT | wx.LC_NO_HEADER) 
+        list_vbox.Add(wx.StaticText(list_panel, label="Selected Components:"), 0, wx.ALL | wx.EXPAND, 2) # Reduced padding
+        # --- Reduced height for ListCtrl ---
+        self.footprint_list_ctrl = wx.ListCtrl(list_panel, size=(-1, 120), style=wx.LC_REPORT | wx.LC_NO_HEADER) 
         self.footprint_list_ctrl.InsertColumn(0, "Reference")
         self.footprint_list_ctrl.SetColumnWidth(0, 150)
         self.footprint_list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnListItemSelected)
 
-        list_vbox.Add(self.footprint_list_ctrl, 1, wx.ALL | wx.EXPAND, 3)
-
+        list_vbox.Add(self.footprint_list_ctrl, 0, wx.ALL | wx.EXPAND, 2) # Proportion 0, fixed height
+        
         selection_control_hbox = wx.BoxSizer(wx.HORIZONTAL)
 
         self.multi_select_checkbox = wx.CheckBox(list_panel, label="Multi-select from PCB")
         self.multi_select_checkbox.SetToolTip("If checked, 'Refresh Selection' adds to list instead of replacing.")
-        selection_control_hbox.Add(self.multi_select_checkbox, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 3)
+        selection_control_hbox.Add(self.multi_select_checkbox, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2) # Reduced padding
 
         refresh_button = wx.Button(list_panel, label="Refresh Selection from PCB")
         refresh_button.Bind(wx.EVT_BUTTON, self.OnRefreshSelection)
-        selection_control_hbox.Add(refresh_button, 0, wx.ALL, 3)
+        selection_control_hbox.Add(refresh_button, 0, wx.ALL, 2) # Reduced padding
 
         remove_button = wx.Button(list_panel, label="Remove Selected from List")
         remove_button.Bind(wx.EVT_BUTTON, self.OnRemoveSelectedFromList)
-        selection_control_hbox.Add(remove_button, 0, wx.ALL, 3)
+        selection_control_hbox.Add(remove_button, 0, wx.ALL, 2) # Reduced padding
 
-        list_vbox.Add(selection_control_hbox, 0, wx.EXPAND | wx.ALL, 3)
+        list_vbox.Add(selection_control_hbox, 0, wx.EXPAND | wx.ALL, 2) # Reduced padding
 
         list_panel.SetSizer(list_vbox)
-        top_hbox.Add(list_panel, 1, wx.EXPAND | wx.ALL, 3)
+        top_hbox.Add(list_panel, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for list panel
 
         details_panel = wx.Panel(panel)
         details_vbox = wx.BoxSizer(wx.VERTICAL)
-        details_vbox.Add(wx.StaticText(details_panel, label="Selected Component Details:"), 0, wx.ALL | wx.EXPAND, 3)
-        self.details_text_ctrl = wx.TextCtrl(details_panel, size=(250, -1), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL) 
-        details_vbox.Add(self.details_text_ctrl, 1, wx.ALL | wx.EXPAND, 3)
+        details_vbox.Add(wx.StaticText(details_panel, label="Selected Component Details:"), 0, wx.ALL | wx.EXPAND, 2) # Reduced padding
+        # --- Reduced height for TextCtrl ---
+        self.details_text_ctrl = wx.TextCtrl(details_panel, size=(-1, 120), style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL) 
+        details_vbox.Add(self.details_text_ctrl, 0, wx.ALL | wx.EXPAND, 2) # Proportion 0, fixed height
         details_panel.SetSizer(details_vbox)
-        top_hbox.Add(details_panel, 1, wx.EXPAND | wx.ALL, 3)
-        main_vbox.Add(top_hbox, 2, wx.EXPAND | wx.ALL, 3)
+        top_hbox.Add(details_panel, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for details panel
+        main_vbox.Add(top_hbox, 0, wx.EXPAND | wx.ALL, 2) # Proportion 0 for top_hbox, fixed height
 
         middle_hbox = wx.BoxSizer(wx.HORIZONTAL)
 
         filters_panel = wx.StaticBoxSizer(wx.StaticBox(panel, label="Filters (Apply to 'J's & 'Connectors' Exports)"),
                                            wx.VERTICAL)
-        # --- Adjusted GridSizer for 3 filter rows (Value, Net Name, Connector Type) ---
-        grid_filters = wx.GridSizer(3, 2, 3, 3) 
-
-        # --- REMOVED: Footprint Name Filter row definition ---
-        # grid_filters.Add(wx.StaticText(panel, label="Footprint Name Filter:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        # self.fp_name_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_footprint_names, style=wx.CB_DROPDOWN)
-        # grid_filters.Add(self.fp_name_filter_ctrl, 0, wx.EXPAND)
+        grid_filters = wx.GridSizer(3, 2, 2, 2) # Reduced gaps
 
         grid_filters.Add(wx.StaticText(panel, label="Value Filter:"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.value_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_values, style=wx.CB_DROPDOWN)
+        self.value_filter_ctrl = wx.ComboBox(panel, size=(120, -1), choices=self.all_values, style=wx.CB_DROPDOWN) # Reduced width
         grid_filters.Add(self.value_filter_ctrl, 0, wx.EXPAND)
 
         grid_filters.Add(wx.StaticText(panel, label="Net Name Filter (any pin):"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.net_name_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_net_names, style=wx.CB_DROPDOWN)
+        self.net_name_filter_ctrl = wx.ComboBox(panel, size=(120, -1), choices=self.all_net_names, style=wx.CB_DROPDOWN) # Reduced width
         grid_filters.Add(self.net_name_filter_ctrl, 0, wx.EXPAND)
 
         grid_filters.Add(wx.StaticText(panel, label="Connector Type Filter (comma-sep):"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.connector_type_filter_ctrl = wx.ComboBox(panel, size=(150, -1), choices=self.all_connector_types, style=wx.CB_DROPDOWN)
+        self.connector_type_filter_ctrl = wx.ComboBox(panel, size=(120, -1), choices=self.all_connector_types, style=wx.CB_DROPDOWN) # Reduced width
         grid_filters.Add(self.connector_type_filter_ctrl, 0, wx.EXPAND)
 
-        filters_panel.Add(grid_filters, 1, wx.EXPAND | wx.ALL, 3)
-        middle_hbox.Add(filters_panel, 1, wx.EXPAND | wx.ALL, 3)
+        filters_panel.Add(grid_filters, 1, wx.EXPAND | wx.ALL, 2) # Reduced padding
+        middle_hbox.Add(filters_panel, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for filters panel
 
         options_panel = wx.StaticBoxSizer(wx.StaticBox(panel, label="Output Options"), wx.VERTICAL)
 
         self.highlight_nets_markdown_checkbox = wx.CheckBox(panel, label="Highlight Same Nets in Markdown Output")
-        options_panel.Add(self.highlight_nets_markdown_checkbox, 0, wx.ALL, 3)
+        options_panel.Add(self.highlight_nets_markdown_checkbox, 0, wx.ALL, 2) # Reduced padding
 
         self.sort_by_reference_checkbox = wx.CheckBox(panel, label="Sort Components by Reference (A-Z)")
-        options_panel.Add(self.sort_by_reference_checkbox, 0, wx.ALL, 3)
+        options_panel.Add(self.sort_by_reference_checkbox, 0, wx.ALL, 2) # Reduced padding
+
+        self.ignore_unconnected_pins_checkbox = wx.CheckBox(panel, label="Ignore 'Unconnected' Pins (CSV)")
+        self.ignore_unconnected_pins_checkbox.SetToolTip("If checked, pins with 'unconnected' net name are excluded from CSV.")
+        options_panel.Add(self.ignore_unconnected_pins_checkbox, 0, wx.ALL, 2) # Reduced padding
+
+        self.ignore_free_pins_checkbox = wx.CheckBox(panel, label="Ignore Free Pins (CSV)")
+        self.ignore_free_pins_checkbox.SetToolTip("If checked, pins with no assigned net are excluded from CSV.")
+        options_panel.Add(self.ignore_free_pins_checkbox, 0, wx.ALL, 2) # Reduced padding
 
         self.output_column_checkboxes = {}
-        # --- REMOVED "Footprint Name" from General Properties list ---
         column_checkbox_data = {
-            "General Properties": ["Reference", "Value", "Description", "Layer", "Position", "Rotation",
+            "General Properties": ["Reference", "Value", "Footprint Name", "Description", "Layer", "Position", "Rotation",
                                    "Connector Type"],
             "Pin Details": ["Pad Name/Number", "Net Name"]
         }
 
-        options_panel.Add(wx.StaticText(panel, label="Select Output Columns:"), 0, wx.ALL, 3)
+        options_panel.Add(wx.StaticText(panel, label="Select Output Columns:"), 0, wx.ALL, 2) # Reduced padding
 
         column_checkbox_hbox = wx.BoxSizer(wx.HORIZONTAL)
         
         for category, columns in column_checkbox_data.items():
             col_vbox = wx.BoxSizer(wx.VERTICAL)
-            col_vbox.Add(wx.StaticText(panel, label=f"{category}"), 0, wx.ALL, 2)
+            col_vbox.Add(wx.StaticText(panel, label=f"{category}"), 0, wx.ALL, 1) # Reduced padding
             for col_name in columns:
                 cb = wx.CheckBox(panel, label=f"Include {col_name}")
                 cb.SetValue(True)
                 self.output_column_checkboxes[col_name] = cb
-                col_vbox.Add(cb, 0, wx.ALL, 2)
-            column_checkbox_hbox.Add(col_vbox, 1, wx.EXPAND | wx.ALL, 3)
-
-        options_panel.Add(column_checkbox_hbox, 1, wx.EXPAND | wx.ALL, 3)
-        middle_hbox.Add(options_panel, 1, wx.EXPAND | wx.ALL, 3)
-        main_vbox.Add(middle_hbox, 1, wx.EXPAND | wx.ALL, 3)
+                col_vbox.Add(cb, 0, wx.ALL, 1) # Reduced padding
+            column_checkbox_hbox.Add(col_vbox, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for each column group
+        
+        options_panel.Add(column_checkbox_hbox, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for column checkboxes
+        middle_hbox.Add(options_panel, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for options panel
+        main_vbox.Add(middle_hbox, 1, wx.EXPAND | wx.ALL, 2) # Proportion 1 for middle_hbox
 
 
         progress_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.status_text = wx.StaticText(panel, label="Ready.")
-        progress_sizer.Add(self.status_text, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 3)
+        progress_sizer.Add(self.status_text, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
         self.progress_bar = wx.Gauge(panel, range=100, size=(150, 15), style=wx.GA_HORIZONTAL)
         self.progress_bar.Hide()
-        progress_sizer.Add(self.progress_bar, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 3)
-        main_vbox.Add(progress_sizer, 0, wx.EXPAND | wx.ALL, 3)
+        progress_sizer.Add(self.progress_bar, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
+        main_vbox.Add(progress_sizer, 0, wx.EXPAND | wx.ALL, 2)
 
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.export_selected_button = wx.Button(panel, label="Export Selected")
         self.export_selected_button.Bind(wx.EVT_BUTTON, self.OnExportSelected)
         self.export_selected_button.Enable(False)
-        button_sizer.Add(self.export_selected_button, 0, wx.ALL, 3)
+        button_sizer.Add(self.export_selected_button, 0, wx.ALL, 2)
 
         export_js_button = wx.Button(panel, label="Export 'J's")
         export_js_button.Bind(wx.EVT_BUTTON, self.OnExportJs)
-        button_sizer.Add(export_js_button, 0, wx.ALL, 3)
+        button_sizer.Add(export_js_button, 0, wx.ALL, 2)
 
         export_connectors_by_type_button = wx.Button(panel, label="Export Connectors (by Type)")
         export_connectors_by_type_button.Bind(wx.EVT_BUTTON, self.OnExportConnectorsByType)
-        button_sizer.Add(export_connectors_by_type_button, 0, wx.ALL, 3)
+        button_sizer.Add(export_connectors_by_type_button, 0, wx.ALL, 2)
+
+        extract_unique_nets_button = wx.Button(panel, label="Extract Unique Connector Nets")
+        extract_unique_nets_button.Bind(wx.EVT_BUTTON, self.OnExtractUniqueNets)
+        button_sizer.Add(extract_unique_nets_button, 0, wx.ALL, 2)
 
         help_button = wx.Button(panel, label="Help")
         help_button.Bind(wx.EVT_BUTTON, self.OnHelp)
-        button_sizer.Add(help_button, 0, wx.ALL, 3)
+        button_sizer.Add(help_button, 0, wx.ALL, 2)
 
         cancel_button = wx.Button(panel, label="Close")
         cancel_button.Bind(wx.EVT_BUTTON, self.OnCancel)
-        button_sizer.Add(cancel_button, 0, wx.ALL, 3)
+        button_sizer.Add(cancel_button, 0, wx.ALL, 2)
 
-        main_vbox.Add(button_sizer, 0, wx.ALIGN_RIGHT | wx.ALL, 3)
+        main_vbox.Add(button_sizer, 0, wx.ALIGN_RIGHT | wx.ALL, 2)
 
         panel.SetSizer(main_vbox)
-        main_vbox.Fit(self)
+        main_vbox.Fit(self) # Let wx.Fit() make final adjustments based on contents
 
     def OnHelp(self, event):
         print("DEBUG: Help button clicked. Opening HTML Help.")
@@ -246,7 +260,7 @@ class PluginDialog(wx.Dialog):
             for fp in newly_selected_from_pcb:
                 existing_footprints_dict[fp.GetReference()] = fp
             
-            merged_footprints_list = sorted(existing_footprints_dict.values(), key=lambda f: f.GetReference())
+            merged_footprints_list = sorted(existing_footprints_dict.values(), key=lambda f: self._natural_sort_key(f.GetReference()))
             
             self._update_footprint_list_display(merged_footprints_list)
             wx.MessageBox(f"Merged selection. Added {len(newly_selected_from_pcb)} new items. Total: {len(merged_footprints_list)}.", 
@@ -303,6 +317,12 @@ class PluginDialog(wx.Dialog):
         self._update_footprint_list_display(new_current_display_footprints)
         wx.MessageBox(f"Removed {removed_count} item(s) from the list.", "Items Removed", wx.OK | wx.ICON_INFORMATION)
 
+    def _natural_sort_key(self, text):
+        """
+        Helper for natural sorting (e.g., J1, J2, J10 instead of J1, J10, J2).
+        """
+        return [int(s) if s.isdigit() else s.lower() for s in re.split('([0-9]+)', text)]
+
 
     def _get_footprint_property_safe(self, footprint, prop_name):
         """
@@ -320,7 +340,7 @@ class PluginDialog(wx.Dialog):
         properties["Value"] = fp.GetValue()
 
         footprint_id = fp.GetFPID()
-        properties["Footprint Name"] = str(footprint_id) # Footprint name is still extracted for display in details
+        properties["Footprint Name"] = str(footprint_id)
 
         description = fp.GetLibDescription()
         properties["Description"] = description if description and description != "No description" else "N/A"
@@ -374,6 +394,88 @@ class PluginDialog(wx.Dialog):
         self._process_and_export(filtered_footprints, "connectors_by_type.md", "connectors_by_type.csv",
                                  "connectors by type")
 
+    def OnExtractUniqueNets(self, event):
+        print("DEBUG: OnExtractUniqueNets method called.")
+        
+        connectors_to_process = []
+        if self.current_display_footprints:
+            print("DEBUG: Extracting unique nets from currently displayed footprints.")
+            connectors_to_process = list(self.current_display_footprints)
+        else:
+            print("DEBUG: No footprints displayed. Extracting unique nets from all 'connector-type' footprints on board.")
+            for fp in self.all_board_footprints:
+                if self._get_footprint_property_safe(fp, "connector-type") is not None:
+                    connectors_to_process.append(fp)
+
+        if not connectors_to_process:
+            wx.MessageBox("No connectors found in current selection or on board with 'connector-type' property.", "No Connectors", wx.OK | wx.ICON_INFORMATION)
+            return
+
+        filtered_connectors = self._apply_text_filters(connectors_to_process)
+
+        if not filtered_connectors:
+            wx.MessageBox("No connectors found after applying general text filters.", "No Unique Nets", wx.OK | wx.ICON_INFORMATION)
+            return
+
+        self.status_text.SetLabel(f"Extracting unique nets from {len(filtered_connectors)} connectors...")
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(0)
+        wx.Yield()
+
+        unique_nets = set()
+        total_pads_scanned = 0
+        for i, fp in enumerate(filtered_connectors):
+            self.progress_bar.SetValue(int((i / len(filtered_connectors)) * 50))
+            wx.Yield()
+            for pad in fp.Pads():
+                total_pads_scanned += 1
+                net = pad.GetNet()
+                if net:
+                    net_name = net.GetNetname()
+                    
+                    is_connected = bool(net)
+                    current_net_name = net_name # Use net_name directly
+                    is_unconnected_literal = (current_net_name.lower() == "unconnected")
+
+                    skip_net = False
+                    if self.ignore_unconnected_pins_checkbox.IsChecked() and is_unconnected_literal:
+                        skip_net = True
+                    if self.ignore_free_pins_checkbox.IsChecked() and not is_connected:
+                        skip_net = True
+
+                    if not skip_net:
+                        unique_nets.add(net_name)
+
+        if not unique_nets:
+            wx.MessageBox("No unique nets found on the selected/filtered connectors.", "No Unique Nets", wx.OK | wx.ICON_INFORMATION)
+            self.status_text.SetLabel("No unique nets found.")
+            self.progress_bar.Hide()
+            return
+
+        sorted_unique_nets = sorted(list(unique_nets), key=self._natural_sort_key)
+        
+        self.status_text.SetLabel(f"Generating unique nets CSV for {len(sorted_unique_nets)} nets...")
+        self.progress_bar.SetValue(75)
+        wx.Yield()
+
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Unique Net Name"])
+        for net_name in sorted_unique_nets:
+            writer.writerow([net_name])
+        csv_content = output.getvalue()
+
+        self.status_text.SetLabel("Showing save dialog...")
+        self.progress_bar.Hide()
+        wx.Yield()
+
+        self.save_file_dialog(csv_content, "CSV Files (*.csv)|*.csv", "Save Unique Connector Nets", "unique_connector_nets.csv")
+
+        self.status_text.SetLabel("Done.")
+        self.progress_bar.SetValue(100)
+        self.progress_bar.Hide()
+        print(f"DEBUG: Unique nets extraction complete. Total unique nets: {len(sorted_unique_nets)}")
+
     def OnCancel(self, event):
         print("DEBUG: Close button clicked. Closing dialog.")
         self.Close()
@@ -394,7 +496,11 @@ class PluginDialog(wx.Dialog):
         self.progress_bar.SetValue(25)
         wx.Yield()
 
-        extracted_data_by_footprint = self.extract_data(filtered_footprints)
+        extracted_data_by_footprint = self.extract_data(
+            filtered_footprints,
+            ignore_unconnected_pins_for_csv=self.ignore_unconnected_pins_checkbox.IsChecked(),
+            ignore_free_pins_for_csv=self.ignore_free_pins_checkbox.IsChecked()
+        )
         print(f"DEBUG: _process_and_export: extract_data completed. Found {len(extracted_data_by_footprint)} components.")
 
         if not extracted_data_by_footprint:
@@ -407,7 +513,7 @@ class PluginDialog(wx.Dialog):
         if self.sort_by_reference_checkbox.IsChecked():
             print("DEBUG: Sorting components by reference for output.")
             sorted_refs = sorted(extracted_data_by_footprint.keys(),
-                                 key=lambda k: extracted_data_by_footprint[k]['general_properties']['Reference'])
+                                 key=lambda k: self._natural_sort_key(extracted_data_by_footprint[k]['general_properties']['Reference']))
             ordered_extracted_data = {ref: extracted_data_by_footprint[ref] for ref in sorted_refs}
             extracted_data_by_footprint = ordered_extracted_data
         else:
@@ -459,13 +565,13 @@ class PluginDialog(wx.Dialog):
         """
         filtered = list(footprints_list)
 
-        # --- REMOVED: fp_name_filter_text processing ---
-        # fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower()
+        # Footprint Name Filter is removed from GUI, so no self.fp_name_filter_ctrl
+        # fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower() 
 
         value_filter_text = self.value_filter_ctrl.GetValue().strip().lower()
         net_name_filter_text = self.net_name_filter_ctrl.GetValue().strip().lower()
 
-        # --- REMOVED: Footprint Name filter application ---
+        # Removed Footprint Name filter application
         # if fp_name_filter_text:
         #     filtered = [fp for fp in filtered if str(fp.GetFPID()).lower().find(fp_name_filter_text) != -1]
         #     print(f"DEBUG: Applied FP Name filter '{fp_name_filter_text}'. Found {len(filtered)} FPs.")
@@ -492,11 +598,11 @@ class PluginDialog(wx.Dialog):
         Returns a list of column names that are checked by the user for output.
         """
         selected_cols = []
-        # --- REMOVED "Footprint Name" from all_possible_columns ---
+        # Adjusted all_possible_columns after removing Footprint Name from GUI/filters
         all_possible_columns = [
             "Reference", "Value", "Description", "Layer",
             "Position", "Rotation", "Connector Type",
-            "Pad Name/Number", "Net Name"
+            "Pad Name/Number", "Net Name", "Pins (Aggregated)" # Added aggregated pins for CSV
         ]
 
         for col_name in all_possible_columns:
@@ -505,7 +611,13 @@ class PluginDialog(wx.Dialog):
                 selected_cols.append(col_name)
         return selected_cols
 
-    def extract_data(self, footprints_to_process):
+    # extract_data now accepts pin filter flags
+    def extract_data(self, footprints_to_process, ignore_unconnected_pins_for_csv=False, ignore_free_pins_for_csv=False):
+        """
+        Extracts relevant properties and pin details from the provided list of footprints.
+        Applies pin filtering for CSV based on ignore_unconnected_pins_for_csv and ignore_free_pins_for_csv flags.
+        Returns a dictionary organized by footprint reference designator.
+        """
         extracted_data_by_footprint = {}
         total_footprints = len(footprints_to_process)
         for i, footprint in enumerate(footprints_to_process):
@@ -517,8 +629,7 @@ class PluginDialog(wx.Dialog):
             footprint_value = footprint.GetValue()
 
             footprint_id = footprint.GetFPID()
-            # --- Footprint Name is still extracted here for internal use (e.g., in details panel) ---
-            footprint_full_name = str(footprint_id) 
+            footprint_full_name = str(footprint_id) # Still extract for internal use/details panel
 
             footprint_description = footprint.GetLibDescription()
 
@@ -533,7 +644,7 @@ class PluginDialog(wx.Dialog):
             general_properties = {
                 "Reference": footprint_ref,
                 "Value": footprint_value,
-                "Footprint Name": footprint_full_name, # Still included in general_properties for internal use
+                "Footprint Name": footprint_full_name, # Still included here for internal use/details
                 "Description": footprint_description if footprint_description and footprint_description != "No description" else "N/A",
                 "Layer": footprint_layer,
                 "Position": f"({footprint_pos.x / 1000000.0:.2f}mm, {footprint_pos.y / 1000000.0:.2f}mm)",
@@ -541,21 +652,43 @@ class PluginDialog(wx.Dialog):
                 "Connector Type": connector_type_val
             }
 
-            pin_data = []
+            pin_data_unfiltered = [] # This list holds all pins, used for Markdown
+            filtered_pins_for_csv = [] # This list holds pins after CSV-specific filters
+            # aggregated_pins_str is REMOVED from here, as it's built in generate_csv now
+
             for pad in footprint.Pads():
                 pad_name = pad.GetPadName()
                 net_name = ""
                 net = pad.GetNet()
-                if net:
-                    net_name = net.GetNetname()
-                pin_data.append({
+                
+                is_connected = bool(net) # True if net object exists
+                current_net_name = net.GetNetname() if is_connected else ""
+                is_unconnected_literal = (current_net_name.lower() == "unconnected") # Check for literal "unconnected" string
+
+                # Always add to unfiltered list for Markdown
+                pin_data_unfiltered.append({
                     "Pad Name/Number": pad_name,
-                    "Net Name": net_name
+                    "Net Name": current_net_name
                 })
 
+                # Apply pin filters for CSV only
+                skip_pin_for_csv = False
+                if ignore_unconnected_pins_for_csv and is_unconnected_literal:
+                    skip_pin_for_csv = True
+                if ignore_free_pins_for_csv and not is_connected: # Only skip if it's truly free (no net)
+                    skip_pin_for_csv = True
+
+                if not skip_pin_for_csv:
+                    filtered_pins_for_csv.append({
+                        "Pad Name/Number": pad_name,
+                        "Net Name": current_net_name
+                    })
+            
             extracted_data_by_footprint[footprint_ref] = {
                 "general_properties": general_properties,
-                "pin_data": pin_data
+                "pin_data": pin_data_unfiltered, # Unfiltered list for Markdown output
+                "filtered_pins_for_csv": filtered_pins_for_csv, # Filtered list for CSV
+                # "aggregated_pins_str" is REMOVED from here
             }
         return extracted_data_by_footprint
 
@@ -574,7 +707,7 @@ class PluginDialog(wx.Dialog):
 
         for ref, component_data in data_by_footprint.items():
             general_props = component_data["general_properties"]
-            pin_data = component_data["pin_data"]
+            pin_data = component_data["pin_data"] # Markdown uses the unfiltered pin_data
 
             markdown += f"## Component: {ref}\n\n"
 
@@ -590,7 +723,7 @@ class PluginDialog(wx.Dialog):
                         row_values.append(general_props.get("Position (X, Y)", "N/A"))
                     elif header == "Rotation":
                         row_values.append(general_props.get("Rotation", "N/A"))
-                    else:
+                    else: # This covers Reference, Value, Description, Layer, Connector Type, Footprint Name
                         row_values.append(str(general_props.get(header, "N/A")))
                 markdown += "| " + " | ".join(row_values) + " |\n"
                 markdown += "\n"
@@ -626,49 +759,598 @@ class PluginDialog(wx.Dialog):
 
     def generate_csv(self, data_by_footprint, selected_columns=None):
         output = StringIO()
+        writer = csv.writer(output)
 
-        if selected_columns is None:
-            selected_columns = self._get_selected_columns()
-
-        csv_headers = []
-        general_prop_cols_map = { # Map display name to internal storage key if different
+        # Map display name to internal storage key for general properties
+        general_prop_cols_map = {
             "Reference": "Reference", "Value": "Value", "Footprint Name": "Footprint Name",
             "Description": "Description", "Layer": "Layer",
             "Position": "Position (X, Y)", "Rotation": "Rotation",
             "Connector Type": "Connector Type"
         }
-        pin_detail_cols_map = {
-            "Pad Name/Number": "Pad Name/Number", "Net Name": "Net Name"
-        }
-
-        for col in selected_columns:
-            if col in general_prop_cols_map:
-                csv_headers.append(general_prop_cols_map[col])
-            elif col in pin_detail_cols_map:
-                csv_headers.append(pin_detail_cols_map[col])
-
-        writer = csv.DictWriter(output, fieldnames=csv_headers, extrasaction='ignore')
-        writer.writeheader()
+        
+        # Fixed headers for the pin rows (as requested)
+        pin_row_headers = ["Connector Name", "Pin Number", "Net Name"]
 
         for ref, component_data in data_by_footprint.items():
             general_props = component_data["general_properties"]
-            pin_data = component_data["pin_data"]
+            # Use the filtered pins for CSV, which are now stored in filtered_pins_for_csv
+            filtered_pins_for_csv = component_data["filtered_pins_for_csv"] 
 
-            base_row = {}
-            for col_display_name, col_storage_name in general_prop_cols_map.items():
-                if col_display_name in selected_columns:
-                    base_row[col_storage_name] = general_props.get(col_storage_name, "")
+            # --- Write Connector Properties Section ---
+            general_headers_to_include = [col for col in selected_columns if col in general_prop_cols_map]
+            
+            # Only write general properties if there are selected general headers OR if there are pins to list
+            # This prevents blank "Component: X" headers if no general properties are selected AND no pins
+            if general_headers_to_include or filtered_pins_for_csv:
+                writer.writerow([f"Component: {ref}"]) # Section header for the component
+                
+                if general_headers_to_include: # Only write properties if columns are selected
+                    # Write general properties as key-value pairs
+                    for col_display_name in general_headers_to_include:
+                        col_storage_name = general_prop_cols_map[col_display_name]
+                        value = general_props.get(col_storage_name, "")
+                        writer.writerow([col_display_name, value])
+                # --- REMOVED BLANK ROW AFTER PROPERTIES ---
+                # writer.writerow([]) 
 
-            if not pin_data:
-                if any(col_name in selected_columns for col_name in general_prop_cols_map.keys()):
-                    writer.writerow(base_row)
-            else:
+            # --- Write Pin Details Section ---
+            # Only write pin section if pin details are selected for output AND there are filtered pins
+            if filtered_pins_for_csv and (("Pad Name/Number" in selected_columns) or ("Net Name" in selected_columns)):
+                writer.writerow(pin_row_headers) # Write pin headers
+                for pin_row in filtered_pins_for_csv:
+                    # Ensure columns match the pin_row_headers order and content
+                    row_data = [
+                        general_props.get("Reference", ""), # Connector Name (Reference)
+                        pin_row.get("Pad Name/Number", ""), # Pin Number
+                        pin_row.get("Net Name", "") # Net Name
+                    ]
+                    writer.writerow(row_data)
+                # --- REMOVED BLANK ROW AFTER PINS ---
+                # writer.writerow([]) 
+
+        return output.getvalue()
+
+    def save_file_dialog(self, content, wildcard, title, default_filename):
+        with wx.FileDialog(
+                None,
+                title,
+                wildcard=wildcard,
+                defaultFile=default_filename,
+                style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+        ) as file_dialog:
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return
+
+            pathname = file_dialog.GetPath()
+            try:
+                with open(pathname, 'w', encoding='utf-8') as f:
+                    f.write(content)
+                wx.MessageBox(f"File saved successfully to:\n{pathname}", "Success", wx.OK | wx.ICON_INFORMATION)
+            except Exception as e:
+                wx.MessageBox(f"Error saving file:\n{e}", "Error", wx.OK | wx.ICON_ERROR)
+
+    def _generate_board_drawing_svg(self, footprints_to_highlight, output_svg_path):
+        """
+        Generates an SVG drawing of the board outline and highlights specified footprints.
+        Saves the SVG to the given output_svg_path.
+        """
+        print(f"DEBUG: Generating SVG drawing to {output_svg_path}")
+        
+        board_bbox = self.board.ComputeBoundingBox(False)
+        
+        if board_bbox.GetWidth() <= 0 or board_bbox.GetHeight() <= 0:
+            board_bbox = pcbnew.EDA_RECT(0, 0, 100000000, 100000000) # 100mm x 100mm in nm
+            print("DEBUG: Board bounding box is empty or invalid, using default 100x100mm.")
+
+        SCALE_FACTOR = 1.0 / 100000.0 
+        
+        svg_width_nm = board_bbox.GetWidth()
+        svg_height_nm = board_bbox.GetHeight()
+        
+        svg_width_px = svg_width_nm * SCALE_FACTOR
+        svg_height_px = svg_height_nm * SCALE_FACTOR
+
+        svg_content = f"""<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="{svg_width_px:.2f}px" height="{svg_height_px:.2f}px" viewBox="0 0 {svg_width_nm} {svg_height_nm}"
+     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect width="100%" height="100%" fill="#FFFFFF"/> <!-- White background -->
+<g transform="translate({-board_bbox.GetX()}, {-board_bbox.GetY()})"> <!-- Translate to origin -->
+"""
+        print("DEBUG: Drawing Edge.Cuts...")
+        edge_cuts_color = "#000000" # Black
+        edge_cuts_width_svg = 0.5 # 0.5mm stroke for SVG outline
+        
+        drawn_edge_cuts = False
+        for drawing in self.board.GetDrawings():
+            if drawing.GetLayer() == pcbnew.Edge_Cuts:
+                drawn_edge_cuts = True
+                if isinstance(drawing, pcbnew.PCB_SHAPE):
+                    if drawing.GetShape() == pcbnew.S_SEGMENT: # Line segment
+                        start = drawing.GetStart()
+                        end = drawing.GetEnd()
+                        svg_content += f'<line x1="{start.x}" y1="{start.y}" x2="{end.x}" y2="{end.y}" ' \
+                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
+                    elif drawing.GetShape() == pcbnew.S_ARC: # Arc - approximate with line for simplicity
+                        start = drawing.GetStart()
+                        end = drawing.GetEnd()
+                        svg_content += f'<line x1="{start.x}" y1="{start.y}" x2="{end.x}" y2="{end.y}" ' \
+                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
+                    elif drawing.GetShape() == pcbnew.S_CIRCLE:
+                        center = drawing.GetCenter()
+                        radius = drawing.GetRadius()
+                        svg_content += f'<circle cx="{center.x}" cy="{center.y}" r="{radius}" ' \
+                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none"/>\n'
+                    elif drawing.GetShape() == pcbnew.S_RECT:
+                        p1 = drawing.GetStart()
+                        p2 = drawing.GetEnd()
+                        x = min(p1.x, p2.x)
+                        y = min(p1.y, p2.y)
+                        width = abs(p1.x - p2.x)
+                        height = abs(p1.y - p2.y)
+                        svg_content += f'<rect x="{x}" y="{y}" width="{width}" height="{height}" ' \
+                                       f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none"/>\n'
+                
+        if not drawn_edge_cuts:
+            print("DEBUG: No Edge.Cuts drawings found. Drawing a default rectangle for visibility.")
+            svg_content += f'<rect x="{board_bbox.GetX()}" y="{board_bbox.GetY()}" ' \
+                           f'width="{board_bbox.GetWidth()}" height="{board_bbox.GetHeight()}" ' \
+                           f'stroke="{edge_cuts_color}" stroke-width="{edge_cuts_width_svg * 1000000}" fill="none" stroke-dasharray="200000,100000"/>\n'
+
+        print("DEBUG: Drawing highlighted footprints...")
+        highlight_color = "#FF0000" # Red for connectors
+        text_height_nm = 500000 # Approx 0.5mm text height
+
+        for fp in footprints_to_highlight:
+            ref = fp.GetReference()
+            
+            fp_bbox = fp.GetBoundingBox()
+            fp_x = fp_bbox.GetX()
+            fp_y = fp_bbox.GetY()
+            fp_width = fp_bbox.GetWidth()
+            fp_height = fp_bbox.GetHeight()
+
+            svg_content += f'<rect x="{fp_x}" y="{fp_y}" width="{fp_width}" height="{fp_height}" ' \
+                           f'fill="{highlight_color}" fill-opacity="0.3" stroke="{highlight_color}" stroke-width="{edge_cuts_width_svg * 1000000}"/>\n'
+            
+            text_x = fp_x + fp_width / 2
+            text_y = fp_y + fp_height / 2 
+            
+            svg_content += f'<text x="{text_x}" y="{text_y}" font-family="Arial" font-size="{text_height_nm}" ' \
+                           f'fill="#000000" text-anchor="middle" dominant-baseline="middle">{ref}</text>\n'
+
+        svg_content += """</g>
+</svg>"""
+        
+        with open(output_svg_path, 'w', encoding='utf-8') as f:
+            f.write(svg_content)
+        print(f"DEBUG: SVG saved to {output_svg_path}. File size: {os.path.getsize(output_svg_path)} bytes.")
+
+    def OnGenerateConnectorReport(self, event):
+        print("DEBUG: OnGenerateConnectorReport method called.")
+        
+        initial_footprints = list(self.all_board_footprints)
+        
+        connector_type_filter_raw = self.connector_type_filter_ctrl.GetValue().strip()
+        connector_types_to_match = [t.strip().lower() for t in connector_type_filter_raw.split(',') if t.strip()]
+
+        connectors_for_report = []
+        if connector_types_to_match:
+            print(f"DEBUG: Filtering connectors for report by types: {connector_types_to_match}")
+            for fp in initial_footprints:
+                fp_connector_type_val = self._get_footprint_property_safe(fp, "connector-type")
+                if fp_connector_type_val is not None:
+                    if fp_connector_type_val.lower().strip() in connector_types_to_match:
+                        connectors_for_report.append(fp)
+        else:
+            print("DEBUG: No connector type filter specified. Including all footprints with 'connector-type' property.")
+            for fp in initial_footprints:
+                if self._get_footprint_property_safe(fp, "connector-type") is not None:
+                    connectors_for_report.append(fp)
+
+        if not connectors_for_report:
+            wx.MessageBox("No connectors found for the report based on the 'connector-type' property/filter.", "No Connectors for Report", wx.OK | wx.ICON_INFORMATION)
+            return
+
+        # Apply general text filters (Value, Net Name) to the connectors
+        filtered_connectors = self._apply_text_filters(connectors_for_report)
+
+        if not filtered_connectors:
+            wx.MessageBox("No connectors found for the report after applying general text filters.", "No Connectors for Report", wx.OK | wx.ICON_INFORMATION)
+            return
+
+        # Apply sorting if checkbox is checked
+        if self.sort_by_reference_checkbox.IsChecked():
+            print("DEBUG: Sorting connectors for report by reference.")
+            filtered_connectors.sort(key=lambda f: self._natural_sort_key(f.GetReference()))
+        else:
+            print("DEBUG: Processing connectors for report in discovery order.")
+
+        self.status_text.SetLabel(f"Generating report for {len(filtered_connectors)} connectors...")
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(0)
+        wx.Yield()
+
+        # Generate the SVG drawing
+        svg_filename = "connector_placement_report.svg"
+        svg_file_path = os.path.join(os.path.dirname(__file__), svg_filename)
+        
+        self.status_text.SetLabel("Generating board drawing (SVG)...")
+        self.progress_bar.SetValue(10)
+        wx.Yield()
+        try:
+            self._generate_board_drawing_svg(filtered_connectors, svg_file_path)
+            print(f"DEBUG: SVG drawing saved to {svg_file_path}")
+            svg_link_markdown = f"![Connector Placement Diagram]({svg_filename})\n\n"
+        except Exception as e:
+            print(f"ERROR: Failed to generate SVG drawing: {e}")
+            import traceback
+            traceback.print_exc()
+            wx.MessageBox(f"An error occurred during SVG drawing generation:\n{e}", "SVG Error", wx.OK | wx.ICON_ERROR)
+            svg_link_markdown = "*(Error generating connector placement diagram)*\n\n"
+        self.progress_bar.SetValue(30)
+        wx.Yield()
+
+
+        # Extract data for the Markdown report (using pin filters for CSV, not MD)
+        extracted_data_by_footprint = self.extract_data(
+            filtered_connectors,
+            ignore_unconnected_pins_for_csv=self.ignore_unconnected_pins_checkbox.IsChecked(),
+            ignore_free_pins_for_csv=self.ignore_free_pins_checkbox.IsChecked()
+        )
+        self.progress_bar.SetValue(60)
+        wx.Yield()
+
+        apply_markdown_highlight = self.highlight_nets_markdown_checkbox.IsChecked()
+        selected_columns = self._get_selected_columns()
+        
+        markdown_content = self.generate_markdown(extracted_data_by_footprint, apply_markdown_highlight, selected_columns)
+        self.progress_bar.SetValue(80)
+        wx.Yield()
+
+        # Combine SVG link and Markdown content
+        final_report_markdown = "# Connector Report\n\n" + svg_link_markdown + markdown_content
+
+        # Prompt to save the combined report
+        self.status_text.SetLabel("Saving report...")
+        self.progress_bar.SetValue(90)
+        wx.Yield()
+        self.save_file_dialog(final_report_markdown, "Markdown Files (*.md)|*.md", "Save Connector Report", "connector_report.md")
+
+        self.status_text.SetLabel("Done.")
+        self.progress_bar.SetValue(100)
+        self.progress_bar.Hide()
+        print("DEBUG: Connector Report generation complete.")
+
+    def OnCancel(self, event):
+        print("DEBUG: Close button clicked. Closing dialog.")
+        self.Close()
+
+    def _process_and_export(self, initial_footprints_list, default_md_name, default_csv_name, export_type_desc):
+        """
+        Consolidates filtering, extraction, generation, and saving for all export types.
+        """
+        self.status_text.SetLabel(f"Applying filters for {export_type_desc}...")
+        self.progress_bar.Show()
+        self.progress_bar.SetValue(0)
+        self.progress_bar.SetRange(100)
+        wx.Yield()
+
+        filtered_footprints = self._apply_text_filters(initial_footprints_list)
+
+        self.status_text.SetLabel(f"Extracting data for {len(filtered_footprints)} components...")
+        self.progress_bar.SetValue(25)
+        wx.Yield()
+
+        extracted_data_by_footprint = self.extract_data(
+            filtered_footprints,
+            ignore_unconnected_pins_for_csv=self.ignore_unconnected_pins_checkbox.IsChecked(),
+            ignore_free_pins_for_csv=self.ignore_free_pins_checkbox.IsChecked()
+        )
+        print(f"DEBUG: _process_and_export: extract_data completed. Found {len(extracted_data_by_footprint)} components.")
+
+        if not extracted_data_by_footprint:
+            wx.MessageBox(f"No pins found in the {export_type_desc} after filtering to export.", "No Pin Data",
+                          wx.OK | wx.ICON_INFORMATION)
+            self.status_text.SetLabel("No data found.")
+            self.progress_bar.Hide()
+            return
+
+        if self.sort_by_reference_checkbox.IsChecked():
+            print("DEBUG: Sorting components by reference for output.")
+            sorted_refs = sorted(extracted_data_by_footprint.keys(),
+                                 key=lambda k: self._natural_sort_key(extracted_data_by_footprint[k]['general_properties']['Reference']))
+            ordered_extracted_data = {ref: extracted_data_by_footprint[ref] for ref in sorted_refs}
+            extracted_data_by_footprint = ordered_extracted_data
+        else:
+            print("DEBUG: Outputting components in processed order.")
+
+        apply_markdown_highlight = self.highlight_nets_markdown_checkbox.IsChecked()
+        selected_columns = self._get_selected_columns()
+
+        self.status_text.SetLabel("Generating Markdown content...")
+        self.progress_bar.SetValue(50)
+        wx.Yield()
+        markdown_content = self.generate_markdown(extracted_data_by_footprint, apply_markdown_highlight,
+                                                  selected_columns)
+
+        self.status_text.SetLabel("Generating CSV content...")
+        self.progress_bar.SetValue(75)
+        wx.Yield()
+        
+        csv_content = ""
+        try:
+            csv_content = self.generate_csv(extracted_data_by_footprint, selected_columns)
+            print(f"DEBUG: CSV content generated. Length: {len(csv_content)} bytes.")
+        except Exception as e:
+            print(f"ERROR: Exception during CSV generation: {e}")
+            import traceback
+            traceback.print_exc()
+            wx.MessageBox(f"An error occurred during CSV generation:\n{e}", "CSV Generation Error", wx.OK | wx.ICON_ERROR)
+            self.status_text.SetLabel("Error during CSV generation.")
+            self.progress_bar.Hide()
+            return
+
+        self.status_text.SetLabel("Showing save dialogs...")
+        self.progress_bar.Hide()
+        wx.Yield()
+
+        self.save_file_dialog(markdown_content, "Markdown Files (*.md)|*.md", "Save Pin Data (Markdown)",
+                              default_md_name)
+        self.save_file_dialog(csv_content, "CSV Files (*.csv)|*.csv", "Save Pin Data (CSV)", default_csv_name)
+
+        self.status_text.SetLabel("Done.")
+        self.progress_bar.SetValue(100)
+        self.progress_bar.Hide()
+        print("DEBUG: _perform_export: Export complete.")
+
+    def _apply_text_filters(self, footprints_list):
+        """
+        Applies Footprint Name, Value, and Net Name filters to a list of footprints.
+        Returns a new filtered list.
+        """
+        filtered = list(footprints_list)
+
+        # Footprint Name Filter is removed from GUI, so no self.fp_name_filter_ctrl
+        # fp_name_filter_text = self.fp_name_filter_ctrl.GetValue().strip().lower() 
+
+        value_filter_text = self.value_filter_ctrl.GetValue().strip().lower()
+        net_name_filter_text = self.net_name_filter_ctrl.GetValue().strip().lower()
+
+        # Removed Footprint Name filter application
+        # if fp_name_filter_text:
+        #     filtered = [fp for fp in filtered if str(fp.GetFPID()).lower().find(fp_name_filter_text) != -1]
+        #     print(f"DEBUG: Applied FP Name filter '{fp_name_filter_text}'. Found {len(filtered)} FPs.")
+
+        if value_filter_text:
+            filtered = [fp for fp in filtered if fp.GetValue().lower().find(value_filter_text) != -1]
+            print(f"DEBUG: Applied Value filter '{value_filter_text}'. Found {len(filtered)} FPs.")
+
+        if net_name_filter_text:
+            filtered_by_net = []
+            for fp in filtered:
+                for pad in fp.Pads():
+                    net = pad.GetNet()
+                    if net and net.GetNetname().lower().find(net_name_filter_text) != -1:
+                        filtered_by_net.append(fp)
+                        break
+            filtered = filtered_by_net
+            print(f"DEBUG: Applied Net Name filter '{net_name_filter_text}'. Found {len(filtered)} FPs.")
+
+        return filtered
+
+    def _get_selected_columns(self):
+        """
+        Returns a list of column names that are checked by the user for output.
+        """
+        selected_cols = []
+        # Adjusted all_possible_columns after removing Footprint Name from GUI/filters
+        all_possible_columns = [
+            "Reference", "Value", "Description", "Layer",
+            "Position", "Rotation", "Connector Type",
+            "Pad Name/Number", "Net Name", "Pins (Aggregated)" # Added aggregated pins for CSV
+        ]
+
+        for col_name in all_possible_columns:
+            cb = self.output_column_checkboxes.get(col_name)
+            if cb and cb.IsChecked():
+                selected_cols.append(col_name)
+        return selected_cols
+
+    # extract_data now accepts pin filter flags
+    def extract_data(self, footprints_to_process, ignore_unconnected_pins_for_csv=False, ignore_free_pins_for_csv=False):
+        """
+        Extracts relevant properties and pin details from the provided list of footprints.
+        Applies pin filtering for CSV based on ignore_unconnected_pins_for_csv and ignore_free_pins_for_csv flags.
+        Returns a dictionary organized by footprint reference designator.
+        """
+        extracted_data_by_footprint = {}
+        total_footprints = len(footprints_to_process)
+        for i, footprint in enumerate(footprints_to_process):
+            if total_footprints > 0:
+                self.progress_bar.SetValue(25 + int((i / total_footprints) * 25))
+                wx.Yield()
+
+            footprint_ref = footprint.GetReference()
+            footprint_value = footprint.GetValue()
+
+            footprint_id = footprint.GetFPID()
+            footprint_full_name = str(footprint_id) # Still extract for internal use/details panel
+
+            footprint_description = footprint.GetLibDescription()
+
+            footprint_layer = footprint.GetLayerName()
+            footprint_pos = footprint.GetPosition()
+            footprint_rot = footprint.GetOrientation()
+
+            connector_type_val = self._get_footprint_property_safe(footprint, "connector-type")
+            if connector_type_val is None:
+                connector_type_val = ""
+
+            general_properties = {
+                "Reference": footprint_ref,
+                "Value": footprint_value,
+                "Footprint Name": footprint_full_name, # Still included here for internal use/details
+                "Description": footprint_description if footprint_description and footprint_description != "No description" else "N/A",
+                "Layer": footprint_layer,
+                "Position": f"({footprint_pos.x / 1000000.0:.2f}mm, {footprint_pos.y / 1000000.0:.2f}mm)",
+                "Rotation": f"{footprint_rot.AsDegrees():.1f}°",
+                "Connector Type": connector_type_val
+            }
+
+            pin_data_unfiltered = [] # This list holds all pins, used for Markdown
+            filtered_pins_for_csv = [] # This list holds pins after CSV-specific filters
+            # aggregated_pins_str is REMOVED from here, as it's built in generate_csv now
+
+            for pad in footprint.Pads():
+                pad_name = pad.GetPadName()
+                net_name = ""
+                net = pad.GetNet()
+                
+                is_connected = bool(net) # True if net object exists
+                current_net_name = net.GetNetname() if is_connected else ""
+                is_unconnected_literal = (current_net_name.lower() == "unconnected") # Check for literal "unconnected" string
+
+                # Always add to unfiltered list for Markdown
+                pin_data_unfiltered.append({
+                    "Pad Name/Number": pad_name,
+                    "Net Name": current_net_name
+                })
+
+                # Apply pin filters for CSV only
+                skip_pin_for_csv = False
+                if ignore_unconnected_pins_for_csv and is_unconnected_literal:
+                    skip_pin_for_csv = True
+                if ignore_free_pins_for_csv and not is_connected: # Only skip if it's truly free (no net)
+                    skip_pin_for_csv = True
+
+                if not skip_pin_for_csv:
+                    filtered_pins_for_csv.append({
+                        "Pad Name/Number": pad_name,
+                        "Net Name": current_net_name
+                    })
+            
+            extracted_data_by_footprint[footprint_ref] = {
+                "general_properties": general_properties,
+                "pin_data": pin_data_unfiltered, # Unfiltered list for Markdown output
+                "filtered_pins_for_csv": filtered_pins_for_csv, # Filtered list for CSV
+                # "aggregated_pins_str" is REMOVED from here
+            }
+        return extracted_data_by_footprint
+
+    def generate_markdown(self, data_by_footprint, apply_highlight=False, selected_columns=None):
+        markdown = "# Extracted Component Pin Data\n\n"
+
+        if selected_columns is None:
+            selected_columns = self._get_selected_columns()
+
+        html_color_palette = [
+            "#FF0000", "#008000", "#0000FF", "#FFA500", "#800080", "#00FFFF", "#FFC0CB", "#00FF7F", "#8B4513",
+            "#A52A2A", "#6A5ACD", "#D2691E", "#4682B4", "#BDB76B", "#FFD700"
+        ]
+        net_colors_map = {}
+        color_index = 0
+
+        for ref, component_data in data_by_footprint.items():
+            general_props = component_data["general_properties"]
+            pin_data = component_data["pin_data"] # Markdown uses the unfiltered pin_data
+
+            markdown += f"## Component: {ref}\n\n"
+
+            general_headers_to_include = [col for col in selected_columns if col in general_props]
+            if general_headers_to_include:
+                markdown += "### General Properties\n\n"
+                markdown += "| " + " | ".join(general_headers_to_include) + " |\n"
+                markdown += "|:" + "---------|:---------".join([""] * len(general_headers_to_include)) + "|\n"
+
+                row_values = []
+                for header in general_headers_to_include:
+                    if header == "Position":
+                        row_values.append(general_props.get("Position (X, Y)", "N/A"))
+                    elif header == "Rotation":
+                        row_values.append(general_props.get("Rotation", "N/A"))
+                    else: # This covers Reference, Value, Description, Layer, Connector Type, Footprint Name
+                        row_values.append(str(general_props.get(header, "N/A")))
+                markdown += "| " + " | ".join(row_values) + " |\n"
+                markdown += "\n"
+
+            pin_headers_to_include = [col for col in selected_columns if col in ["Pad Name/Number", "Net Name"]]
+            if pin_data and pin_headers_to_include:
+                markdown += "### Pin Details\n\n"
+                markdown += "| " + " | ".join(pin_headers_to_include) + " |\n"
+                markdown += "|:" + "----------------|:---------".join([""] * len(pin_headers_to_include)) + "|\n"
+
                 for pin_row in pin_data:
-                    combined_row = base_row.copy()
-                    for col_display_name, col_storage_name in pin_detail_cols_map.items():
-                        if col_display_name in selected_columns:
-                            combined_row[col_storage_name] = pin_row.get(col_storage_name, "")
-                    writer.writerow(combined_row)
+                    row_values = []
+                    for header in pin_headers_to_include:
+                        val = pin_row.get(header, "N/A")
+                        if header == "Net Name" and apply_highlight and val != "N/A" and val != "":
+                            if val not in net_colors_map:
+                                net_colors_map[val] = html_color_palette[color_index % len(html_color_palette)]
+                                color_index += 1
+
+                            display_val = f'<span style="color: {net_colors_map[val]};">{val}</span>'
+                        else:
+                            display_val = val
+
+                        row_values.append(display_val)
+                    markdown += "| " + " | ".join(row_values) + " |\n"
+                markdown += "\n"
+            elif pin_data and not pin_headers_to_include:
+                markdown += "Pin details available but no pin columns selected.\n\n"
+            else:
+                markdown += "No pins found for this component.\n\n"
+
+        return markdown
+
+    def generate_csv(self, data_by_footprint, selected_columns=None):
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Map display name to internal storage key for general properties
+        general_prop_cols_map = {
+            "Reference": "Reference", "Value": "Value", "Footprint Name": "Footprint Name",
+            "Description": "Description", "Layer": "Layer",
+            "Position": "Position (X, Y)", "Rotation": "Rotation",
+            "Connector Type": "Connector Type"
+        }
+        
+        # Fixed headers for the pin rows (as requested)
+        pin_row_headers = ["Connector Name", "Pin Number", "Net Name"]
+
+        for ref, component_data in data_by_footprint.items():
+            general_props = component_data["general_properties"]
+            filtered_pins_for_csv = component_data["filtered_pins_for_csv"] # Use the filtered pins
+
+            # --- Write Connector Properties Section ---
+            general_headers_to_include = [col for col in selected_columns if col in general_prop_cols_map]
+            
+            # Only write general properties section if general properties are selected OR if there are pins to list
+            if general_headers_to_include or filtered_pins_for_csv:
+                writer.writerow([f"Component: {ref}"]) # Section header for the component
+                
+                if general_headers_to_include: # Only write properties if columns are selected
+                    # Write general properties as key-value pairs
+                    for col_display_name in general_headers_to_include:
+                        col_storage_name = general_prop_cols_map[col_display_name]
+                        value = general_props.get(col_storage_name, "")
+                        writer.writerow([col_display_name, value])
+                # No blank row needed here as per request
+
+            # --- Write Pin Details Section ---
+            # Only write pin section if pin details are selected for output AND there are filtered pins
+            if filtered_pins_for_csv and (("Pad Name/Number" in selected_columns) or ("Net Name" in selected_columns)):
+                writer.writerow(pin_row_headers) # Write pin headers
+                for pin_row in filtered_pins_for_csv:
+                    # Ensure columns match the pin_row_headers order and content
+                    row_data = [
+                        general_props.get("Reference", ""), # Connector Name (Reference)
+                        pin_row.get("Pad Name/Number", ""), # Pin Number
+                        pin_row.get("Net Name", "") # Net Name
+                    ]
+                    writer.writerow(row_data)
+                # No blank row needed here as per request
 
         return output.getvalue()
 

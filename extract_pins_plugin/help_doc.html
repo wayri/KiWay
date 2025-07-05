@@ -62,7 +62,7 @@
 <body>
     <h1>KiCad Pin Extraction Plugin with GUI</h1>
 
-    <p>This plugin allows you to extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly Markdown and CSV formats. It provides robust filtering, flexible sorting, and customizable output options.</p>
+    <p>This plugin is designed to help you extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly Markdown and CSV formats. It provides robust filtering, flexible sorting, and customizable output options.</p>
 
     <h2>Features:</h2>
 
@@ -81,22 +81,11 @@
         <li><strong>Export Selected</strong>: Exports data for <em>only</em> the components currently displayed in the "Selected Components" list (i.e., those that were selected on the PCB and refreshed into the dialog). This button is automatically enabled/disabled based on whether components are in the "Selected Components" list.</li>
         <li><strong>Export 'J's</strong>: Exports data for <em>all</em> components on the entire PCB whose Reference Designator starts with the letter 'J' (e.g., J1, J2, JUMP1, J_CONN).</li>
         <li><strong>Export Connectors (by Type)</strong>: Exports data for <em>all</em> components on the entire PCB that have a custom property named "<code>connector-type</code>" whose value matches any of the comma-separated types you define in the "Connector Type Filter" field (e.g., "harness,backplane").</li>
+        <li><strong>Extract Unique Connector Nets</strong>: Generates a CSV file containing a list of all unique net names connected to the pins of the currently displayed components (if any are in the list) or all components with a 'connector-type' property on the board. This is useful for creating net lists for specific connector types.</li>
     </ul>
 
     <h3>3. Advanced Filtering Options (Text Inputs with Auto-Suggest)</h3>
-    <p class="note">These filters apply to the "Export 'J's" and "Export Connectors (by Type)" options. The filter fields now provide auto-suggestions populated from data currently present on your board.</p>
-
-    <h4>Footprint Name Filter:</h4>
-    <ul>
-        <li><strong>Purpose</strong>: Filter components based on their full Footprint Name.</li>
-        <li><strong>How it Works</strong>: Enter a partial or full string. Only components whose full footprint name (e.g., <code>Connector_IDC:IDC-34_2x17_P2.54mm_Horizontal</code>) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing footprint names on your board.</li>
-        <li><strong>Auto-Suggest Content:</strong> All unique full footprint names found on your current PCB (e.g., "<code>Package_SO:SOIC-8_W3.9mm</code>", "<code>Resistor_SMD:R_0603_1608Metric</code>", "<code>Connector_Generic:CONN_01x02</code>").</li>
-    </ul>
-    <div class="example-box">
-        <strong>Example:</strong>
-        <p>If you type <code>SOIC</code>, it might include components like <code>Package_SO:SOIC-8_W3.9mm</code>.</p>
-        <p>If you type <code>IDC-34</code>, it might include <code>Connector_IDC:IDC-34_2x17_P2.54mm</code>.</p>
-    </div>
+    <p class="note">These filters apply to the "Export 'J's", "Export Connectors (by Type)", and "Extract Unique Connector Nets" options. The filter fields now provide auto-suggestions populated from data currently present on your board.</p>
 
     <h4>Value Filter:</h4>
     <ul>
@@ -139,6 +128,8 @@
     <ul>
         <li><strong>Sort Components by Reference (A-Z)</strong>: If checked, the exported Markdown and CSV tables will list components alphabetically by their reference designator (e.g., C1, C2, J1, U1). If unchecked, they will appear in the order they were processed (typically discovery order).</li>
         <li><strong>Highlight Same Nets in Markdown Output</strong>: If checked, net names in the Markdown output's "Pin Details" tables will be color-coded. Pads connected to the same net will have their net name displayed in a unique, automatically assigned color. This visual distinction requires a Markdown viewer that supports inline HTML styling (e.g., VS Code, GitHub).</li>
+        <li><strong>Ignore 'Unconnected' Pins (CSV)</strong>: If checked, any pins whose net name is literally "unconnected" (case-insensitive) will be excluded from the generated CSV file.</li>
+        <li><strong>Ignore Free Pins (CSV)</strong>: If checked, any pins that have no net assigned to them (i.e., are truly unconnected or floating) will be excluded from the generated CSV file.</li>
         <li><strong>Include [Property Name]</strong>: A series of checkboxes allowing you to choose exactly which general properties (Reference, Value, Footprint Name, etc.) and pin details (Pad Name/Number, Net Name) are included as columns in the Markdown and CSV output files.</li>
     </ul>
 
@@ -155,16 +146,21 @@
         <li>The plugin dialog will open. You can now interact with both KiCad and the dialog simultaneously.</li>
         <li><strong>To Update the Dialog's List:</strong> If you select or deselect components on your PCB after the dialog is open, click the "<strong>Refresh Selection from PCB</strong>" button in the dialog. The list in the dialog will update to reflect your current PCB selection.</li>
         <li><strong>To View Component Details:</strong> Click on any component's reference designator in the "Selected Components" list within the dialog. Its detailed properties will appear on the right.</li>
-        <li><strong>Apply Filters:</strong> Enter text into the "Footprint Name Filter", "Value Filter", "Net Name Filter", or "Connector Type Filter" fields as needed. Filters apply to the "Export 'J's" and "Export Connectors (by Type)" options. These fields now offer auto-suggestions from your board's data.</li>
-        <li><strong>Choose Output Options:</strong> Select the "Sort Components by Reference", "Highlight Same Nets in Markdown Output", and specific "Include [Property Name]" checkboxes as desired.</li>
+        <li><strong>Apply Filters:</strong> Enter text into the "Value Filter", "Net Name Filter", or "Connector Type Filter" fields as needed. Filters apply to the "Export 'J's", "Export Connectors (by Type)", and "Extract Unique Connector Nets" options. These fields now offer auto-suggestions from your board's data.</li>
+        <li><strong>Choose Output Options:</strong> Select the "Sort Components by Reference", "Highlight Same Nets in Markdown Output", and specific "Include [Property Name]" checkboxes as desired.
+            <ul>
+                <li>Remember to select "Ignore 'Unconnected' Pins (CSV)" and/or "Ignore Free Pins (CSV)" if you want to exclude those pins from your CSV output.</li>
+            </ul>
+        </li>
         <li><strong>Select Export Type:</strong> Click one of the export buttons:
             <ul>
                 <li>"<strong>Export Selected</strong>" to export data for components currently visible in the dialog's list, applying common filters (except 'Connector Type' filter) and sorting.</li>
                 <li>"<strong>Export 'J's</strong>" to export data for all components on the entire PCB whose reference starts with 'J', applying other filters and sorting.</li>
                 <li>"<strong>Export Connectors (by Type)</strong>" to export components based on the "connector-type" field and filter, applying other filters and sorting.</li>
+                <li>"<strong>Extract Unique Connector Nets</strong>" to get a list of all unique net names from selected/filtered connectors.</li>
             </ul>
         </li>
-        <li><strong>Save Files:</strong> You will be prompted twice to save the generated Markdown (.md) file and CSV (.csv) file. Choose your desired location and filenames.</li>
+        <li><strong>Save Files:</strong> You will be prompted to save the generated file(s). Choose your desired location and filenames.</li>
         <li><strong>Close Dialog:</strong> Click the "Close" button when you are finished.</li>
     </ol>
 
@@ -177,15 +173,26 @@
                 <li>Net names will be color-coded if the option was selected.</li>
             </ul>
         </li>
-        <li><strong>CSV (.csv):</strong> This file is designed for structured data analysis in spreadsheet programs (e.g., Excel, Google Sheets, LibreOffice Calc).
+        <li><strong>CSV (.csv):</strong> This file is designed for structured data that can be easily opened in spreadsheet programs (e.g., Excel, Google Sheets, LibreOffice Calc).
             <ul>
-                <li>It's a flattened table, where each row represents a single pin.</li>
-                <li>Component details are repeated for each pin belonging to that component, with columns chosen by your "Include" selections.</li>
-                <li>This format is ideal for filtering, sorting, and further data processing.</li>
+                <li>For component/pin reports, each component starts with a "<code>Component: [Reference]</code>" header row.</li>
+                <li>Below the header, the component's selected general properties are listed as key-value pairs (e.g., "Reference,J1", "Value,2x10 Header").</li>
+                <li>Then, a header row "Connector Name,Pin Number,Net Name" is provided, followed by rows for each pin.</li>
+                <li>Pins are filtered based on the "Ignore Unconnected Pins" and "Ignore Free Pins" checkboxes.</li>
+                <li>For the "Extract Unique Connector Nets" output, it's a simple single-column CSV of unique net names.</li>
             </ul>
         </li>
     </ul>
 
-    
+    <h2>Future Enhancements (Suggestions):</h2>
+    <p>Consider adding these features to make the plugin even more powerful:</p>
+    <ul>
+        <li><strong>Export to Excel (XLSX):</strong> Direct export to a structured Excel file, potentially with multiple sheets for different data views, which is often preferred for professional data analysis.</li>
+        <li><strong>Configuration Saving:</strong> Implement saving and loading of user preferences (e.g., checkbox states, filter values) between KiCad sessions.</li>
+        <li><strong>Integration with Schematic Data:</strong> (Advanced) Directly access and include data from the schematic symbols (e.g., full datasheet links, manufacturer part numbers that aren't pushed to footprints) for a truly comprehensive report.</li>
+        <li><strong>Custom Property Selection:</strong> Allow the user to define and select *any* custom properties found on the board to be included as columns in the output.</li>
+        <li><strong>Netlist Export:</strong> Option to export a simplified netlist for the selected components.</li>
+        <li><strong>Board Outline Drawing (SVG):</strong> Re-implement the generation of a visual SVG diagram of the board outline with highlighted components, potentially as a standalone export or embedded in a report.</li>
+    </ul>
 </body>
 </html>

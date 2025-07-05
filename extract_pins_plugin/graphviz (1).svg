@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2008pt" height="396pt" viewBox="0.00 0.00 2008.19 395.80">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 391.8)">
+<title>UserFlow</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-391.8 2004.19,-391.8 2004.19,4 -4,4"/>
+<!-- START -->
+<g id="node1" class="node">
+<title>START</title>
+<ellipse fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" cx="1084.99" cy="-252" rx="116.44" ry="18"/>
+<text text-anchor="middle" x="1084.99" y="-247.8" font-family="Times,serif" font-size="14.00">Launch Plugin from KiCad</text>
+</g>
+<!-- MAIN_DIALOG_OPEN -->
+<g id="node2" class="node">
+<title>MAIN_DIALOG_OPEN</title>
+<polygon fill="#bbdefb" stroke="#1976d2" stroke-width="2" points="1450.17,-218.8 1333.86,-218.8 1333.86,-177.2 1450.17,-177.2 1450.17,-218.8"/>
+<text text-anchor="middle" x="1392.02" y="-202.2" font-family="Times,serif" font-size="14.00">GUI Dialog Open</text>
+<text text-anchor="middle" x="1392.02" y="-185.4" font-family="Times,serif" font-size="14.00">(Non-Modal)</text>
+</g>
+<!-- START&#45;&gt;MAIN_DIALOG_OPEN -->
+<g id="edge1" class="edge">
+<title>START-&gt;MAIN_DIALOG_OPEN</title>
+<path fill="none" stroke="#666666" d="M1180.14,-241.29C1221.93,-235.82 1271.58,-228.32 1315.86,-219 1317.95,-218.56 1320.07,-218.1 1322.2,-217.61"/>
+<polygon fill="#666666" stroke="#666666" points="1331.76,-215.32 1323.08,-222.03 1328.08,-216.2 1322.03,-217.65 1322.03,-217.65 1322.03,-217.65 1328.08,-216.2 1320.98,-213.27 1331.76,-215.32"/>
+</g>
+<!-- USER_SELECT_PCB -->
+<g id="node3" class="node">
+<title>USER_SELECT_PCB</title>
+<polygon fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5" points="1788.35,-387.8 1645.22,-387.8 1645.22,-346.2 1788.35,-346.2 1788.35,-387.8"/>
+<text text-anchor="middle" x="1716.79" y="-371.2" font-family="Times,serif" font-size="14.00">User Selects/Deselects</text>
+<text text-anchor="middle" x="1716.79" y="-354.4" font-family="Times,serif" font-size="14.00">Components on PCB</text>
+</g>
+<!-- MAIN_DIALOG_OPEN&#45;&gt;USER_SELECT_PCB -->
+<g id="edge2" class="edge">
+<title>MAIN_DIALOG_OPEN-&gt;USER_SELECT_PCB</title>
+<path fill="none" stroke="#666666" d="M1399.4,-219.48C1409.18,-248.43 1430.8,-299.31 1468.17,-325 1516.38,-358.14 1582.06,-368.08 1633.66,-370.03"/>
+<polygon fill="#666666" stroke="#666666" points="1643.56,-370.31 1633.44,-374.53 1639.78,-370.2 1633.57,-370.03 1633.57,-370.03 1633.57,-370.03 1639.78,-370.2 1633.69,-365.53 1643.56,-370.31"/>
+<text text-anchor="middle" x="1536.02" y="-372" font-family="Times,serif" font-size="14.00">Allows interaction</text>
+</g>
+<!-- USER_SELECT_LIST -->
+<g id="node5" class="node">
+<title>USER_SELECT_LIST</title>
+<polygon fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5" points="1776.88,-274.8 1656.69,-274.8 1656.69,-233.2 1776.88,-233.2 1776.88,-274.8"/>
+<text text-anchor="middle" x="1716.79" y="-258.2" font-family="Times,serif" font-size="14.00">User Selects Items</text>
+<text text-anchor="middle" x="1716.79" y="-241.4" font-family="Times,serif" font-size="14.00">in Dialog List</text>
+</g>
+<!-- MAIN_DIALOG_OPEN&#45;&gt;USER_SELECT_LIST -->
+<g id="edge5" class="edge">
+<title>MAIN_DIALOG_OPEN-&gt;USER_SELECT_LIST</title>
+<path fill="none" stroke="#666666" d="M1450.86,-208.87C1456.7,-209.94 1462.55,-211 1468.17,-212 1527.84,-222.62 1595.7,-234.09 1645.28,-242.35"/>
+<polygon fill="#666666" stroke="#666666" points="1655,-243.97 1644.4,-246.77 1651.27,-243.35 1645.13,-242.33 1645.13,-242.33 1645.13,-242.33 1651.27,-243.35 1645.87,-237.89 1655,-243.97"/>
+</g>
+<!-- USER_APPLY_FILTERS -->
+<g id="node7" class="node">
+<title>USER_APPLY_FILTERS</title>
+<polygon fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5" points="1808.56,-161.8 1625.01,-161.8 1625.01,-120.2 1808.56,-120.2 1808.56,-161.8"/>
+<text text-anchor="middle" x="1716.79" y="-145.2" font-family="Times,serif" font-size="14.00">User Enters Filters</text>
+<text text-anchor="middle" x="1716.79" y="-128.4" font-family="Times,serif" font-size="14.00">(Value, Net, Connector Type)</text>
+</g>
+<!-- MAIN_DIALOG_OPEN&#45;&gt;USER_APPLY_FILTERS -->
+<g id="edge8" class="edge">
+<title>MAIN_DIALOG_OPEN-&gt;USER_APPLY_FILTERS</title>
+<path fill="none" stroke="#666666" d="M1450.86,-187.15C1456.71,-186.08 1462.56,-185.01 1468.17,-184 1515.98,-175.4 1569.03,-166.15 1613.72,-158.44"/>
+<polygon fill="#666666" stroke="#666666" points="1623.4,-156.77 1614.31,-162.9 1619.67,-157.41 1613.54,-158.47 1613.54,-158.47 1613.54,-158.47 1619.67,-157.41 1612.78,-154.03 1623.4,-156.77"/>
+</g>
+<!-- USER_CHOOSE_OUTPUT -->
+<g id="node8" class="node">
+<title>USER_CHOOSE_OUTPUT</title>
+<polygon fill="#fff9c4" stroke="#fbc02d" stroke-width="1.5" points="1811.7,-101.8 1621.87,-101.8 1621.87,-60.2 1811.7,-60.2 1811.7,-101.8"/>
+<text text-anchor="middle" x="1716.79" y="-85.2" font-family="Times,serif" font-size="14.00">User Chooses Output Columns</text>
+<text text-anchor="middle" x="1716.79" y="-68.4" font-family="Times,serif" font-size="14.00">&amp; Highlight/Sort Options</text>
+</g>
+<!-- MAIN_DIALOG_OPEN&#45;&gt;USER_CHOOSE_OUTPUT -->
+<g id="edge9" class="edge">
+<title>MAIN_DIALOG_OPEN-&gt;USER_CHOOSE_OUTPUT</title>
+<path fill="none" stroke="#666666" d="M1428.16,-176.3C1440.52,-169.23 1454.69,-161.73 1468.17,-156 1516.5,-135.46 1572.32,-118.04 1618.71,-105.18"/>
+<polygon fill="#666666" stroke="#666666" points="1628.2,-102.58 1619.74,-109.56 1624.55,-103.58 1618.55,-105.22 1618.55,-105.22 1618.55,-105.22 1624.55,-103.58 1617.36,-100.88 1628.2,-102.58"/>
+</g>
+<!-- END -->
+<g id="node19" class="node">
+<title>END</title>
+<ellipse fill="#ffcdd2" stroke="#d32f2f" stroke-width="1.5" cx="1716.79" cy="-22" rx="86.16" ry="18"/>
+<text text-anchor="middle" x="1716.79" y="-17.8" font-family="Times,serif" font-size="14.00">Plugin Session End</text>
+</g>
+<!-- MAIN_DIALOG_OPEN&#45;&gt;END -->
+<g id="edge20" class="edge">
+<title>MAIN_DIALOG_OPEN-&gt;END</title>
+<path fill="none" stroke="#666666" d="M1402.18,-176.61C1413.89,-151.84 1436.5,-111.61 1468.17,-89.2 1514.59,-56.37 1576.27,-39.57 1626.46,-30.98"/>
+<polygon fill="#666666" stroke="#666666" points="1636.11,-29.41 1626.96,-35.46 1632.38,-30.02 1626.24,-31.02 1626.24,-31.02 1626.24,-31.02 1632.38,-30.02 1625.52,-26.57 1636.11,-29.41"/>
+<text text-anchor="middle" x="1536.02" y="-93.4" font-family="Times,serif" font-size="14.00">User closes window (X)</text>
+</g>
+<!-- CLICK_REFRESH -->
+<g id="node4" class="node">
+<title>CLICK_REFRESH</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="2000.19,-343.8 1848.7,-343.8 1848.7,-302.2 2000.19,-302.2 2000.19,-343.8"/>
+<text text-anchor="middle" x="1924.45" y="-327.2" font-family="Times,serif" font-size="14.00">Click 'Refresh Selection</text>
+<text text-anchor="middle" x="1924.45" y="-310.4" font-family="Times,serif" font-size="14.00">from PCB'</text>
+</g>
+<!-- USER_SELECT_PCB&#45;&gt;CLICK_REFRESH -->
+<g id="edge3" class="edge">
+<title>USER_SELECT_PCB-&gt;CLICK_REFRESH</title>
+<path fill="none" stroke="#666666" d="M1788.56,-351.86C1804.39,-348.47 1821.33,-344.85 1837.69,-341.35"/>
+<polygon fill="#666666" stroke="#666666" points="1847.14,-339.33 1838.3,-345.82 1843.44,-340.12 1837.36,-341.42 1837.36,-341.42 1837.36,-341.42 1843.44,-340.12 1836.42,-337.02 1847.14,-339.33"/>
+</g>
+<!-- CLICK_REFRESH&#45;&gt;MAIN_DIALOG_OPEN -->
+<g id="edge4" class="edge">
+<title>CLICK_REFRESH-&gt;MAIN_DIALOG_OPEN</title>
+<path fill="none" stroke="#666666" d="M1848.26,-318.4C1755.76,-310.64 1595.35,-290.27 1468.17,-238 1458.84,-234.16 1449.13,-229.53 1439.92,-224.79"/>
+<polygon fill="#666666" stroke="#666666" points="1431.24,-220.21 1442.18,-220.89 1434.58,-221.98 1440.08,-224.88 1440.08,-224.88 1440.08,-224.88 1434.58,-221.98 1437.99,-228.86 1431.24,-220.21"/>
+<text text-anchor="middle" x="1716.79" y="-319.14" font-family="Times,serif" font-size="14.00">Updates List</text>
+</g>
+<!-- CLICK_REMOVE -->
+<g id="node6" class="node">
+<title>CLICK_REMOVE</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="1999.41,-257.8 1849.48,-257.8 1849.48,-216.2 1999.41,-216.2 1999.41,-257.8"/>
+<text text-anchor="middle" x="1924.45" y="-241.2" font-family="Times,serif" font-size="14.00">Click 'Remove Selected</text>
+<text text-anchor="middle" x="1924.45" y="-224.4" font-family="Times,serif" font-size="14.00">from List'</text>
+</g>
+<!-- USER_SELECT_LIST&#45;&gt;CLICK_REMOVE -->
+<g id="edge6" class="edge">
+<title>USER_SELECT_LIST-&gt;CLICK_REMOVE</title>
+<path fill="none" stroke="#666666" d="M1777.27,-249.08C1796.28,-247.51 1817.7,-245.74 1838.17,-244.05"/>
+<polygon fill="#666666" stroke="#666666" points="1847.88,-243.25 1838.28,-248.56 1844.11,-243.56 1837.91,-244.07 1837.91,-244.07 1837.91,-244.07 1844.11,-243.56 1837.54,-239.59 1847.88,-243.25"/>
+</g>
+<!-- CLICK_REMOVE&#45;&gt;MAIN_DIALOG_OPEN -->
+<g id="edge7" class="edge">
+<title>CLICK_REMOVE-&gt;MAIN_DIALOG_OPEN</title>
+<path fill="none" stroke="#666666" d="M1853.94,-215.73C1840.07,-212.26 1825.52,-209.17 1811.7,-207.2 1689.55,-189.82 1545.37,-191.44 1462.04,-194.51"/>
+<polygon fill="#666666" stroke="#666666" points="1452.16,-194.89 1461.97,-190.01 1455.93,-194.74 1462.15,-194.5 1462.15,-194.5 1462.15,-194.5 1455.93,-194.74 1462.32,-199 1452.16,-194.89"/>
+<text text-anchor="middle" x="1716.79" y="-211.4" font-family="Times,serif" font-size="14.00">Updates List</text>
+</g>
+<!-- CLICK_EXPORT_SEL -->
+<g id="node9" class="node">
+<title>CLICK_EXPORT_SEL</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="150.81,-299 6.91,-299 6.91,-263 150.81,-263 150.81,-299"/>
+<text text-anchor="middle" x="78.86" y="-276.8" font-family="Times,serif" font-size="14.00">Click 'Export Selected'</text>
+</g>
+<!-- PROCESSING -->
+<g id="node15" class="node">
+<title>PROCESSING</title>
+<polygon fill="#f0f4c3" stroke="#afb42b" stroke-width="1.5" points="552.98,-218.8 357.38,-218.8 357.38,-177.2 552.98,-177.2 552.98,-218.8"/>
+<text text-anchor="middle" x="455.18" y="-202.2" font-family="Times,serif" font-size="14.00">Processing Data</text>
+<text text-anchor="middle" x="455.18" y="-185.4" font-family="Times,serif" font-size="14.00">(Filters, Extraction, Generation)</text>
+</g>
+<!-- CLICK_EXPORT_SEL&#45;&gt;PROCESSING -->
+<g id="edge10" class="edge">
+<title>CLICK_EXPORT_SEL-&gt;PROCESSING</title>
+<path fill="none" stroke="#666666" d="M151.12,-273.52C203.69,-267.09 276.68,-256.26 339.38,-240 356.9,-235.46 375.49,-229.28 392.49,-223.06"/>
+<polygon fill="#666666" stroke="#666666" points="401.71,-219.62 393.91,-227.33 398.16,-220.94 392.34,-223.12 392.34,-223.12 392.34,-223.12 398.16,-220.94 390.76,-218.9 401.71,-219.62"/>
+<text text-anchor="middle" x="257.55" y="-274.04" font-family="Times,serif" font-size="14.00">Uses current list</text>
+</g>
+<!-- CLICK_EXPORT_JS -->
+<g id="node10" class="node">
+<title>CLICK_EXPORT_JS</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="135.07,-245 22.65,-245 22.65,-209 135.07,-209 135.07,-245"/>
+<text text-anchor="middle" x="78.86" y="-222.8" font-family="Times,serif" font-size="14.00">Click 'Export 'J's'</text>
+</g>
+<!-- CLICK_EXPORT_JS&#45;&gt;PROCESSING -->
+<g id="edge11" class="edge">
+<title>CLICK_EXPORT_JS-&gt;PROCESSING</title>
+<path fill="none" stroke="#666666" d="M135.5,-222.69C190.88,-218.4 277.34,-211.7 346.23,-206.36"/>
+<polygon fill="#666666" stroke="#666666" points="355.92,-205.61 346.3,-210.87 352.15,-205.9 345.95,-206.39 345.95,-206.39 345.95,-206.39 352.15,-205.9 345.6,-201.9 355.92,-205.61"/>
+<text text-anchor="middle" x="257.55" y="-223.42" font-family="Times,serif" font-size="14.00">Uses all 'J's</text>
+</g>
+<!-- CLICK_EXPORT_CONN -->
+<g id="node11" class="node">
+<title>CLICK_EXPORT_CONN</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="157.72,-190.8 0,-190.8 0,-149.2 157.72,-149.2 157.72,-190.8"/>
+<text text-anchor="middle" x="78.86" y="-174.2" font-family="Times,serif" font-size="14.00">Click 'Export Connectors</text>
+<text text-anchor="middle" x="78.86" y="-157.4" font-family="Times,serif" font-size="14.00">(by Type)'</text>
+</g>
+<!-- CLICK_EXPORT_CONN&#45;&gt;PROCESSING -->
+<g id="edge12" class="edge">
+<title>CLICK_EXPORT_CONN-&gt;PROCESSING</title>
+<path fill="none" stroke="#666666" d="M157.96,-175.17C209.49,-178.65 278.47,-183.47 339.38,-188.2 341.54,-188.37 343.74,-188.54 345.94,-188.72"/>
+<polygon fill="#666666" stroke="#666666" points="355.89,-189.51 345.56,-193.2 352.12,-189.21 345.92,-188.71 345.92,-188.71 345.92,-188.71 352.12,-189.21 346.28,-184.23 355.89,-189.51"/>
+<text text-anchor="middle" x="257.55" y="-192.4" font-family="Times,serif" font-size="14.00">Uses 'connector-type' filter</text>
+</g>
+<!-- CLICK_EXTRACT_NETS -->
+<g id="node12" class="node">
+<title>CLICK_EXTRACT_NETS</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="147.61,-130.8 10.12,-130.8 10.12,-89.2 147.61,-89.2 147.61,-130.8"/>
+<text text-anchor="middle" x="78.86" y="-114.2" font-family="Times,serif" font-size="14.00">Click 'Extract Unique</text>
+<text text-anchor="middle" x="78.86" y="-97.4" font-family="Times,serif" font-size="14.00">Connector Nets'</text>
+</g>
+<!-- CLICK_EXTRACT_NETS&#45;&gt;PROCESSING -->
+<g id="edge13" class="edge">
+<title>CLICK_EXTRACT_NETS-&gt;PROCESSING</title>
+<path fill="none" stroke="#666666" d="M148.05,-118.85C200.81,-126.48 275.41,-139 339.38,-156.2 356.51,-160.81 374.7,-166.87 391.43,-172.94"/>
+<polygon fill="#666666" stroke="#666666" points="400.49,-176.28 389.55,-177.04 396.95,-174.97 391.11,-172.82 391.11,-172.82 391.11,-172.82 396.95,-174.97 392.67,-168.6 400.49,-176.28"/>
+<text text-anchor="middle" x="257.55" y="-160.4" font-family="Times,serif" font-size="14.00">Uses selected/connector-type</text>
+</g>
+<!-- CLICK_HELP -->
+<g id="node13" class="node">
+<title>CLICK_HELP</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="789.18,-159 707.09,-159 707.09,-123 789.18,-123 789.18,-159"/>
+<text text-anchor="middle" x="748.14" y="-136.8" font-family="Times,serif" font-size="14.00">Click 'Help'</text>
+</g>
+<!-- HELP_OPENED -->
+<g id="node18" class="node">
+<title>HELP_OPENED</title>
+<polygon fill="#f8bbd0" stroke="#e91e63" stroke-width="1.5" points="1147.81,-161.8 1022.16,-161.8 1022.16,-120.2 1147.81,-120.2 1147.81,-161.8"/>
+<text text-anchor="middle" x="1084.99" y="-145.2" font-family="Times,serif" font-size="14.00">HTML Help Opens</text>
+<text text-anchor="middle" x="1084.99" y="-128.4" font-family="Times,serif" font-size="14.00">in Browser</text>
+</g>
+<!-- CLICK_HELP&#45;&gt;HELP_OPENED -->
+<g id="edge17" class="edge">
+<title>CLICK_HELP-&gt;HELP_OPENED</title>
+<path fill="none" stroke="#666666" d="M789.53,-141C844.23,-141 942.83,-141 1010.76,-141"/>
+<polygon fill="#666666" stroke="#666666" points="1020.59,-141 1010.59,-145.5 1016.81,-141 1010.59,-141 1010.59,-141 1010.59,-141 1016.81,-141 1010.59,-136.5 1020.59,-141"/>
+</g>
+<!-- CLICK_CLOSE -->
+<g id="node14" class="node">
+<title>CLICK_CLOSE</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" points="1435.4,-36 1348.64,-36 1348.64,0 1435.4,0 1435.4,-36"/>
+<text text-anchor="middle" x="1392.02" y="-13.8" font-family="Times,serif" font-size="14.00">Click 'Close'</text>
+</g>
+<!-- CLICK_CLOSE&#45;&gt;END -->
+<g id="edge19" class="edge">
+<title>CLICK_CLOSE-&gt;END</title>
+<path fill="none" stroke="#666666" d="M1435.88,-18.53C1482.37,-19.11 1558.11,-20.05 1619.09,-20.8"/>
+<polygon fill="#666666" stroke="#666666" points="1629.08,-20.93 1619.02,-25.3 1625.3,-20.88 1619.08,-20.8 1619.08,-20.8 1619.08,-20.8 1625.3,-20.88 1619.13,-16.3 1629.08,-20.93"/>
+</g>
+<!-- FILE_SAVE_DIALOG -->
+<g id="node16" class="node">
+<title>FILE_SAVE_DIALOG</title>
+<polygon fill="#e1f5fe" stroke="#2196f3" stroke-width="1.5" points="748.14,-216 626.33,-198 748.14,-180 869.95,-198 748.14,-216"/>
+<text text-anchor="middle" x="748.14" y="-193.8" font-family="Times,serif" font-size="14.00">File Save Dialog(s)</text>
+</g>
+<!-- PROCESSING&#45;&gt;FILE_SAVE_DIALOG -->
+<g id="edge14" class="edge">
+<title>PROCESSING-&gt;FILE_SAVE_DIALOG</title>
+<path fill="none" stroke="#666666" d="M553.47,-198C572.29,-198 592.32,-198 612.09,-198"/>
+<polygon fill="#666666" stroke="#666666" points="621.82,-198 611.82,-202.5 618.04,-198 611.82,-198 611.82,-198 611.82,-198 618.04,-198 611.82,-193.5 621.82,-198"/>
+<text text-anchor="middle" x="589.65" y="-202.2" font-family="Times,serif" font-size="14.00">Shows</text>
+</g>
+<!-- FILES_GENERATED -->
+<g id="node17" class="node">
+<title>FILES_GENERATED</title>
+<polygon fill="#dcedc8" stroke="#558b2f" stroke-width="1.5" points="1185.14,-216 984.83,-216 984.83,-180 1185.14,-180 1185.14,-216"/>
+<text text-anchor="middle" x="1084.99" y="-193.8" font-family="Times,serif" font-size="14.00">Markdown/CSV Files Generated</text>
+</g>
+<!-- FILE_SAVE_DIALOG&#45;&gt;FILES_GENERATED -->
+<g id="edge15" class="edge">
+<title>FILE_SAVE_DIALOG-&gt;FILES_GENERATED</title>
+<path fill="none" stroke="#666666" d="M873.35,-198C906.15,-198 941.32,-198 973.35,-198"/>
+<polygon fill="#666666" stroke="#666666" points="983.32,-198 973.32,-202.5 979.54,-198 973.32,-198 973.32,-198 973.32,-198 979.54,-198 973.32,-193.5 983.32,-198"/>
+<text text-anchor="middle" x="919.24" y="-202.2" font-family="Times,serif" font-size="14.00">User Saves</text>
+</g>
+<!-- FILES_GENERATED&#45;&gt;MAIN_DIALOG_OPEN -->
+<g id="edge16" class="edge">
+<title>FILES_GENERATED-&gt;MAIN_DIALOG_OPEN</title>
+<path fill="none" stroke="#666666" d="M1185.44,-198C1230.1,-198 1281.69,-198 1322.01,-198"/>
+<polygon fill="#666666" stroke="#666666" points="1331.85,-198 1321.85,-202.5 1328.07,-198 1321.85,-198 1321.85,-198 1321.85,-198 1328.07,-198 1321.85,-193.5 1331.85,-198"/>
+<text text-anchor="middle" x="1267.65" y="-202.2" font-family="Times,serif" font-size="14.00">Returns to dialog</text>
+</g>
+<!-- HELP_OPENED&#45;&gt;MAIN_DIALOG_OPEN -->
+<g id="edge18" class="edge">
+<title>HELP_OPENED-&gt;MAIN_DIALOG_OPEN</title>
+<path fill="none" stroke="#666666" d="M1148.3,-148.86C1194.74,-155.19 1259.59,-165.02 1315.86,-177.2 1317.95,-177.65 1320.06,-178.13 1322.19,-178.62"/>
+<polygon fill="#666666" stroke="#666666" points="1331.73,-180.93 1320.96,-182.95 1328.06,-180.04 1322.01,-178.58 1322.01,-178.58 1322.01,-178.58 1328.06,-180.04 1323.07,-174.2 1331.73,-180.93"/>
+<text text-anchor="middle" x="1267.65" y="-181.4" font-family="Times,serif" font-size="14.00">User closes help</text>
+</g>
+</g>
+</svg>

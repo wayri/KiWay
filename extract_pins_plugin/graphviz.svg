@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1946pt" height="438pt" viewBox="0.00 0.00 1945.80 437.80">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 433.8)">
+<title>G</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-433.8 1941.8,-433.8 1941.8,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_kicad_app</title>
+<polygon fill="none" stroke="black" points="1659,-200.6 1659,-277.4 1797,-277.4 1797,-200.6 1659,-200.6"/>
+<text text-anchor="middle" x="1728" y="-260.8" font-family="Times,serif" font-size="14.00">KiCad Application</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_plugin_files</title>
+<polygon fill="none" stroke="black" points="1395,-89 1395,-165.8 1897,-165.8 1897,-89 1395,-89"/>
+<text text-anchor="middle" x="1646" y="-149.2" font-family="Times,serif" font-size="14.00">Plugin Files</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_plugin_flow</title>
+<polygon fill="none" stroke="black" points="8,-8 8,-421.8 1387,-421.8 1387,-8 8,-8"/>
+<text text-anchor="middle" x="697.5" y="-405.2" font-family="Times,serif" font-size="14.00">Plugin Flow</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_plugin_dialog_gui</title>
+<polygon fill="none" stroke="black" points="16,-16 16,-389 1231,-389 1231,-16 16,-16"/>
+<text text-anchor="middle" x="623.5" y="-372.4" font-family="Times,serif" font-size="14.00">GUI Dialog Components &amp; Logic</text>
+</g>
+<!-- KICAD -->
+<g id="node1" class="node">
+<title>KICAD</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1788.5,-244.6 1667.5,-244.6 1667.5,-208.6 1788.5,-208.6 1788.5,-244.6"/>
+<text text-anchor="middle" x="1728" y="-222.4" font-family="Times,serif" font-size="14.00">KiCad PCB Editor</text>
+</g>
+<!-- EXTRACT_PLUGIN -->
+<g id="node3" class="node">
+<title>EXTRACT_PLUGIN</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1889.35,-133 1744.65,-133 1744.65,-97 1889.35,-97 1889.35,-133"/>
+<text text-anchor="middle" x="1817" y="-110.8" font-family="Times,serif" font-size="14.00">extract_pins_plugin.py</text>
+</g>
+<!-- KICAD&#45;&gt;EXTRACT_PLUGIN -->
+<g id="edge20" class="edge">
+<title>KICAD-&gt;EXTRACT_PLUGIN</title>
+<path fill="none" stroke="#666666" d="M1741.91,-208.47C1756.32,-190.72 1779.04,-162.75 1795.71,-142.21"/>
+<polygon fill="#666666" stroke="#666666" points="1798.36,-144.51 1801.94,-134.54 1792.92,-140.1 1798.36,-144.51"/>
+<text text-anchor="middle" x="1853.82" y="-178" font-family="Times,serif" font-size="14.00">1) Launch Plugin from KiCad</text>
+</g>
+<!-- INIT -->
+<g id="node2" class="node">
+<title>INIT</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1483.08,-133 1402.92,-133 1402.92,-97 1483.08,-97 1483.08,-133"/>
+<text text-anchor="middle" x="1443" y="-110.8" font-family="Times,serif" font-size="14.00">__init__.py</text>
+</g>
+<!-- PLUGIN_DIALOG_INSTANCE -->
+<g id="node6" class="node">
+<title>PLUGIN_DIALOG_INSTANCE</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1379.41,-356.2 1238.59,-356.2 1238.59,-320.2 1379.41,-320.2 1379.41,-356.2"/>
+<text text-anchor="middle" x="1309" y="-334" font-family="Times,serif" font-size="14.00">PluginDialog Instance</text>
+</g>
+<!-- EXTRACT_PLUGIN&#45;&gt;PLUGIN_DIALOG_INSTANCE -->
+<g id="edge21" class="edge">
+<title>EXTRACT_PLUGIN-&gt;PLUGIN_DIALOG_INSTANCE</title>
+<path fill="none" stroke="#666666" d="M1794.59,-133.41C1779.03,-144.55 1757.33,-158.29 1736,-165.8 1620.12,-206.63 1573.54,-149.61 1461.75,-200.6 1406.07,-226 1356.25,-278.94 1329.55,-310.94"/>
+<polygon fill="#666666" stroke="#666666" points="1326.92,-308.63 1323.3,-318.59 1332.34,-313.07 1326.92,-308.63"/>
+<text text-anchor="middle" x="1558.38" y="-222.4" font-family="Times,serif" font-size="14.00">2) Instantiate &amp; Show GUI Dialog</text>
+</g>
+<!-- PLUGIN_DIALOG_FILE -->
+<g id="node4" class="node">
+<title>PLUGIN_DIALOG_FILE</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1726.64,-133 1615.36,-133 1615.36,-97 1726.64,-97 1726.64,-133"/>
+<text text-anchor="middle" x="1671" y="-110.8" font-family="Times,serif" font-size="14.00">plugin_dialog.py</text>
+</g>
+<!-- HELP_HTML -->
+<g id="node5" class="node">
+<title>HELP_HTML</title>
+<polygon fill="#f0f0f0" stroke="#333333" points="1597.24,-133 1500.76,-133 1500.76,-97 1597.24,-97 1597.24,-133"/>
+<text text-anchor="middle" x="1549" y="-110.8" font-family="Times,serif" font-size="14.00">help_doc.html</text>
+</g>
+<!-- PLUGIN_DIALOG_INSTANCE&#45;&gt;KICAD -->
+<g id="edge22" class="edge">
+<title>PLUGIN_DIALOG_INSTANCE-&gt;KICAD</title>
+<path fill="none" stroke="#666666" d="M1375.86,-319.71C1452.54,-299.65 1577.77,-266.9 1656.4,-246.33"/>
+<polygon fill="#666666" stroke="#666666" points="1656.92,-249.81 1665.71,-243.89 1655.15,-243.04 1656.92,-249.81"/>
+<text text-anchor="middle" x="1544.23" y="-289.6" font-family="Times,serif" font-size="14.00">Interacts with</text>
+</g>
+<!-- GUI_LIST -->
+<g id="node7" class="node">
+<title>GUI_LIST</title>
+<polygon fill="#e0f7fa" stroke="#00796b" stroke-width="2" points="511.8,-356.2 328.2,-356.2 328.2,-320.2 511.8,-320.2 511.8,-356.2"/>
+<text text-anchor="middle" x="420" y="-334" font-family="Times,serif" font-size="14.00">Component List (wx.ListCtrl)</text>
+</g>
+<!-- ON_REFRESH -->
+<g id="node11" class="node">
+<title>ON_REFRESH</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="527.03,-244.6 388.97,-244.6 388.97,-208.6 527.03,-208.6 527.03,-244.6"/>
+<text text-anchor="middle" x="458" y="-222.4" font-family="Times,serif" font-size="14.00">OnRefreshSelection()</text>
+</g>
+<!-- GUI_LIST&#45;&gt;ON_REFRESH -->
+<g id="edge1" class="edge">
+<title>GUI_LIST-&gt;ON_REFRESH</title>
+<path fill="none" stroke="#666666" d="M452.37,-319.48C458.27,-314.69 463.62,-308.93 467,-302.2 474.07,-288.13 472.47,-270.74 468.8,-256.29"/>
+<polygon fill="#666666" stroke="#666666" points="472.21,-255.47 465.98,-246.9 465.51,-257.48 472.21,-255.47"/>
+<text text-anchor="middle" x="544.18" y="-289.6" font-family="Times,serif" font-size="14.00">User selects items in PCB</text>
+</g>
+<!-- ON_LIST_SEL -->
+<g id="node13" class="node">
+<title>ON_LIST_SEL</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="339.65,-244.6 202.35,-244.6 202.35,-208.6 339.65,-208.6 339.65,-244.6"/>
+<text text-anchor="middle" x="271" y="-222.4" font-family="Times,serif" font-size="14.00">OnListItemSelected()</text>
+</g>
+<!-- GUI_LIST&#45;&gt;ON_LIST_SEL -->
+<g id="edge5" class="edge">
+<title>GUI_LIST-&gt;ON_LIST_SEL</title>
+<path fill="none" stroke="#666666" d="M327.43,-320.82C308.28,-315.73 291.84,-309.5 285.02,-302.2 273.69,-290.08 270.12,-271.83 269.41,-256.42"/>
+<polygon fill="#666666" stroke="#666666" points="272.91,-256.83 269.35,-246.85 265.91,-256.87 272.91,-256.83"/>
+<text text-anchor="middle" x="348.01" y="-289.6" font-family="Times,serif" font-size="14.00">User clicks item in list</text>
+</g>
+<!-- GUI_DETAILS -->
+<g id="node8" class="node">
+<title>GUI_DETAILS</title>
+<polygon fill="#e0f7fa" stroke="#00796b" stroke-width="2" points="486.68,-133 281.32,-133 281.32,-97 486.68,-97 486.68,-133"/>
+<text text-anchor="middle" x="384" y="-110.8" font-family="Times,serif" font-size="14.00">Component Details (wx.TextCtrl)</text>
+</g>
+<!-- GUI_FILTERS -->
+<g id="node9" class="node">
+<title>GUI_FILTERS</title>
+<polygon fill="#e0f7fa" stroke="#00796b" stroke-width="2" points="785.2,-356.2 628.8,-356.2 628.8,-320.2 785.2,-320.2 785.2,-356.2"/>
+<text text-anchor="middle" x="707" y="-334" font-family="Times,serif" font-size="14.00">Filters &amp; Output Options</text>
+</g>
+<!-- GUI_ACTIONS -->
+<g id="node10" class="node">
+<title>GUI_ACTIONS</title>
+<polygon fill="#e0f7fa" stroke="#00796b" stroke-width="2" points="1037.64,-356.2 870.36,-356.2 870.36,-320.2 1037.64,-320.2 1037.64,-356.2"/>
+<text text-anchor="middle" x="954" y="-334" font-family="Times,serif" font-size="14.00">Progress &amp; Action Buttons</text>
+</g>
+<!-- _PROCESS_EXPORT -->
+<g id="node16" class="node">
+<title>_PROCESS_EXPORT</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="967.15,-244.6 822.85,-244.6 822.85,-208.6 967.15,-208.6 967.15,-244.6"/>
+<text text-anchor="middle" x="895" y="-222.4" font-family="Times,serif" font-size="14.00">_process_and_export()</text>
+</g>
+<!-- GUI_ACTIONS&#45;&gt;_PROCESS_EXPORT -->
+<g id="edge9" class="edge">
+<title>GUI_ACTIONS-&gt;_PROCESS_EXPORT</title>
+<path fill="none" stroke="#666666" d="M920.84,-319.36C914.62,-314.57 908.83,-308.84 904.83,-302.2 896.73,-288.73 894.07,-271.45 893.53,-256.91"/>
+<polygon fill="#666666" stroke="#666666" points="897.03,-256.99 893.5,-247 890.03,-257 897.03,-256.99"/>
+<text text-anchor="middle" x="947.42" y="-289.6" font-family="Times,serif" font-size="14.00">Export Buttons</text>
+</g>
+<!-- ON_HELP -->
+<g id="node21" class="node">
+<title>ON_HELP</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="1222.82,-244.6 1153.18,-244.6 1153.18,-208.6 1222.82,-208.6 1222.82,-244.6"/>
+<text text-anchor="middle" x="1188" y="-222.4" font-family="Times,serif" font-size="14.00">OnHelp()</text>
+</g>
+<!-- GUI_ACTIONS&#45;&gt;ON_HELP -->
+<g id="edge11" class="edge">
+<title>GUI_ACTIONS-&gt;ON_HELP</title>
+<path fill="none" stroke="#666666" d="M1038.43,-320.42C1080.08,-312.04 1121.94,-303.41 1124,-302.2 1143.48,-290.72 1159.94,-271.14 1171.29,-254.92"/>
+<polygon fill="#666666" stroke="#666666" points="1174.19,-256.88 1176.83,-246.62 1168.37,-252.99 1174.19,-256.88"/>
+<text text-anchor="middle" x="1179.52" y="-289.6" font-family="Times,serif" font-size="14.00">Help Button</text>
+</g>
+<!-- ON_EXTRACT_NETS -->
+<g id="node22" class="node">
+<title>ON_EXTRACT_NETS</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="1134.87,-244.6 985.13,-244.6 985.13,-208.6 1134.87,-208.6 1134.87,-244.6"/>
+<text text-anchor="middle" x="1060" y="-222.4" font-family="Times,serif" font-size="14.00">OnExtractUniqueNets()</text>
+</g>
+<!-- GUI_ACTIONS&#45;&gt;ON_EXTRACT_NETS -->
+<g id="edge10" class="edge">
+<title>GUI_ACTIONS-&gt;ON_EXTRACT_NETS</title>
+<path fill="none" stroke="#666666" d="M972.47,-319.56C978.15,-314.05 984.38,-307.92 990,-302.2 1005.56,-286.36 1022.63,-268.19 1036.01,-253.75"/>
+<polygon fill="#666666" stroke="#666666" points="1038.58,-256.13 1042.79,-246.41 1033.43,-251.38 1038.58,-256.13"/>
+<text text-anchor="middle" x="1062.74" y="-289.6" font-family="Times,serif" font-size="14.00">Extract Unique Nets</text>
+</g>
+<!-- ON_REMOVE -->
+<g id="node23" class="node">
+<title>ON_REMOVE</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="780.31,-244.6 591.69,-244.6 591.69,-208.6 780.31,-208.6 780.31,-244.6"/>
+<text text-anchor="middle" x="686" y="-222.4" font-family="Times,serif" font-size="14.00">OnRemoveSelectedFromList()</text>
+</g>
+<!-- GUI_ACTIONS&#45;&gt;ON_REMOVE -->
+<g id="edge12" class="edge">
+<title>GUI_ACTIONS-&gt;ON_REMOVE</title>
+<path fill="none" stroke="#666666" d="M869.61,-329.95C819.6,-324.39 761.91,-315.41 740.43,-302.2 722.51,-291.18 708.66,-271.85 699.41,-255.63"/>
+<polygon fill="#666666" stroke="#666666" points="702.53,-254.03 694.72,-246.87 696.36,-257.34 702.53,-254.03"/>
+<text text-anchor="middle" x="817.22" y="-289.6" font-family="Times,serif" font-size="14.00">Remove Selected from List</text>
+</g>
+<!-- ON_REFRESH&#45;&gt;GUI_LIST -->
+<g id="edge3" class="edge">
+<title>ON_REFRESH-&gt;GUI_LIST</title>
+<path fill="none" stroke="#666666" d="M440.92,-245.51C431.95,-256.18 421.85,-270.52 417.12,-285.4 414.83,-292.61 414.35,-300.67 414.75,-308.24"/>
+<polygon fill="#666666" stroke="#666666" points="411.25,-308.46 415.78,-318.04 418.21,-307.72 411.25,-308.46"/>
+<text text-anchor="middle" x="440.06" y="-289.6" font-family="Times,serif" font-size="14.00">Updates</text>
+</g>
+<!-- ON_REFRESH&#45;&gt;GUI_DETAILS -->
+<g id="edge4" class="edge">
+<title>ON_REFRESH-&gt;GUI_DETAILS</title>
+<path fill="none" stroke="#666666" d="M446.11,-207.99C434.31,-190.52 416.07,-163.5 402.4,-143.25"/>
+<polygon fill="#666666" stroke="#666666" points="405.45,-141.51 396.95,-135.18 399.65,-145.43 405.45,-141.51"/>
+<text text-anchor="middle" x="451.95" y="-178" font-family="Times,serif" font-size="14.00">Clears</text>
+</g>
+<!-- _UPDATE_DISPLAY -->
+<g id="node12" class="node">
+<title>_UPDATE_DISPLAY</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="701.6,-133 504.4,-133 504.4,-97 701.6,-97 701.6,-133"/>
+<text text-anchor="middle" x="603" y="-110.8" font-family="Times,serif" font-size="14.00">_update_footprint_list_display()</text>
+</g>
+<!-- ON_REFRESH&#45;&gt;_UPDATE_DISPLAY -->
+<g id="edge2" class="edge">
+<title>ON_REFRESH-&gt;_UPDATE_DISPLAY</title>
+<path fill="none" stroke="#666666" d="M481.62,-207.75C505.74,-189.52 543.37,-161.07 570.34,-140.69"/>
+<polygon fill="#666666" stroke="#666666" points="572.32,-143.58 578.18,-134.76 568.1,-138 572.32,-143.58"/>
+</g>
+<!-- ON_LIST_SEL&#45;&gt;GUI_DETAILS -->
+<g id="edge8" class="edge">
+<title>ON_LIST_SEL-&gt;GUI_DETAILS</title>
+<path fill="none" stroke="#666666" d="M289.41,-207.75C307.88,-189.83 336.51,-162.06 357.44,-141.76"/>
+<polygon fill="#666666" stroke="#666666" points="359.77,-144.37 364.51,-134.9 354.9,-139.35 359.77,-144.37"/>
+<text text-anchor="middle" x="351.33" y="-178" font-family="Times,serif" font-size="14.00">Populates</text>
+</g>
+<!-- _GET_FP_PROPS -->
+<g id="node14" class="node">
+<title>_GET_FP_PROPS</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="263.58,-133 24.42,-133 24.42,-97 263.58,-97 263.58,-133"/>
+<text text-anchor="middle" x="144" y="-110.8" font-family="Times,serif" font-size="14.00">_get_footprint_properties_for_display()</text>
+</g>
+<!-- ON_LIST_SEL&#45;&gt;_GET_FP_PROPS -->
+<g id="edge6" class="edge">
+<title>ON_LIST_SEL-&gt;_GET_FP_PROPS</title>
+<path fill="none" stroke="#666666" d="M250.31,-207.75C229.37,-189.67 196.8,-161.57 173.23,-141.22"/>
+<polygon fill="#666666" stroke="#666666" points="175.68,-138.72 165.82,-134.83 171.11,-144.02 175.68,-138.72"/>
+</g>
+<!-- _GET_PROP_SAFE -->
+<g id="node15" class="node">
+<title>_GET_PROP_SAFE</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="238.69,-60 49.31,-60 49.31,-24 238.69,-24 238.69,-60"/>
+<text text-anchor="middle" x="144" y="-37.8" font-family="Times,serif" font-size="14.00">_get_footprint_property_safe()</text>
+</g>
+<!-- _GET_FP_PROPS&#45;&gt;_GET_PROP_SAFE -->
+<g id="edge7" class="edge">
+<title>_GET_FP_PROPS-&gt;_GET_PROP_SAFE</title>
+<path fill="none" stroke="#666666" d="M144,-96.08C144,-88.8 144,-80.19 144,-72.05"/>
+<polygon fill="#666666" stroke="#666666" points="147.5,-72.18 144,-62.18 140.5,-72.18 147.5,-72.18"/>
+</g>
+<!-- EXTRACT_DATA -->
+<g id="node17" class="node">
+<title>EXTRACT_DATA</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="1222.86,-133 1129.14,-133 1129.14,-97 1222.86,-97 1222.86,-133"/>
+<text text-anchor="middle" x="1176" y="-110.8" font-family="Times,serif" font-size="14.00">extract_data()</text>
+</g>
+<!-- _PROCESS_EXPORT&#45;&gt;EXTRACT_DATA -->
+<g id="edge13" class="edge">
+<title>_PROCESS_EXPORT-&gt;EXTRACT_DATA</title>
+<path fill="none" stroke="#666666" d="M951.52,-207.67C959.71,-205.21 968.05,-202.78 976,-200.6 991.87,-196.24 1105.41,-173.43 1120,-165.8 1131.83,-159.61 1143.17,-150.39 1152.51,-141.55"/>
+<polygon fill="#666666" stroke="#666666" points="1154.78,-144.23 1159.42,-134.71 1149.85,-139.26 1154.78,-144.23"/>
+</g>
+<!-- GEN_MD -->
+<g id="node18" class="node">
+<title>GEN_MD</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="858.8,-133 719.2,-133 719.2,-97 858.8,-97 858.8,-133"/>
+<text text-anchor="middle" x="789" y="-110.8" font-family="Times,serif" font-size="14.00">generate_markdown()</text>
+</g>
+<!-- _PROCESS_EXPORT&#45;&gt;GEN_MD -->
+<g id="edge14" class="edge">
+<title>_PROCESS_EXPORT-&gt;GEN_MD</title>
+<path fill="none" stroke="#666666" d="M877.97,-207.99C860.76,-190.2 833.98,-162.51 814.29,-142.15"/>
+<polygon fill="#666666" stroke="#666666" points="816.86,-139.77 807.39,-135.02 811.83,-144.64 816.86,-139.77"/>
+</g>
+<!-- GEN_CSV -->
+<g id="node19" class="node">
+<title>GEN_CSV</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="975.2,-133 876.8,-133 876.8,-97 975.2,-97 975.2,-133"/>
+<text text-anchor="middle" x="926" y="-110.8" font-family="Times,serif" font-size="14.00">generate_csv()</text>
+</g>
+<!-- _PROCESS_EXPORT&#45;&gt;GEN_CSV -->
+<g id="edge15" class="edge">
+<title>_PROCESS_EXPORT-&gt;GEN_CSV</title>
+<path fill="none" stroke="#666666" d="M899.98,-207.99C904.79,-190.99 912.15,-164.96 917.82,-144.92"/>
+<polygon fill="#666666" stroke="#666666" points="921.16,-145.96 920.52,-135.39 914.43,-144.06 921.16,-145.96"/>
+</g>
+<!-- SAVE_FILE -->
+<g id="node20" class="node">
+<title>SAVE_FILE</title>
+<polygon fill="#c8e6c9" stroke="#388e3c" stroke-width="2" points="1110.92,-133 993.08,-133 993.08,-97 1110.92,-97 1110.92,-133"/>
+<text text-anchor="middle" x="1052" y="-110.8" font-family="Times,serif" font-size="14.00">save_file_dialog()</text>
+</g>
+<!-- _PROCESS_EXPORT&#45;&gt;SAVE_FILE -->
+<g id="edge16" class="edge">
+<title>_PROCESS_EXPORT-&gt;SAVE_FILE</title>
+<path fill="none" stroke="#666666" d="M922.07,-207.82C939.8,-196.08 963.43,-180.23 984,-165.8 995.4,-157.8 1007.71,-148.87 1018.69,-140.81"/>
+<polygon fill="#666666" stroke="#666666" points="1020.75,-143.64 1026.72,-134.89 1016.6,-138 1020.75,-143.64"/>
+</g>
+<!-- ON_HELP&#45;&gt;HELP_HTML -->
+<g id="edge23" class="edge">
+<title>ON_HELP-&gt;HELP_HTML</title>
+<path fill="none" stroke="#666666" d="M1185.99,-207.97C1185.74,-196.43 1187.67,-182.02 1197.23,-173.8 1209.64,-163.11 1476.74,-171.76 1492,-165.8 1505.25,-160.62 1517.49,-150.91 1527.2,-141.43"/>
+<polygon fill="#666666" stroke="#666666" points="1529.59,-144.01 1534,-134.37 1524.54,-139.15 1529.59,-144.01"/>
+<text text-anchor="middle" x="1215.11" y="-178" font-family="Times,serif" font-size="14.00">Opens</text>
+</g>
+<!-- ON_EXTRACT_NETS&#45;&gt;EXTRACT_DATA -->
+<g id="edge17" class="edge">
+<title>ON_EXTRACT_NETS-&gt;EXTRACT_DATA</title>
+<path fill="none" stroke="#666666" d="M1078.9,-207.75C1097.94,-189.75 1127.51,-161.82 1149.02,-141.49"/>
+<polygon fill="#666666" stroke="#666666" points="1151.15,-144.3 1156.01,-134.88 1146.34,-139.21 1151.15,-144.3"/>
+</g>
+<!-- ON_EXTRACT_NETS&#45;&gt;SAVE_FILE -->
+<g id="edge18" class="edge">
+<title>ON_EXTRACT_NETS-&gt;SAVE_FILE</title>
+<path fill="none" stroke="#666666" d="M1058.71,-207.99C1057.48,-191.07 1055.59,-165.21 1054.13,-145.2"/>
+<polygon fill="#666666" stroke="#666666" points="1057.64,-145.16 1053.42,-135.44 1050.66,-145.67 1057.64,-145.16"/>
+</g>
+<!-- ON_REMOVE&#45;&gt;_UPDATE_DISPLAY -->
+<g id="edge19" class="edge">
+<title>ON_REMOVE-&gt;_UPDATE_DISPLAY</title>
+<path fill="none" stroke="#666666" d="M672.66,-207.99C659.37,-190.44 638.78,-163.25 623.43,-142.98"/>
+<polygon fill="#666666" stroke="#666666" points="626.32,-141 617.49,-135.14 620.74,-145.22 626.32,-141"/>
+</g>
+</g>
+</svg>
