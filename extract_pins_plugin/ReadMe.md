@@ -62,6 +62,7 @@ The current method for installation is a bit manual, it is as follows;
 
 - **Purpose**: Filter components based on their 'Value' field.
 - **How it Works**: Enter a partial or full string. Only components whose 'Value' field (e.g., `10k`, `0.1uF`, `LED`) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing values on your board.
+- Supports wildcards: Use `*` to match any text (e.g., `CONN*` matches `CONN_1x02`).
 - **Auto-Suggest Content**: All unique component values found on your PCB (e.g., `10k`, `0.1uF`, `ATMEGA328P`, `CONN_1x03`).
 
 **Example**:
@@ -74,6 +75,7 @@ The current method for installation is a bit manual, it is as follows;
 
 - **Purpose**: Filter components based on their connected net names.
 - **How it Works**: Enter a partial or full string. Only components with *any* pin connected to a net whose name contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing net names on your board.
+- Supports wildcards: Use `*` to match patterns in net names (e.g., `VCC*` matches `VCC_3V3`).
 - **Auto-Suggest Content**: All unique net names found on your PCB (e.g., `VCC`, `GND`, `SCL`, `Net-(R1-Pad1)`, `/USB_DP`).
 
 **Example**:
@@ -87,6 +89,7 @@ The current method for installation is a bit manual, it is as follows;
 
 - **Purpose**: Filter components based on their custom `connector-type` property. Primarily used by the **Export Connectors (by Type)** button.
 - **How it Works**: Enter one or more values, separated by commas (e.g., `harness,backplane`). Only components with a custom property `connector-type` matching any entry (case-insensitive) will be included. The field provides auto-suggestions of existing `connector-type` values on your board.
+- Supports wildcards: Use `*` in entries to match multiple types (e.g., `power*` matches `power_conn`).
 - **Auto-Suggest Content**: All unique values of `connector-type` found on your PCB (e.g., `harness`, `backplane`, `power_conn`, `board2board`).
 
 **Example**:
@@ -141,3 +144,4 @@ The current method for installation is a bit manual, it is as follows;
   - Ideal for filtering, sorting, and data processing in spreadsheets.
 
 ---
+
