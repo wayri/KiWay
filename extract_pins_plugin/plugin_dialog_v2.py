@@ -785,25 +785,70 @@ class PluginDialogV2(wx.Dialog):
     def OnGenerateFlowDiagram(self, event):
         refs_str = self.diagram_refs.GetValue().strip()
         if not refs_str:
+            wx.MessageBox("Enter component references.", "Info", wx.OK)
             return
         
-        refs = [fp.GetReference() for fp in self._get_footprints_by_pattern(refs_str)]
-        if len(refs) < 2:
-            wx.MessageBox("Need at least 2 components for flow diagram.", "Info", wx.OK)
+        footprints = self._get_footprints_by_pattern(refs_str)
+        if not footprints:
+            wx.MessageBox("No matching components found.", "Info", wx.OK)
             return
         
-        # Use first half as sources, second half as destinations
-        mid = len(refs) // 2
-        sources = refs[:mid]
-        dests = refs[mid:]
+        refs = [fp.GetReference() for fp in footprints]
         
-        data = self.analyzer.generate_source_destination_table(sources, dests)
-        if not data:
-            wx.MessageBox("No connections found.", "Info", wx.OK)
-            return
+        # For flow diagram, find all connections FROM these components TO any other component
+        self.status_text.SetLabel("Generating flow diagram...")
+        wx.Yield()
         
-        content = self.diagram_gen.generate_signal_flow_diagram(data)
+        # Use the first component(s) as sources and find their destinations
+        # If only 1 component, show all its connections
+        # If multiple, show connections between them
+        
+        if len(refs) == 1:
+            # Single component: show all connections from/to it
+            data = self.analyzer.generate_ic_signal_chart(
+                refs[0],
+                include_power_nets=not self.diag_ignore_power.IsChecked()
+            )
+            if not data:
+                wx.MessageBox(f"No connections found for {refs[0]}.", "Info", wx.OK)
+                return
+            
+            # Convert IC chart format to signal flow format
+            flow_data = []
+            for entry in data:
+                flow_data.append({
+                    'Source Reference': refs[0],
+                    'Source Pin': entry.get('IC Pin', ''),
+                    'Net Name': entry.get('Net Name', ''),
+                    'Destination Reference': entry.get('Destination Reference', ''),
+                    'Destination Pin': entry.get('Destination Pin', '')
+                })
+            
+            content = self.diagram_gen.generate_signal_flow_diagram(
+                flow_data, 
+                title=f"Connections: {refs[0]}"
+            )
+        else:
+            # Multiple components: show connections between all of them
+            # Use all as both sources and destinations to catch all inter-connections
+            data = self.analyzer.generate_source_destination_table(refs, refs)
+            
+            if not data:
+                # Try finding connections from these to any other component
+                all_other_refs = [r for r in self.all_refs if r not in refs]
+                data = self.analyzer.generate_source_destination_table(refs, all_other_refs[:20])
+            
+            if not data:
+                wx.MessageBox("No connections found between specified components.", "Info", wx.OK)
+                return
+            
+            content = self.diagram_gen.generate_signal_flow_diagram(
+                data, 
+                title=f"Signal Flow: {', '.join(refs[:3])}{'...' if len(refs) > 3 else ''}"
+            )
+        
         self._save_file(content, "SVG", "flow_diagram.svg")
+        self.status_text.SetLabel("Diagram generated.")
 
     def _save_file(self, content, format_name, default_name):
         """Show save dialog and write file."""

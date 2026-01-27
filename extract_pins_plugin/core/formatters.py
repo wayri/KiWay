@@ -216,7 +216,7 @@ class CSVFormatter(BaseFormatter):
                     base_row.extend(["", ""])
                 writer.writerow(base_row)
         
-        return output.getvalue()
+        return output.getvalue().strip()
 
     def format_signal_flow(
         self,
@@ -237,7 +237,7 @@ class CSVFormatter(BaseFormatter):
             row = [str(entry.get(h, "")) for h in headers]
             writer.writerow(row)
         
-        return output.getvalue()
+        return output.getvalue().strip()
 
     def format_unique_nets(
         self,
@@ -251,7 +251,7 @@ class CSVFormatter(BaseFormatter):
         for net in nets:
             writer.writerow([net])
         
-        return output.getvalue()
+        return output.getvalue().strip()
 
 
 class JSONFormatter(BaseFormatter):
