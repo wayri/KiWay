@@ -62,8 +62,16 @@ class PluginDialogV2(wx.Dialog):
                                key=DataExtractor.natural_sort_key)
         self.all_ics = [r for r in self.all_refs if r.startswith('U')]
         
+        # Auto-refresh timer for detecting new selections
+        self.auto_refresh_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.OnAutoRefreshTimer, self.auto_refresh_timer)
+        self.last_known_selection = set()  # Track what we've already added
+        
         self.InitUI()
         self._update_footprint_list_display(initial_selected_footprints)
+        
+        # Initialize last known selection with initial footprints
+        self.last_known_selection = {fp.GetReference() for fp in initial_selected_footprints}
         
         self.Centre()
         self.Show()
@@ -141,18 +149,37 @@ class PluginDialogV2(wx.Dialog):
         self.footprint_list_ctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnListItemSelected)
         left_panel.Add(self.footprint_list_ctrl, 1, wx.EXPAND | wx.ALL, 2)
         
+        # Auto-refresh checkbox
+        auto_refresh_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.auto_refresh_cb = wx.CheckBox(panel, label="Auto-Refresh")
+        self.auto_refresh_cb.SetToolTip("Automatically add components as you click them on the PCB")
+        self.auto_refresh_cb.Bind(wx.EVT_CHECKBOX, self.OnAutoRefreshToggle)
+        auto_refresh_sizer.Add(self.auto_refresh_cb, 0, wx.ALL, 2)
+        
+        self.auto_status = wx.StaticText(panel, label="")
+        self.auto_status.SetForegroundColour(wx.Colour(0, 150, 0))
+        auto_refresh_sizer.Add(self.auto_status, 1, wx.ALIGN_CENTER_VERTICAL | wx.LEFT, 5)
+        
+        left_panel.Add(auto_refresh_sizer, 0, wx.EXPAND | wx.ALL, 2)
+        
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.multi_select_cb = wx.CheckBox(panel, label="Multi-select")
-        self.multi_select_cb.SetToolTip("Add to existing selection")
+        self.multi_select_cb.SetToolTip("Add to existing selection on manual refresh")
         btn_sizer.Add(self.multi_select_cb, 0, wx.ALL, 2)
         
         refresh_btn = wx.Button(panel, label="Refresh", size=(70, -1))
         refresh_btn.Bind(wx.EVT_BUTTON, self.OnRefreshSelection)
+        refresh_btn.SetToolTip("Manually refresh from PCB selection")
         btn_sizer.Add(refresh_btn, 0, wx.ALL, 2)
         
         remove_btn = wx.Button(panel, label="Remove", size=(70, -1))
         remove_btn.Bind(wx.EVT_BUTTON, self.OnRemoveSelectedFromList)
         btn_sizer.Add(remove_btn, 0, wx.ALL, 2)
+        
+        clear_btn = wx.Button(panel, label="Clear", size=(50, -1))
+        clear_btn.Bind(wx.EVT_BUTTON, self.OnClearList)
+        clear_btn.SetToolTip("Clear the component list")
+        btn_sizer.Add(clear_btn, 0, wx.ALL, 2)
         
         left_panel.Add(btn_sizer, 0, wx.EXPAND | wx.ALL, 2)
         top_sizer.Add(left_panel, 1, wx.EXPAND | wx.ALL, 5)
@@ -391,6 +418,9 @@ class PluginDialogV2(wx.Dialog):
     # ==================== Event Handlers ====================
     
     def OnClose(self, event):
+        # Stop timer before closing
+        if self.auto_refresh_timer.IsRunning():
+            self.auto_refresh_timer.Stop()
         self.Destroy()
 
     def OnHelp(self, event):
@@ -400,6 +430,53 @@ class PluginDialogV2(wx.Dialog):
             webbrowser.open_new_tab(f"file:///{help_file}")
         else:
             wx.MessageBox("Help file not found.", "Error", wx.OK | wx.ICON_ERROR)
+
+    def OnAutoRefreshToggle(self, event):
+        """Toggle auto-refresh timer on/off."""
+        if self.auto_refresh_cb.IsChecked():
+            # Start timer - check every 500ms
+            self.auto_refresh_timer.Start(500)
+            self.auto_status.SetLabel("● Active")
+            self.status_text.SetLabel("Auto-refresh enabled. Click components on PCB to add them.")
+        else:
+            self.auto_refresh_timer.Stop()
+            self.auto_status.SetLabel("")
+            self.status_text.SetLabel("Auto-refresh disabled.")
+
+    def OnAutoRefreshTimer(self, event):
+        """Timer callback - check for newly selected components."""
+        try:
+            # Get currently selected footprints from PCB
+            currently_selected = {fp.GetReference(): fp 
+                                  for fp in self.board.GetFootprints() if fp.IsSelected()}
+            
+            # Find new selections (not already in our list)
+            existing_refs = {fp.GetReference() for fp in self.current_display_footprints}
+            new_refs = set(currently_selected.keys()) - existing_refs
+            
+            if new_refs:
+                # Add new components to list
+                new_footprints = [currently_selected[ref] for ref in new_refs]
+                all_footprints = list(self.current_display_footprints) + new_footprints
+                
+                # Sort and update
+                all_footprints.sort(key=lambda fp: DataExtractor.natural_sort_key(fp.GetReference()))
+                self._update_footprint_list_display(all_footprints)
+                
+                # Update status
+                added_str = ", ".join(sorted(new_refs, key=DataExtractor.natural_sort_key))
+                self.status_text.SetLabel(f"Added: {added_str}")
+                
+        except Exception as e:
+            # Silently handle errors during auto-refresh
+            pass
+
+    def OnClearList(self, event):
+        """Clear the component list."""
+        self.current_display_footprints = []
+        self._update_footprint_list_display([])
+        self.last_known_selection = set()
+        self.status_text.SetLabel("List cleared.")
 
     def _update_footprint_list_display(self, footprints_list):
         self.footprint_list_ctrl.DeleteAllItems()

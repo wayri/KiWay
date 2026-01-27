@@ -3,196 +3,455 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KiCad Pin Extractor Plugin Help</title>
+    <title>KiWay Extract Pins Plugin - Help Guide v2.0</title>
     <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --text: #eaeaea;
+            --text-dim: #a0a0a0;
+            --success: #4ecdc4;
+            --warning: #ffdd57;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
             line-height: 1.6;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            padding: 20px;
         }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 30px;
+        }
+        
         h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            color: var(--highlight);
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
+        
+        .version {
+            color: var(--success);
+            font-size: 1.2em;
+        }
+        
         h2 {
-            color: #34495e;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 25px;
+            color: var(--success);
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--accent);
         }
+        
         h3 {
-            color: #34495e;
-            margin-top: 20px;
+            color: var(--warning);
+            margin: 20px 0 10px 0;
         }
-        ul {
-            list-style-type: disc;
-            margin-left: 20px;
+        
+        p {
+            margin-bottom: 15px;
         }
-        ol {
-            list-style-type: decimal;
-            margin-left: 20px;
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
         }
+        
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.2);
+        }
+        
+        .feature-card h4 {
+            color: var(--highlight);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95em;
+        }
+        
         code {
-            background-color: #eee;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: monospace;
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
         }
-        strong {
-            color: #e74c3c;
-        }
-        .note {
-            background-color: #ecf0f1;
-            border-left: 5px solid #3498db;
-            padding: 10px;
+        
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
             margin: 15px 0;
         }
-        .example-box {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .tab-section {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .tab-header {
+            display: inline-block;
+            background: var(--highlight);
+            color: white;
+            padding: 5px 15px;
             border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--accent);
+        }
+        
+        th {
+            background: var(--accent);
+            color: var(--success);
+        }
+        
+        tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+        
+        .tip {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning {
+            background: rgba(255, 221, 87, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .shortcut {
+            display: inline-block;
+            background: var(--accent);
+            border: 1px solid var(--success);
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 2px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent);
+            color: var(--text-dim);
         }
     </style>
 </head>
 <body>
-    <h1>KiCad Pin Extraction Plugin with GUI</h1>
+    <div class="container">
+        <header>
+            <h1>🔌 KiWay Extract Pins Plugin</h1>
+            <p class="version">Version 2.0.0</p>
+            <p>Extract component data, analyze signal flow, and generate documentation from KiCAD PCBs</p>
+        </header>
 
-    <p>This plugin is designed to help you extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly Markdown and CSV formats. It provides robust filtering, flexible sorting, and customizable output options.</p>
+        <h2>✨ Features Overview</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📊 Pin Extraction</h4>
+                <p>Extract pin and net information from any component to CSV, Markdown, or JSON formats. Filter by reference, value, net name, or connector type.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔀 Signal Flow Analysis</h4>
+                <p>Generate source-to-destination signal tables. Trace connections between connectors, ICs, and any components.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📋 IC Signal Charts</h4>
+                <p>Create complete pin-to-destination mapping for ICs. Perfect for debugging and documentation.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📐 SVG Diagrams</h4>
+                <p>Generate self-contained block diagrams. No external dependencies - pure SVG output with color-coded nets.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚡ Power Net Grouping</h4>
+                <p>Automatically classify GND, VCC, VDD as power nets. Sort and group separately from signal nets.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔄 Auto-Refresh</h4>
+                <p>Enable auto-refresh to automatically add selected components from PCB to your list in real-time.</p>
+            </div>
+        </div>
 
-    <h2>Features:</h2>
+        <h2>🖥️ GUI Usage</h2>
 
-    <h3>1. Dynamic Selection & Details</h3>
-    <ul>
-        <li>The plugin dialog opens immediately when launched, even if no components are initially selected on the PCB.</li>
-        <li>You can <strong>select/deselect components directly in the KiCad PCB editor</strong> while this dialog is open.</li>
-        <li>Use the "<strong>Refresh Selection from PCB</strong>" button within the dialog to update the list of components displayed in the dialog's "Selected Components" panel based on your current PCB selection.</li>
-        <li>Click on any component's reference designator in the "Selected Components" list to view its detailed properties (Reference, Value, Footprint Name, Description, Layer, Position, Rotation, and custom properties like 'connector-type') in the "Selected Component Details" panel for quick review.</li>
-        <li><strong>Multi-select from PCB</strong>: If this checkbox is enabled, clicking "Refresh Selection from PCB" will *add* newly selected components from the PCB to the existing list in the dialog, rather than replacing the entire list. This allows you to build a cumulative selection.</li>
-        <li><strong>Remove Selected from List</strong>: This button allows you to remove one or more items that you have selected within the dialog's "Selected Components" list. Use standard click, Ctrl+click, or Shift+click to select multiple items in the list before clicking this button.</li>
-    </ul>
+        <h3>Getting Started</h3>
+        <ol>
+            <li>Open your PCB in KiCAD PCB Editor</li>
+            <li>Optionally select some components on the PCB</li>
+            <li>Go to <code>Tools → External Plugins → Extract Component Pins with GUI</code></li>
+            <li>The plugin dialog opens with 4 tabs</li>
+        </ol>
 
-    <h3>2. Flexible Export Options (Buttons)</h3>
-    <ul>
-        <li><strong>Export Selected</strong>: Exports data for <em>only</em> the components currently displayed in the "Selected Components" list (i.e., those that were selected on the PCB and refreshed into the dialog). This button is automatically enabled/disabled based on whether components are in the "Selected Components" list.</li>
-        <li><strong>Export 'J's</strong>: Exports data for <em>all</em> components on the entire PCB whose Reference Designator starts with the letter 'J' (e.g., J1, J2, JUMP1, J_CONN).</li>
-        <li><strong>Export Connectors (by Type)</strong>: Exports data for <em>all</em> components on the entire PCB that have a custom property named "<code>connector-type</code>" whose value matches any of the comma-separated types you define in the "Connector Type Filter" field (e.g., "harness,backplane").</li>
-        <li><strong>Extract Unique Connector Nets</strong>: Generates a CSV file containing a list of all unique net names connected to the pins of the currently displayed components (if any are in the list) or all components with a 'connector-type' property on the board. This is useful for creating net lists for specific connector types.</li>
-    </ul>
+        <div class="tab-section">
+            <span class="tab-header">Tab 1: Extract Pins</span>
+            <p>The main extraction tab for component pin data.</p>
+            
+            <h4>Component Selection</h4>
+            <ul>
+                <li><strong>Auto-Refresh:</strong> Enable to automatically add components as you click them on the PCB</li>
+                <li><strong>Refresh Button:</strong> Manually get current PCB selection</li>
+                <li><strong>Multi-select:</strong> Check to add to existing list instead of replacing</li>
+                <li><strong>Remove:</strong> Remove selected items from the list</li>
+            </ul>
 
-    <h3>3. Advanced Filtering Options (Text Inputs with Auto-Suggest) [  Wildcard Supported *  ]</h3>
-    <p class="note">These filters apply to the "Export 'J's", "Export Connectors (by Type)", and "Extract Unique Connector Nets" options. The filter fields now provide auto-suggestions populated from data currently present on your board.    </p>
-    <p class="note">Wildcard support; Users can also use wildcard or "  *  ", This helps in bulk selection of filter texts, e.g. *GND will select all the text ending with GND, like P_GND, DGND, EGND etc. </p>
-    <h4>Value Filter:</h4>
-    <ul>
-        <li><strong>Purpose</strong>: Filter components based on their 'Value' field.</li>
-        <li><strong>How it Works</strong>: Enter a partial or full string. Only components whose 'Value' field (e.g., <code>10k</code>, <code>0.1uF</code>, <code>LED</code>) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing values on your board.</li>
-        <li><strong>Auto-Suggest Content:</strong> All unique component values found on your current PCB (e.g., "<code>10k</code>", "<code>0.1uF</code>", "<code>ATMEGA328P</code>", "<code>CONN_1x03</code>").</li>
-    </ul>
-    <div class="example-box">
-        <strong>Example:</strong>
-        <p>If you type <code>100n</code>, it might include capacitors with value <code>100nF</code>.</p>
-        <p>If you type <code>CONN</code>, it might include generic connectors with value <code>CONN_1x02</code>.</p>
+            <h4>Filters (Wildcards Supported!)</h4>
+            <table>
+                <tr><th>Filter</th><th>Example</th><th>Description</th></tr>
+                <tr><td>Reference</td><td><code>J*</code></td><td>Match component references</td></tr>
+                <tr><td>Net</td><td><code>SPI_*,I2C_*</code></td><td>Filter by net names</td></tr>
+                <tr><td>Value</td><td><code>10k*</code></td><td>Filter by component value</td></tr>
+            </table>
+
+            <h4>Options</h4>
+            <ul>
+                <li><strong>Ignore Unconnected:</strong> Skip pins with no connection</li>
+                <li><strong>Ignore Power Nets:</strong> Exclude GND, VCC, VDD, etc.</li>
+                <li><strong>Sort by Net Type:</strong> Group signals first, then power</li>
+                <li><strong>Highlight Nets:</strong> Color-code nets in Markdown output</li>
+            </ul>
+
+            <h4>Export Buttons</h4>
+            <ul>
+                <li><strong>Export Selected:</strong> Export current list</li>
+                <li><strong>Export J*:</strong> Export all connectors</li>
+                <li><strong>Export by Pattern:</strong> Use the reference filter pattern</li>
+                <li><strong>Unique Nets:</strong> Extract net names only</li>
+            </ul>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 2: Signal Flow</span>
+            <p>Analyze connections between source and destination components.</p>
+            
+            <h4>Usage</h4>
+            <ol>
+                <li>Enter <strong>Source</strong> pattern (e.g., <code>J*</code> for all connectors)</li>
+                <li>Enter <strong>Destination</strong> pattern (e.g., <code>U1</code> for MCU)</li>
+                <li>Click <strong>Preview</strong> to see results</li>
+                <li>Export to CSV, Markdown, or SVG diagram</li>
+            </ol>
+
+            <div class="tip">
+                <strong>💡 Tip:</strong> Use <code>J*</code> → <code>U*</code> to see all connector-to-IC connections!
+            </div>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 3: IC Signal Chart</span>
+            <p>Generate complete pin mapping for a specific IC.</p>
+            
+            <h4>Usage</h4>
+            <ol>
+                <li>Select an IC from the dropdown (e.g., U1)</li>
+                <li>Choose whether to include power nets</li>
+                <li>Click <strong>Preview</strong> to see all pin connections</li>
+                <li>Export to CSV, Markdown, or SVG chart</li>
+            </ol>
+
+            <p>The output shows for each IC pin:</p>
+            <ul>
+                <li>Pin number/name</li>
+                <li>Connected net name</li>
+                <li>Destination component and pin</li>
+                <li>Whether it's a power or signal net</li>
+            </ul>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 4: Diagrams</span>
+            <p>Generate self-contained SVG block diagrams.</p>
+            
+            <h4>Diagram Types</h4>
+            <ul>
+                <li><strong>Component Blocks:</strong> Single component with all pins listed</li>
+                <li><strong>Flow Diagrams:</strong> Connections between multiple components</li>
+            </ul>
+
+            <p>Diagrams are pure SVG - no external dependencies needed. Open in any browser or vector editor.</p>
+        </div>
+
+        <h2>💻 CLI Usage</h2>
+        
+        <p>The plugin includes a full command-line interface for automation and scripting.</p>
+
+        <h3>Basic Commands</h3>
+        <pre><code># Show help
+python -m extract_pins_plugin --help
+
+# List all components
+python -m extract_pins_plugin list board.kicad_pcb
+
+# Extract J* connectors to CSV
+python -m extract_pins_plugin extract --refs "J*" --format csv board.kicad_pcb
+
+# Signal flow analysis
+python -m extract_pins_plugin signal-flow --source "J*" --dest "U1" board.kicad_pcb
+
+# IC signal chart
+python -m extract_pins_plugin ic-chart --ic "U1" --format svg board.kicad_pcb
+
+# Generate diagram
+python -m extract_pins_plugin diagram --refs "U1,J1,J2" board.kicad_pcb</code></pre>
+
+        <h3>CLI Options</h3>
+        <table>
+            <tr><th>Option</th><th>Description</th></tr>
+            <tr><td><code>--refs "pattern"</code></td><td>Reference patterns (wildcards: *, ?)</td></tr>
+            <tr><td><code>--format csv|md|json|svg</code></td><td>Output format</td></tr>
+            <tr><td><code>-o, --output file</code></td><td>Output file (stdout if omitted)</td></tr>
+            <tr><td><code>--ignore-power</code></td><td>Exclude power nets</td></tr>
+            <tr><td><code>--sort-by-type</code></td><td>Group signals before power</td></tr>
+            <tr><td><code>--net-filter "pattern"</code></td><td>Filter by net name</td></tr>
+        </table>
+
+        <h2>🔤 Wildcard Patterns</h2>
+        
+        <p>All filters support wildcards for flexible matching:</p>
+        
+        <table>
+            <tr><th>Pattern</th><th>Matches</th><th>Example Use</th></tr>
+            <tr><td><code>J*</code></td><td>J1, J2, J10, JCONN1</td><td>All connectors</td></tr>
+            <tr><td><code>U?</code></td><td>U1, U2 (not U10)</td><td>Single digit ICs</td></tr>
+            <tr><td><code>*_CLK</code></td><td>SPI_CLK, I2C_CLK</td><td>All clock signals</td></tr>
+            <tr><td><code>J*,U*</code></td><td>All J and U components</td><td>Multiple patterns</td></tr>
+            <tr><td><code>SPI_*,I2C_*</code></td><td>SPI and I2C nets</td><td>Bus filtering</td></tr>
+        </table>
+
+        <h2>📁 Output Formats</h2>
+
+        <h3>CSV</h3>
+        <p>Clean, one-row-per-pin format. Opens directly in Excel/Google Sheets.</p>
+
+        <h3>Markdown</h3>
+        <p>Human-readable tables. View in any Markdown viewer or GitHub.</p>
+
+        <h3>JSON</h3>
+        <p>Structured data for programmatic processing and integration.</p>
+
+        <h3>SVG</h3>
+        <p>Vector diagrams with:</p>
+        <ul>
+            <li>Color-coded net types (signal/power/ground)</li>
+            <li>Component blocks with pin details</li>
+            <li>Connection paths with labels</li>
+            <li>Legend and summary</li>
+        </ul>
+
+        <h2>⚡ Power Net Classification</h2>
+        
+        <p>The plugin automatically identifies power nets:</p>
+        
+        <table>
+            <tr><th>Category</th><th>Patterns</th></tr>
+            <tr><td>Supply</td><td>VCC*, VDD*, 3V3*, 5V*, 12V*, VBAT*, VIN*</td></tr>
+            <tr><td>Ground</td><td>GND*, AGND*, DGND*, PGND*, VSS*</td></tr>
+            <tr><td>Power</td><td>PWR*, +*V, V+, V-</td></tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Use "Sort by Net Type" to group signal nets first, making it easier to focus on your design's logic connections.
+        </div>
+
+        <h2>📝 Example Workflows</h2>
+
+        <h3>Document Connector Pinouts</h3>
+        <ol>
+            <li>Open plugin</li>
+            <li>Set Reference filter to <code>J*</code></li>
+            <li>Click "Export by Pattern"</li>
+            <li>Save CSV for spreadsheet, MD for documentation</li>
+        </ol>
+
+        <h3>Debug MCU Connections</h3>
+        <ol>
+            <li>Go to "IC Signal Chart" tab</li>
+            <li>Select your MCU (e.g., U1)</li>
+            <li>Click "Preview"</li>
+            <li>Export SVG for visual reference</li>
+        </ol>
+
+        <h3>Trace Signal Path</h3>
+        <ol>
+            <li>Go to "Signal Flow" tab</li>
+            <li>Set Source: <code>J1</code></li>
+            <li>Set Destination: <code>U1</code></li>
+            <li>Enable "Include Intermediates"</li>
+            <li>Preview to see complete path</li>
+        </ol>
+
+        <footer>
+            <p>KiWay Extract Pins Plugin v2.0.0</p>
+            <p>Created by Wayri (Yawar)</p>
+            <p>Licensed under GPL-3.0</p>
+        </footer>
     </div>
-
-    <h4>Net Name Filter (any pin):</h4>
-    <ul>
-        <li><strong>Purpose</strong>: Filter components based on their connected net names.</li>
-        <li><strong>How it Works</strong>: Enter a partial or full string. Only components that have <em>any</em> pin connected to a net whose name contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing net names on your board.</li>
-        <li><strong>Auto-Suggest Content:</strong> All unique net names found on your current PCB (e.g., "<code>VCC</code>", "<code>GND</code>", "<code>SCL</code>", "<code>Net-(R1-Pad1)</code>", "<code>/USB_DP</code>").</li>
-    </ul>
-    <div class="example-box">
-        <strong>Example:</strong>
-        <p>If you type <code>VCC</code>, it might include all components connected to <code>VCC</code>, <code>VCC_3V3</code>, etc.</p>
-        <p>If you type <code>SCL</code>, it might include components on your I2C clock line.</p>
-        <p>If you type <code>Net-(J1-Pin1)</code>, it will filter for components connected to that specific auto-generated net name.</p>
-    </div>
-
-    <h4>Connector Type Filter (comma-sep):</h4>
-    <ul>
-        <li><strong>Purpose</strong>: Filter components based on their custom "<code>connector-type</code>" property. This filter is primarily used by the "<strong>Export Connectors (by Type)</strong>" button.</li>
-        <li><strong>How it Works</strong>: Enter one or more values, separated by commas (e.g., <code>harness,backplane</code>). Only components that have a custom property named "<code>connector-type</code>" whose value (case-insensitive) exactly matches <em>any</em> of the comma-separated entries you provide will be included. The field provides auto-suggestions of existing "connector-type" values found on your board.</li>
-        <li><strong>Auto-Suggest Content:</strong> All unique values of the custom property "<code>connector-type</code>" found on your current PCB (e.g., "<code>harness</code>", "<code>backplane</code>", "<code>power_conn</code>", "<code>board2board</code>").</li>
-    </ul>
-    <div class="example-box">
-        <strong>Example:</strong>
-        <p>If a component has a custom property <code>connector-type</code> with value <code>harness</code>, and you type <code>harness</code> into the filter, it will be included.</p>
-        <p>If you type <code>power,board2board</code>, it will include components with <code>connector-type: power</code> OR <code>connector-type: board2board</code>.</p>
-    </div>
-
-    <h3>4. Output Customization Checkboxes</h3>
-    <ul>
-        <li><strong>Sort Components by Reference (A-Z)</strong>: If checked, the exported Markdown and CSV tables will list components alphabetically by their reference designator (e.g., C1, C2, J1, U1). If unchecked, they will appear in the order they were processed (typically discovery order).</li>
-        <li><strong>Highlight Same Nets in Markdown Output</strong>: If checked, net names in the Markdown output's "Pin Details" tables will be color-coded. Pads connected to the same net will have their net name displayed in a unique, automatically assigned color. This visual distinction requires a Markdown viewer that supports inline HTML styling (e.g., VS Code, GitHub).</li>
-        <li><strong>Ignore 'Unconnected' Pins (CSV)</strong>: If checked, any pins whose net name is literally "unconnected" (case-insensitive) will be excluded from the generated CSV file.</li>
-        <li><strong>Ignore Free Pins (CSV)</strong>: If checked, any pins that have no net assigned to them (i.e., are truly unconnected or floating) will be excluded from the generated CSV file.</li>
-        <li><strong>Include [Property Name]</strong>: A series of checkboxes allowing you to choose exactly which general properties (Reference, Value, Footprint Name, etc.) and pin details (Pad Name/Number, Net Name) are included as columns in the Markdown and CSV output files.</li>
-    </ul>
-
-    <h3>5. Progress Feedback</h3>
-    <ul>
-        <li>A progress bar and status text will indicate the plugin's activity during lengthy export operations, providing visual feedback.</li>
-    </ul>
-
-    <h2>How to Use:</h2>
-    <ol>
-        <li><strong>Open your KiCad PCB design</strong> in the PCB Editor.</li>
-        <li>(Optional) <strong>Select one or more components</strong> directly on your PCB that you might want to export data for using the "Export Selected" option.</li>
-        <li>Go to <strong><code>Tools -> External Plugins -> Extract Component Pins with GUI</code></strong> in the KiCad PCB Editor.</li>
-        <li>The plugin dialog will open. You can now interact with both KiCad and the dialog simultaneously.</li>
-        <li><strong>To Update the Dialog's List:</strong> If you select or deselect components on your PCB after the dialog is open, click the "<strong>Refresh Selection from PCB</strong>" button in the dialog. The list in the dialog will update to reflect your current PCB selection.</li>
-        <li><strong>To View Component Details:</strong> Click on any component's reference designator in the "Selected Components" list within the dialog. Its detailed properties will appear on the right.</li>
-        <li><strong>Apply Filters:</strong> Enter text into the "Value Filter", "Net Name Filter", or "Connector Type Filter" fields as needed. Filters apply to the "Export 'J's", "Export Connectors (by Type)", and "Extract Unique Connector Nets" options. These fields now offer auto-suggestions from your board's data.</li>
-        <li><strong>Choose Output Options:</strong> Select the "Sort Components by Reference", "Highlight Same Nets in Markdown Output", and specific "Include [Property Name]" checkboxes as desired.
-            <ul>
-                <li>Remember to select "Ignore 'Unconnected' Pins (CSV)" and/or "Ignore Free Pins (CSV)" if you want to exclude those pins from your CSV output.</li>
-            </ul>
-        </li>
-        <li><strong>Select Export Type:</strong> Click one of the export buttons:
-            <ul>
-                <li>"<strong>Export Selected</strong>" to export data for components currently visible in the dialog's list, applying common filters (except 'Connector Type' filter) and sorting.</li>
-                <li>"<strong>Export 'J's</strong>" to export data for all components on the entire PCB whose reference starts with 'J', applying other filters and sorting.</li>
-                <li>"<strong>Export Connectors (by Type)</strong>" to export components based on the "connector-type" field and filter, applying other filters and sorting.</li>
-                <li>"<strong>Extract Unique Connector Nets</strong>" to get a list of all unique net names from selected/filtered connectors.</li>
-            </ul>
-        </li>
-        <li><strong>Save Files:</strong> You will be prompted to save the generated file(s). Choose your desired location and filenames.</li>
-        <li><strong>Close Dialog:</strong> Click the "Close" button when you are finished.</li>
-    </ol>
-
-    <h2>Output Files:</h2>
-    <ul>
-        <li><strong>Markdown (.md):</strong> This file is designed for human readability and easy sharing.
-            <ul>
-                <li>Each exported component gets its own dedicated section with a heading (e.g., <code>## Component: J1</code>).</li>
-                <li>"General Properties" and "Pin Details" tables are included based on your "Include" column selections.</li>
-                <li>Net names will be color-coded if the option was selected.</li>
-            </ul>
-        </li>
-        <li><strong>CSV (.csv):</strong> This file is designed for structured data that can be easily opened in spreadsheet programs (e.g., Excel, Google Sheets, LibreOffice Calc).
-            <ul>
-                <li>For component/pin reports, each component starts with a "<code>Component: [Reference]</code>" header row.</li>
-                <li>Below the header, the component's selected general properties are listed as key-value pairs (e.g., "Reference,J1", "Value,2x10 Header").</li>
-                <li>Then, a header row "Connector Name,Pin Number,Net Name" is provided, followed by rows for each pin.</li>
-                <li>Pins are filtered based on the "Ignore Unconnected Pins" and "Ignore Free Pins" checkboxes.</li>
-                <li>For the "Extract Unique Connector Nets" output, it's a simple single-column CSV of unique net names.</li>
-            </ul>
-        </li>
-    </ul>
-
-    <h2>Future Enhancements (Suggestions):</h2>
-    <p>Consider adding these features to make the plugin even more powerful:</p>
-    <ul>
-        <li><strong>Export to Excel (XLSX):</strong> Direct export to a structured Excel file, potentially with multiple sheets for different data views, which is often preferred for professional data analysis.</li>
-        <li><strong>Configuration Saving:</strong> Implement saving and loading of user preferences (e.g., checkbox states, filter values) between KiCad sessions.</li>
-        <li><strong>Integration with Schematic Data:</strong> (Advanced) Directly access and include data from the schematic symbols (e.g., full datasheet links, manufacturer part numbers that aren't pushed to footprints) for a truly comprehensive report.</li>
-        <li><strong>Custom Property Selection:</strong> Allow the user to define and select *any* custom properties found on the board to be included as columns in the output.</li>
-        <li><strong>Netlist Export:</strong> Option to export a simplified netlist for the selected components.</li>
-        <li><strong>Board Outline Drawing (SVG):</strong> Re-implement the generation of a visual SVG diagram of the board outline with highlighted components, potentially as a standalone export or embedded in a report.</li>
-    </ul>
 </body>
 </html>
