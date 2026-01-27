@@ -1,0 +1,13 @@
+{
+    "$schema": "https://gitlab.com/kicad/code/kicad/-/raw/master/kicad/pcm/schemas/pcm.v1.schema.json",
+    "maintainer": {
+        "name": "Wayri (Yawar)",
+        "contact": {
+            "github": "https://github.com/wayri"
+        }
+    },
+    "name": "KiWay Plugin Repository",
+    "packages": {
+        "url": "packages.json"
+    }
+}
