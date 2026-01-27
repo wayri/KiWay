@@ -67,7 +67,6 @@ def main():
     
     # Construct Version Info
     version_info = metadata['versions'][0]
-    # Update with PCM requirement details
     version_info.update({
         "download_sha256": sha256,
         "download_size": file_size,
@@ -97,9 +96,57 @@ def main():
     }
     
     os.makedirs(PCM_DIR, exist_ok=True)
+    packages_file = Path(PCM_DIR) / "packages.json"
     repo_file = Path(PCM_DIR) / "repository.json"
     
-    # Initialize repository structure
+    # --- 1. Handle packages.json (The Content) ---
+    packages_data = {"packages": []}
+    
+    if packages_file.exists():
+        try:
+            with open(packages_file, 'r') as f:
+                existing = json.load(f)
+                if isinstance(existing.get('packages'), list):
+                    packages_data = existing
+        except:
+            pass
+
+    # Update/Add Package in packages.json
+    packages_list = packages_data['packages']
+    updated = False
+    for i, pkg in enumerate(packages_list):
+        if pkg['identifier'] == identifier:
+            # Check/Update version
+            v_exists = False
+            for v_idx, v in enumerate(pkg['versions']):
+                if v['version'] == version:
+                    pkg['versions'][v_idx] = version_info
+                    v_exists = True
+                    break
+            if not v_exists:
+                pkg['versions'].insert(0, version_info)
+            
+            pkg['description'] = package['description']
+            pkg['description_full'] = package['description_full']
+            updated = True
+            break
+            
+    if not updated:
+        packages_list.append(package)
+    
+    packages_data['packages'] = packages_list
+    
+    # Write packages.json
+    with open(packages_file, 'w') as f:
+        json.dump(packages_data, f, indent=4)
+        
+    print(f"Updated {packages_file}")
+    
+    # --- 2. Handle repository.json (The Pointer) ---
+    # We must calculate hash of packages.json for validation
+    packages_sha256 = calculate_sha256(packages_file)
+    packages_timestamp = int(datetime.datetime.now().timestamp())
+    
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",
         "name": "KiWay Plugin Repository",
@@ -107,54 +154,18 @@ def main():
             "name": "Wayri (Yawar)",
             "contact": {"github": "https://github.com/wayri"}
         },
-        "packages": []
+        "packages": {
+            "url": "packages.json",
+            "sha256": packages_sha256,
+            "update_timestamp": packages_timestamp
+        }
     }
     
-    # Load existing if available and valid
-    if repo_file.exists():
-        try:
-            with open(repo_file, 'r') as f:
-                existing = json.load(f)
-                if isinstance(existing.get('packages'), list):
-                    repository = existing
-        except:
-            pass
-
-    # Update/Add Package
-    packages = repository['packages']
-    updated = False
-    for i, pkg in enumerate(packages):
-        if pkg['identifier'] == identifier:
-            # For simplicity, we fully replace the package entry with the new metadata
-            # In a pro repo, you'd append the new version to pkg['versions']
-            # Let's try to append version if package exists
-            
-            # Check if version exists
-            v_exists = False
-            for v_idx, v in enumerate(pkg['versions']):
-                if v['version'] == version:
-                    pkg['versions'][v_idx] = version_info # Update existing version
-                    v_exists = True
-                    break
-            if not v_exists:
-                pkg['versions'].insert(0, version_info) # Add new version at top
-                
-            # Update other metadata in case description changed
-            pkg['description'] = package['description']
-            pkg['description_full'] = package['description_full']
-            
-            updated = True
-            break
-            
-    if not updated:
-        packages.append(package)
-    
-    repository['packages'] = packages
-    
+    # Write repository.json
     with open(repo_file, 'w') as f:
         json.dump(repository, f, indent=4)
         
-    print(f"Success! Updated {repo_file}")
+    print(f"Updated {repo_file}")
     print(f"Release Zip: {zip_path}")
     print(f"SHA256: {sha256}")
 
