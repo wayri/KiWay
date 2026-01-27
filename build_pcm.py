@@ -130,7 +130,8 @@ def main():
     
     # URL to the raw packages.json file on GitHub
     # Note: Using main branch as the stable source
-    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json"
+    # Added timestamp query to BUST GITHUB RAW CACHE
+    packages_url = f"https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json?t={packages_timestamp}"
     
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",
