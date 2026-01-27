@@ -2,7 +2,7 @@
 
 **KiWay Extract Pins** is a powerful KiCAD plugin designed to automate documentation and signal analysis. It allows you to extract pin data, trace signal flows, and generate diagrams directly from your PCB layout.
 
-## 🚀 Features at a Glance
+## Features at a Glance
 
 | Feature | Description |
 |---------|-------------|
@@ -14,7 +14,7 @@
 
 ---
 
-# 📥 Installation
+# Installation
 
 ### Method 1: Plugin Manager (Recommended)
 1. Open **KiCAD 9.0+**.
@@ -31,7 +31,7 @@ Download the latest release zip and extract the `extract_pins_plugin` folder to:
 
 ---
 
-# 🖥️ GUI Usage Guide
+# GUI Usage Guide
 
 The GUI is designed for interactive exploration.
 
@@ -50,7 +50,7 @@ The GUI is designed for interactive exploration.
 
 ---
 
-# 💻 CLI Reference (Command Line)
+# CLI Reference (Command Line)
 
 You can use KiWay without opening the KiCAD GUI. This is perfect for generating documentation automatically.
 
@@ -101,7 +101,7 @@ kiway-python -m extract_pins_plugin find-path --start "TP1" --end "U1" --max-hop
 
 ---
 
-# 👨‍💻 Developer Guide
+# Developer Guide
 
 For contributors who want to understand the codebase structure.
 
@@ -109,7 +109,7 @@ For contributors who want to understand the codebase structure.
 
 ---
 
-# ❓ FAQ
+# FAQ
 
 **Q: Can I run this on KiCAD 8?**
 A: The metadata targets KiCAD 9.0+, but it may work on KiCAD 8 if you manually edit the `metadata.json` version requirement, though it is untested.

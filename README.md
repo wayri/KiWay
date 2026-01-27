@@ -16,7 +16,7 @@ A comprehensive documentation and analysis tool.
 
 ### Method 1: Plugin Manager (Recommended)
 1. Open **KiCAD Plugin and Content Manager**
-2. Add Repository: `https://raw.githubusercontent.com/wayri/KiWay/main/pcm/repository.json`
+2. Add Repository: `https://raw.githubusercontent.com/wayri/KiWay/main/pcm/repo.json`
 3. Install **KiWay Extract Pins**
 
 ### Method 2: Manual
