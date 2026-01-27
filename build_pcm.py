@@ -18,7 +18,7 @@ def calculate_sha256(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def create_plugin_zip(plugin_path, version, output_dir):
+def create_plugin_zip(plugin_path, version, output_dir, metadata):
     os.makedirs(output_dir, exist_ok=True)
     zip_filename = f"{plugin_path.name}-{version}.zip"
     zip_path = os.path.join(output_dir, zip_filename)
@@ -32,7 +32,11 @@ def create_plugin_zip(plugin_path, version, output_dir):
                 if file.endswith('.pyc') or file == 'metadata.json': 
                     pass
                 file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, start=plugin_path.parent)
+                # Nest under identifier folder
+                rel_path = os.path.relpath(file_path, start=plugin_path)
+                arcname = os.path.join(metadata['identifier'], rel_path)
+                # FORCE FORWARD SLASHES for Zip Standard
+                arcname = arcname.replace(os.sep, '/')
                 zipf.write(file_path, arcname)
     
     return zip_path, zip_filename
@@ -47,7 +51,7 @@ def main():
     version = metadata['versions'][0]['version']
     identifier = metadata['identifier']
     
-    zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR)
+    zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR, metadata)
     
     file_size = os.path.getsize(zip_path)
     sha256 = calculate_sha256(zip_path)
@@ -67,6 +71,11 @@ def main():
             install_size += info.file_size
     version_info['install_size'] = install_size
 
+    # Construct Package
+    # Add icon to resources
+    if 'icon' not in metadata['resources']:
+        metadata['resources']['icon'] = "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/extract_pins_plugin_favicon.png"
+
     package = {
         "name": metadata['name'],
         "description": metadata['description'],
@@ -83,19 +92,22 @@ def main():
     packages_file = Path(PCM_DIR) / "pkgs.json"
     repo_file = Path(PCM_DIR) / "repo.json"
     
-    # --- PACKAGES.JSON (Root List) ---
-    packages_list = []
+    # --- PACKAGES.JSON (Object Wrapper) ---
+    packages_data = {"packages": []}
+    
     if packages_file.exists():
         try:
             with open(packages_file, 'r') as f:
                 existing = json.load(f)
-                if isinstance(existing, list):
-                    packages_list = existing
-                elif isinstance(existing, dict) and 'packages' in existing:
-                    packages_list = existing['packages']
+                if isinstance(existing, dict) and 'packages' in existing:
+                    packages_data = existing
+                elif isinstance(existing, list):
+                    # Migration from root list
+                    packages_data['packages'] = existing
         except:
             pass
 
+    packages_list = packages_data['packages']
     updated = False
     for i, pkg in enumerate(packages_list):
         if pkg['identifier'] == identifier:
@@ -109,14 +121,17 @@ def main():
                 pkg['versions'].insert(0, version_info)
             pkg['description'] = package['description']
             pkg['description_full'] = package['description_full']
+            pkg['resources'] = package['resources']
             updated = True
             break
             
     if not updated:
         packages_list.append(package)
     
+    packages_data['packages'] = packages_list
+    
     with open(packages_file, 'w') as f:
-        json.dump(packages_list, f, indent=4)
+        json.dump(packages_data, f, indent=4)
         
     print(f"Updated {packages_file}")
     
@@ -125,7 +140,8 @@ def main():
     
     # URL to the raw packages.json file on GitHub
     # Note: Using main branch as the stable source
-    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json"
+    # Added timestamp query to BUST GITHUB RAW CACHE
+    packages_url = f"https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json?t={packages_timestamp}"
     
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",

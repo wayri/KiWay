@@ -3,7 +3,7 @@
     "name": "KiWay Extract Pins",
     "description": "A powerful plugin for extracting pin data from PCB components and analyzing signal flow.",
     "description_full": "KiWay Extract Pins is a comprehensive documentation and analysis plugin for KiCAD.\n\n**Features:**\n- Extract component pin data to CSV, Markdown, or JSON\n- Generate signal flow tables between components\n- Create IC signal charts showing all connections\n- CLI support for automation and scripting\n- Flexible filtering options\n\nTargets KiCAD 9 and later.",
-    "identifier": "com.wayri.kiway-extract-pins",
+    "identifier": "kiway.extract.pins",
     "type": "plugin",
     "author": {
         "name": "Wayri (Yawar)",
@@ -19,7 +19,8 @@
     },
     "license": "GPL-3.0",
     "resources": {
-        "homepage": "https://github.com/wayri/KiWay"
+        "homepage": "https://github.com/wayri/KiWay",
+        "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/icon.png"
     },
     "versions": [
         {

@@ -8,7 +8,7 @@
         }
     },
     "packages": {
-        "url": "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json",
-        "update_timestamp": 1769549475
+        "url": "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json?t=1769555625",
+        "update_timestamp": 1769555625
     }
 }
