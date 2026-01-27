@@ -436,7 +436,7 @@ class PluginDialogV2(wx.Dialog):
         if self.auto_refresh_cb.IsChecked():
             # Start timer - check every 500ms
             self.auto_refresh_timer.Start(500)
-            self.auto_status.SetLabel("● Active")
+            self.auto_status.SetLabel("(Active)")
             self.status_text.SetLabel("Auto-refresh enabled. Click components on PCB to add them.")
         else:
             self.auto_refresh_timer.Stop()

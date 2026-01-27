@@ -8,35 +8,35 @@ A comprehensive KiCAD plugin for extracting component/pin data and analyzing sig
 
 ## Features
 
-### 📊 Data Extraction
+### Data Extraction
 - Extract pin and net information from any component
 - Filter by reference pattern (`J*`, `U*`, etc.), value, or connector type
 - Export to clean **CSV**, **Markdown**, or **JSON** formats
 - Support for custom `connector-type` properties
 
-### 🔀 Signal Flow Analysis
+### Signal Flow Analysis
 - Generate source-to-destination signal flow tables
 - Trace connections between connectors, ICs, and passives
 - Find all signal paths between any two components
 - Identify intermediate components in signal chains
 
-### 📋 IC Signal Charts
+### IC Signal Charts
 - Create complete pin-to-destination mapping for ICs
 - Optionally include or exclude power/ground nets
 - Group and sort power nets separately from signals
 - Perfect for documentation and debugging
 
-### 📐 Block Diagrams (NEW!)
+### Block Diagrams (NEW!)
 - Generate SVG block diagrams - fully self-contained, no external dependencies
 - Visualize IC signal connections with color-coded net types
 - Create signal flow diagrams between component groups
 
-### ⚡ Power Net Classification
+### Power Net Classification
 - Automatic detection of power/ground nets (VCC, VDD, GND, VSS, etc.)
 - Sort and group power nets separately from signal nets
 - Customizable power net patterns
 
-### 💻 CLI Support (NEW!)
+### CLI Support (NEW!)
 - Full command-line interface for automation
 - Batch processing of multiple boards
 - Integration with build systems and CI/CD
@@ -46,16 +46,16 @@ A comprehensive KiCAD plugin for extracting component/pin data and analyzing sig
 
 ## Installation
 
-### Method 1: Manual Installation
+### Method 1: Plugin Manager (Recommended)
+1. Open KiCAD → `Plugin and Content Manager`
+2. Add repository: `https://raw.githubusercontent.com/wayri/KiWay/main/pcm/repo.json`
+3. Search for "KiWay" and install
+
+### Method 2: Manual Installation
 1. Enable the KiCAD API: `Preferences → Preferences → Plugins → Enable`
 2. Open PCB Editor → `Tools → Plugins → Open Plugin Directory`
 3. Copy the `extract_pins_plugin` folder to the plugin directory
 4. `Tools → Plugins → Refresh Plugins`
-
-### Method 2: Plugin Content Manager (Coming Soon)
-1. Open KiCAD → `Plugin and Content Manager`
-2. Add repository: `https://github.com/wayri/KiWay/releases/latest/download/repository.json`
-3. Search for "KiWay" and install
 
 ---
 
@@ -67,29 +67,26 @@ A comprehensive KiCAD plugin for extracting component/pin data and analyzing sig
 3. `Tools → External Plugins → Extract Component Pins with GUI`
 4. Use the dialog to filter, configure, and export
 
-### CLI Mode
+### CLI Mode (Installed Plugin)
 
 ```bash
 # Basic extraction - all J* connectors to CSV
 python -m extract_pins_plugin extract --refs "J*" --format csv board.kicad_pcb
+```
 
-# Multiple patterns with net filtering
-python -m extract_pins_plugin extract --refs "J*,P*" --net-filter "SPI_*,I2C_*" board.kicad_pcb
+### CLI Mode (Standalone / Without Installation)
+You can run the plugin directly from the downloaded folder without installing it into KiCad, as long as you use KiCad's bundled Python.
 
-# Signal flow between connectors and ICs
-python -m extract_pins_plugin signal-flow --source "J*" --dest "U*" --format md board.kicad_pcb
+**Windows:**
+```cmd
+"C:\Program Files\KiCad\9.0\bin\python.exe" -m extract_pins_plugin extract --refs "J*" "C:\path\to\your\board.kicad_pcb"
+```
 
-# IC signal chart as SVG diagram
-python -m extract_pins_plugin ic-chart --ic "U1" --format svg -o u1_chart.svg board.kicad_pcb
-
-# Generate block diagrams
-python -m extract_pins_plugin diagram --refs "U1,U2" -o diagrams.svg board.kicad_pcb
-
-# Extract unique nets, grouped by type
-python -m extract_pins_plugin unique-nets --refs "J*" --sort-by-type board.kicad_pcb
-
-# Find signal paths
-python -m extract_pins_plugin find-path --start "J1" --end "U1" board.kicad_pcb
+**Linux/Mac:**
+If you have the `pcbnew` python module available in your system python:
+```bash
+export PYTHONPATH=$PYTHONPATH:/usr/share/kicad/scripting/plugins
+python3 -m extract_pins_plugin extract --refs "J*" board.kicad_pcb
 ```
 
 ---

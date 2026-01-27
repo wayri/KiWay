@@ -20,10 +20,10 @@
                 "version": "2.0.0",
                 "status": "stable",
                 "kicad_version": "9.0",
-                "download_sha256": "2f4799a8586ad2e6c7d83e0ff888e3df51a801898fb90b7a50b11e35924d0b4a",
-                "download_size": 1098467,
+                "download_sha256": "7a1eb6d1d6a11d4644e99dee177d4adb8c4be1506785dfc94200e15185a00e1b",
+                "download_size": 1098493,
                 "download_url": "https://github.com/wayri/KiWay/releases/download/v2.0.0/extract_pins_plugin-2.0.0.zip",
-                "install_size": 1319473,
+                "install_size": 1319267,
                 "platforms": [
                     "windows",
                     "linux",
