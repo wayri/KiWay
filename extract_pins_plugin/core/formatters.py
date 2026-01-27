@@ -186,37 +186,47 @@ class CSVFormatter(BaseFormatter):
                 "Position", "Rotation", "Connector Type"
             ]
         
-        output = StringIO()
-        writer = csv.writer(output)
+        # Build rows list first, then join with newlines
+        rows = []
         
         # Build header row
         headers = include_properties.copy()
         if include_pins:
             headers.extend(["Pin", "Net Name"])
         
-        writer.writerow(headers)
+        rows.append(",".join(f'"{h}"' for h in headers))
         
         for ref, comp_data in data.items():
             props = comp_data.get("general_properties", {})
             pins = comp_data.get("pins", [])
             
             # Build base row with properties
-            base_row = [str(props.get(h, "")) for h in include_properties]
+            base_values = []
+            for h in include_properties:
+                val = str(props.get(h, "")).replace('"', '""')  # Escape quotes
+                base_values.append(f'"{val}"')
             
             if include_pins and pins:
-                # One row per pin
+                # One row per pin - only include pins that have data
                 for pin in pins:
-                    row = base_row.copy()
-                    row.append(pin.get("Pad Name/Number", ""))
-                    row.append(pin.get("Net Name", ""))
-                    writer.writerow(row)
+                    pad_name = pin.get("Pad Name/Number", "")
+                    net_name = pin.get("Net Name", "")
+                    
+                    # Skip completely empty pins
+                    if not pad_name and not net_name:
+                        continue
+                    
+                    row_values = base_values.copy()
+                    row_values.append(f'"{pad_name}"')
+                    row_values.append(f'"{net_name}"')
+                    rows.append(",".join(row_values))
             else:
-                # Single row for component
+                # Single row for component without pins
                 if include_pins:
-                    base_row.extend(["", ""])
-                writer.writerow(base_row)
+                    base_values.extend(['""', '""'])
+                rows.append(",".join(base_values))
         
-        return output.getvalue().strip()
+        return "\n".join(rows)
 
     def format_signal_flow(
         self,
