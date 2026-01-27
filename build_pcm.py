@@ -80,8 +80,8 @@ def main():
     }
     
     os.makedirs(PCM_DIR, exist_ok=True)
-    packages_file = Path(PCM_DIR) / "packages.json"
-    repo_file = Path(PCM_DIR) / "repository.json"
+    packages_file = Path(PCM_DIR) / "pkgs.json"
+    repo_file = Path(PCM_DIR) / "repo.json"
     
     # --- PACKAGES.JSON (Root List) ---
     packages_list = []
@@ -126,7 +126,7 @@ def main():
     
     # URL to the raw packages.json file on GitHub
     # Note: Using main branch as the stable source
-    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/packages.json"
+    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json"
     
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",

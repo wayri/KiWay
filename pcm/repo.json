@@ -8,8 +8,8 @@
         }
     },
     "packages": {
-        "url": "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/packages.json",
+        "url": "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json",
         "sha256": "b3d52cc8c51c4891f991b215e0e0144f39616ce4689cf180c1f10ae3bf7235c2",
-        "update_timestamp": 1769548045
+        "update_timestamp": 1769548974
     }
 }
