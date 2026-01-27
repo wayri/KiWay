@@ -14,17 +14,18 @@
             },
             "license": "GPL-3.0",
             "resources": {
-                "homepage": "https://github.com/wayri/KiWay"
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/extract_pins_plugin_favicon.png"
             },
             "versions": [
                 {
                     "version": "2.0.0",
                     "status": "stable",
                     "kicad_version": "9.0",
-                    "download_sha256": "7a1eb6d1d6a11d4644e99dee177d4adb8c4be1506785dfc94200e15185a00e1b",
-                    "download_size": 1098493,
+                    "download_sha256": "1af47b15d16a1f66b56a1c07aeb2837e874d38dcb3d450cdc667421f2c03f038",
+                    "download_size": 1098534,
                     "download_url": "https://github.com/wayri/KiWay/releases/download/v2.0.0/extract_pins_plugin-2.0.0.zip",
-                    "install_size": 1319267,
+                    "install_size": 1319390,
                     "platforms": [
                         "windows",
                         "linux",

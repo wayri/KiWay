@@ -117,6 +117,7 @@ def main():
                 pkg['versions'].insert(0, version_info)
             pkg['description'] = package['description']
             pkg['description_full'] = package['description_full']
+            pkg['resources'] = package['resources']
             updated = True
             break
             

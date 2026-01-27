@@ -19,7 +19,8 @@
     },
     "license": "GPL-3.0",
     "resources": {
-        "homepage": "https://github.com/wayri/KiWay"
+        "homepage": "https://github.com/wayri/KiWay",
+        "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/extract_pins_plugin_favicon.png"
     },
     "versions": [
         {
