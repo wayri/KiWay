@@ -124,6 +124,10 @@ def main():
     packages_sha256 = calculate_sha256(packages_file)
     packages_timestamp = int(datetime.datetime.now().timestamp())
     
+    # URL to the raw packages.json file on GitHub
+    # Note: Using main branch as the stable source
+    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/packages.json"
+    
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",
         "name": "KiWay Plugin Repository",
@@ -132,7 +136,7 @@ def main():
             "contact": {"github": "https://github.com/wayri"}
         },
         "packages": {
-            "url": "packages.json",
+            "url": packages_url,
             "sha256": packages_sha256,
             "update_timestamp": packages_timestamp
         }
