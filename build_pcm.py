@@ -67,6 +67,11 @@ def main():
             install_size += info.file_size
     version_info['install_size'] = install_size
 
+    # Construct Package
+    # Add icon to resources
+    if 'icon' not in metadata['resources']:
+        metadata['resources']['icon'] = "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/extract_pins_plugin_favicon.png"
+
     package = {
         "name": metadata['name'],
         "description": metadata['description'],
