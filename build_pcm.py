@@ -96,25 +96,37 @@ def main():
     }
     
     os.makedirs(PCM_DIR, exist_ok=True)
-    packages_file = Path(PCM_DIR) / "packages.json"
     repo_file = Path(PCM_DIR) / "repository.json"
     
-    # --- 1. Handle packages.json (The Content) ---
-    packages_data = {"packages": []}
+    # Initialize repository structure
+    repository = {
+        "$schema": "https://go.kicad.org/pcm/schemas/v1",
+        "name": "KiWay Plugin Repository",
+        "maintainer": {
+            "name": "Wayri (Yawar)",
+            "contact": {"github": "https://github.com/wayri"}
+        },
+        "packages": []
+    }
     
-    if packages_file.exists():
+    # Load existing if available and valid
+    if repo_file.exists():
         try:
-            with open(packages_file, 'r') as f:
+            with open(repo_file, 'r') as f:
                 existing = json.load(f)
                 if isinstance(existing.get('packages'), list):
-                    packages_data = existing
+                    repository = existing
+                # If existing is the 'split' type (dict), overwrite it with new structure
         except:
             pass
 
-    # Update/Add Package in packages.json
-    packages_list = packages_data['packages']
+    # Update/Add Package
+    packages = repository['packages']
+    if not isinstance(packages, list):
+        packages = [] # Reset if it was a dict
+        
     updated = False
-    for i, pkg in enumerate(packages_list):
+    for i, pkg in enumerate(packages):
         if pkg['identifier'] == identifier:
             # Check/Update version
             v_exists = False
@@ -132,40 +144,19 @@ def main():
             break
             
     if not updated:
-        packages_list.append(package)
+        packages.append(package)
     
-    packages_data['packages'] = packages_list
+    repository['packages'] = packages
     
-    # Write packages.json
-    with open(packages_file, 'w') as f:
-        json.dump(packages_data, f, indent=4)
-        
-    print(f"Updated {packages_file}")
-    
-    # --- 2. Handle repository.json (The Pointer) ---
-    # We must calculate hash of packages.json for validation
-    packages_sha256 = calculate_sha256(packages_file)
-    packages_timestamp = int(datetime.datetime.now().timestamp())
-    
-    repository = {
-        "$schema": "https://go.kicad.org/pcm/schemas/v1",
-        "name": "KiWay Plugin Repository",
-        "maintainer": {
-            "name": "Wayri (Yawar)",
-            "contact": {"github": "https://github.com/wayri"}
-        },
-        "packages": {
-            "url": "packages.json",
-            "sha256": packages_sha256,
-            "update_timestamp": packages_timestamp
-        }
-    }
-    
-    # Write repository.json
     with open(repo_file, 'w') as f:
         json.dump(repository, f, indent=4)
         
-    print(f"Updated {repo_file}")
+    # Remove packages.json if it exists to avoid confusion
+    packages_file = Path(PCM_DIR) / "packages.json"
+    if packages_file.exists():
+        os.remove(packages_file)
+        
+    print(f"Updated {repo_file} (Inline Mode)")
     print(f"Release Zip: {zip_path}")
     print(f"SHA256: {sha256}")
 
