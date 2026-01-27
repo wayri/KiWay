@@ -1,147 +1,193 @@
-# KiCad Pin Extraction Plugin with GUI
-![](https://github.com/wayri/KiCAD_Plugins/blob/develop/extract_pins_plugin/epp_favicon.png)
+# KiWay Extract Pins Plugin
 
----
-This plugin allows you to extract detailed pin and property information from components (footprints) on your KiCad PCB into user-friendly **Markdown** and **CSV** formats. It provides robust filtering, flexible sorting, and customizable output options.
+A comprehensive KiCAD plugin for extracting component/pin data and analyzing signal flow. Features both GUI and CLI interfaces.
+
+![Version](https://img.shields.io/badge/Version-2.0.0-blue)
+![KiCAD](https://img.shields.io/badge/KiCAD-9.0+-green)
+![License](https://img.shields.io/badge/License-GPL--3.0-orange)
+
+## Features
+
+### 📊 Data Extraction
+- Extract pin and net information from any component
+- Filter by reference pattern (`J*`, `U*`, etc.), value, or connector type
+- Export to clean **CSV**, **Markdown**, or **JSON** formats
+- Support for custom `connector-type` properties
+
+### 🔀 Signal Flow Analysis
+- Generate source-to-destination signal flow tables
+- Trace connections between connectors, ICs, and passives
+- Find all signal paths between any two components
+- Identify intermediate components in signal chains
+
+### 📋 IC Signal Charts
+- Create complete pin-to-destination mapping for ICs
+- Optionally include or exclude power/ground nets
+- Group and sort power nets separately from signals
+- Perfect for documentation and debugging
+
+### 📐 Block Diagrams (NEW!)
+- Generate SVG block diagrams - fully self-contained, no external dependencies
+- Visualize IC signal connections with color-coded net types
+- Create signal flow diagrams between component groups
+
+### ⚡ Power Net Classification
+- Automatic detection of power/ground nets (VCC, VDD, GND, VSS, etc.)
+- Sort and group power nets separately from signal nets
+- Customizable power net patterns
+
+### 💻 CLI Support (NEW!)
+- Full command-line interface for automation
+- Batch processing of multiple boards
+- Integration with build systems and CI/CD
+- All GUI features available from command line
 
 ---
 
 ## Installation
 
-The current method for installation is a bit manual, it is as follows;
+### Method 1: Manual Installation
+1. Enable the KiCAD API: `Preferences → Preferences → Plugins → Enable`
+2. Open PCB Editor → `Tools → Plugins → Open Plugin Directory`
+3. Copy the `extract_pins_plugin` folder to the plugin directory
+4. `Tools → Plugins → Refresh Plugins`
 
-! - Ensure that KiCAD API is enabled (Got to Preferences Menu->Preferences->Plugins->CheckBox)
-! - Also ensure the python API is detected automatically, if not provide a path to it (generally the automatic button should suffice)
-
-1. Next go to the PCB Editor, Go to Tools->Plugins->Open Plugin Directory
-2. Now Copy and paste the Pin Extraction Plugin (extract_pins_plugin folder) into the plugin directory
-3. Now go back to KiCAD and go to Tool->Plugins->Refresh Plugins
-4. Now Check if the Plugin Has Appeared in the Plugin Menu/Plugin Toolbar (its a blue icon on white background with a IC with pins and an arrow pointing down)
-![EPPFAVICON](https://github.com/wayri/KiCAD_Plugins/blob/develop/extract_pins_plugin/epp_favicon.png)
-6. If it is visible, you are now ready to use the plugin, See Further below on how to use the plugin
-
-
-## Features
-
-### 1. Dynamic Selection & Details
-
-- The plugin dialog opens immediately when launched, even if no components are initially selected on the PCB.
-- You can **select/deselect components directly in the KiCad PCB editor** while this dialog is open.
-- Use the **"Refresh Selection from PCB"** button within the dialog to update the list of components displayed in the dialog's "Selected Components" panel based on your current PCB selection.
-- Click on any component's reference designator in the "Selected Components" list to view its detailed properties (Reference, Value, Footprint Name, Description, Layer, Position, Rotation, and custom properties like `connector-type`) in the "Selected Component Details" panel for quick review.
-- **Multi-select from PCB**: If this checkbox is enabled, clicking "Refresh Selection from PCB" will *add* newly selected components from the PCB to the existing list in the dialog, rather than replacing the entire list. This allows you to build a cumulative selection.
-- **Remove Selected from List**: This button allows you to remove one or more items that you have selected within the dialog's "Selected Components" list. Use standard click, Ctrl+click, or Shift+click to select multiple items in the list before clicking this button.
+### Method 2: Plugin Content Manager (Coming Soon)
+1. Open KiCAD → `Plugin and Content Manager`
+2. Add repository: `https://github.com/wayri/KiWay/releases/latest/download/repository.json`
+3. Search for "KiWay" and install
 
 ---
 
-### 2. Flexible Export Options (Buttons)
+## Usage
 
-- **Export Selected**: Exports data for *only* the components currently displayed in the "Selected Components" list (those selected on the PCB and refreshed into the dialog). This button is automatically enabled/disabled based on whether components are in the list.
-- **Export 'J's**: Exports data for *all* components on the entire PCB whose Reference Designator starts with the letter 'J' (e.g., J1, J2, JUMP1, J_CONN).
-- **Export Connectors (by Type)**: Exports data for *all* components on the entire PCB that have a custom property named `connector-type` whose value matches any of the comma-separated types you define in the "Connector Type Filter" field (e.g., "harness,backplane").
+### GUI Mode
+1. Open your PCB in the PCB Editor
+2. *(Optional)* Select components on the PCB
+3. `Tools → External Plugins → Extract Component Pins with GUI`
+4. Use the dialog to filter, configure, and export
 
----
+### CLI Mode
 
-### 3. Advanced Filtering Options (Text Inputs with Auto-Suggest)
+```bash
+# Basic extraction - all J* connectors to CSV
+python -m extract_pins_plugin extract --refs "J*" --format csv board.kicad_pcb
 
-> These filters apply to the **Export 'J's** and **Export Connectors (by Type)** options. The filter fields provide auto-suggestions populated from data currently present on your board.
+# Multiple patterns with net filtering
+python -m extract_pins_plugin extract --refs "J*,P*" --net-filter "SPI_*,I2C_*" board.kicad_pcb
 
-#### Footprint Name Filter
+# Signal flow between connectors and ICs
+python -m extract_pins_plugin signal-flow --source "J*" --dest "U*" --format md board.kicad_pcb
 
-- **Purpose**: Filter components based on their full Footprint Name.
-- **How it Works**: Enter a partial or full string. Only components whose full footprint name (e.g., `Connector_IDC:IDC-34_2x17_P2.54mm_Horizontal`) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing footprint names on your board.
-- **Auto-Suggest Content**: All unique full footprint names found on your PCB (e.g., `Package_SO:SOIC-8_W3.9mm`, `Resistor_SMD:R_0603_1608Metric`, `Connector_Generic:CONN_01x02`).
+# IC signal chart as SVG diagram
+python -m extract_pins_plugin ic-chart --ic "U1" --format svg -o u1_chart.svg board.kicad_pcb
 
-**Example**:
-- Type `SOIC` to include `Package_SO:SOIC-8_W3.9mm`.
-- Type `IDC-34` to include `Connector_IDC:IDC-34_2x17_P2.54mm`.
+# Generate block diagrams
+python -m extract_pins_plugin diagram --refs "U1,U2" -o diagrams.svg board.kicad_pcb
 
----
+# Extract unique nets, grouped by type
+python -m extract_pins_plugin unique-nets --refs "J*" --sort-by-type board.kicad_pcb
 
-#### Value Filter
-
-- **Purpose**: Filter components based on their 'Value' field.
-- **How it Works**: Enter a partial or full string. Only components whose 'Value' field (e.g., `10k`, `0.1uF`, `LED`) contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing values on your board.
-- Supports wildcards: Use `*` to match any text (e.g., `CONN*` matches `CONN_1x02`).
-- **Auto-Suggest Content**: All unique component values found on your PCB (e.g., `10k`, `0.1uF`, `ATMEGA328P`, `CONN_1x03`).
-
-**Example**:
-- Type `100n` to include capacitors with value `100nF`.
-- Type `CONN` to include connectors with value `CONN_1x02`.
+# Find signal paths
+python -m extract_pins_plugin find-path --start "J1" --end "U1" board.kicad_pcb
+```
 
 ---
 
-#### Net Name Filter (any pin)
+## CLI Commands Reference
 
-- **Purpose**: Filter components based on their connected net names.
-- **How it Works**: Enter a partial or full string. Only components with *any* pin connected to a net whose name contains this text (case-insensitive) will be included. The field provides auto-suggestions of existing net names on your board.
-- Supports wildcards: Use `*` to match patterns in net names (e.g., `VCC*` matches `VCC_3V3`).
-- **Auto-Suggest Content**: All unique net names found on your PCB (e.g., `VCC`, `GND`, `SCL`, `Net-(R1-Pad1)`, `/USB_DP`).
+### `extract` - Extract component/pin data
+```
+--refs          Reference patterns (wildcards: *, ?)
+--connector-types  Filter by connector-type property
+--value-filter  Filter by component value
+--net-filter    Filter by net name (comma-separated patterns)
+--ignore-unconnected  Skip 'unconnected' pins
+--ignore-free   Skip pins with no net
+--ignore-power  Skip power/ground nets
+--sort-by-net-type  Sort signals before power
+--format        csv, md, json (default: csv)
+```
 
-**Example**:
-- Type `VCC` to include all components connected to `VCC`, `VCC_3V3`, etc.
-- Type `SCL` to include components on your I2C clock line.
-- Type `Net-(J1-Pin1)` to filter for components connected to that specific net.
+### `signal-flow` - Source/destination table
+```
+--source        Source components (wildcards supported)
+--dest          Destination components (wildcards supported)
+--intermediates Include intermediate components
+--format        csv, md, json, svg
+```
 
----
+### `ic-chart` - IC signal chart
+```
+--ic            IC reference (wildcards for batch)
+--include-power Include power nets
+--power-nets    Custom power net patterns
+--format        csv, md, json, svg
+```
 
-#### Connector Type Filter (comma-separated)
+### `diagram` - SVG block diagrams
+```
+--refs          Component references (wildcards supported)
+```
 
-- **Purpose**: Filter components based on their custom `connector-type` property. Primarily used by the **Export Connectors (by Type)** button.
-- **How it Works**: Enter one or more values, separated by commas (e.g., `harness,backplane`). Only components with a custom property `connector-type` matching any entry (case-insensitive) will be included. The field provides auto-suggestions of existing `connector-type` values on your board.
-- Supports wildcards: Use `*` in entries to match multiple types (e.g., `power*` matches `power_conn`).
-- **Auto-Suggest Content**: All unique values of `connector-type` found on your PCB (e.g., `harness`, `backplane`, `power_conn`, `board2board`).
+### `unique-nets` - Extract unique net names
+```
+--sort-by-type  Group signals first, then power, then ground
+```
 
-**Example**:
-- Enter `harness` to include components with `connector-type: harness`.
-- Enter `power,board2board` to include both types.
+### `find-path` - Find signal paths
+```
+--start         Starting component
+--end           Ending component
+--max-hops      Maximum hops (default: 10)
+```
 
----
-
-### 4. Output Customization Checkboxes
-
-- **Sort Components by Reference (A-Z)**: If checked, the exported tables will list components alphabetically by reference (e.g., C1, J1, U1). If unchecked, order reflects discovery sequence.
-- **Highlight Same Nets in Markdown Output**: If checked, net names in the Markdown "Pin Details" tables will be color-coded. Pads connected to the same net will have the same color (requires a Markdown viewer that supports inline HTML styling).
-- **Include [Property Name]**: Series of checkboxes letting you choose exactly which general properties (Reference, Value, Footprint Name, etc.) and pin details (Pad Name/Number, Net Name) are included in the output files.
-
----
-
-### 5. Progress Feedback
-
-- A progress bar and status text indicate the plugin's activity during lengthy export operations.
-
----
-
-## How to Use
-
-1. **Open your KiCad PCB design** in the PCB Editor.
-2. *(Optional)* **Select one or more components** directly on your PCB that you want to export using the "Export Selected" option.
-3. Go to **`Tools -> External Plugins -> Extract Component Pins with GUI`** in the KiCad PCB Editor.
-4. The plugin dialog will open. You can interact with both KiCad and the dialog simultaneously.
-5. **To Update the Dialog's List**: If you select/deselect components on your PCB after the dialog is open, click **"Refresh Selection from PCB"** in the dialog. The list updates to match your current PCB selection.
-6. **To View Component Details**: Click any component's reference designator in the "Selected Components" list to view its detailed properties.
-7. **Apply Filters**: Enter text into the "Footprint Name Filter", "Value Filter", "Net Name Filter", or "Connector Type Filter" as needed. These fields provide auto-suggestions from your board's data.
-8. **Choose Output Options**: Select "Sort Components by Reference", "Highlight Same Nets in Markdown Output", and specific "Include [Property Name]" checkboxes as desired.
-9. **Select Export Type**: Click one of the export buttons:
-   - **"Export Selected"** to export data for currently visible components in the dialog list.
-   - **"Export 'J's"** to export all components on the PCB whose reference starts with 'J'.
-   - **"Export Connectors (by Type)"** to export based on the `connector-type` field and filter.
-10. **Save Files**: You’ll be prompted to save the generated Markdown (.md) and CSV (.csv) files.
-11. **Close Dialog**: Click "Close" when finished.
+### `list` - List board components
+```
+--refs          Filter by reference pattern
+```
 
 ---
 
-## Output Files
+## Wildcard Patterns
 
-- **Markdown (.md)**: Designed for human readability and sharing.
-  - Each component gets its own section (e.g., `## Component: J1`).
-  - "General Properties" and "Pin Details" tables are included based on your "Include" selections.
-  - Net names will be color-coded if that option was selected.
+All reference and filter arguments support wildcards:
 
-- **CSV (.csv)**: Designed for structured data analysis.
-  - A flattened table where each row represents a single pin.
-  - Component details repeat for each pin, with columns chosen by your "Include" selections.
-  - Ideal for filtering, sorting, and data processing in spreadsheets.
+| Pattern | Matches |
+|---------|---------|
+| `J*` | J1, J2, J10, JCONN1 |
+| `U?` | U1, U2, but not U10 |
+| `J*,U*` | All J and U components |
+| `SPI_*` | SPI_MOSI, SPI_CLK, etc. |
+| `*GND*` | Any net containing GND |
 
 ---
 
+## Output Formats
+
+### CSV
+Clean, one-row-per-pin format ideal for spreadsheet analysis.
+
+### Markdown
+Human-readable tables with optional net highlighting.
+
+### JSON
+Structured data for programmatic processing.
+
+### SVG
+Self-contained vector diagrams with:
+- Color-coded net types (signal/power/ground)
+- Component blocks with pin details
+- Connection paths with labels
+- Legend and summary
+
+---
+
+## License
+
+GPL-3.0 - See [LICENSE](LICENSE) for details.
+
+## Author
+
+**Wayri (Yawar)**
+- GitHub: [@wayri](https://github.com/wayri)
