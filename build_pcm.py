@@ -9,7 +9,6 @@ from pathlib import Path
 PLUGIN_DIR = "extract_pins_plugin"
 PCM_DIR = "pcm"
 RELEASES_DIR = "releases"
-# IMPORTANT: This must match the location where you upload the zip
 REPO_URL_BASE = "https://github.com/wayri/KiWay/releases/download" 
 
 def calculate_sha256(file_path):
@@ -31,16 +30,8 @@ def create_plugin_zip(plugin_path, version, output_dir):
             dirs[:] = [d for d in dirs if d not in ['__pycache__', '.git', '.vscode']]
             for file in files:
                 if file.endswith('.pyc') or file == 'metadata.json': 
-                    # Note: metadata.json MUST be at root of zip for KiCad to identify it?
-                    # KiCad expects the zip to contain the plugin folder or the content directly.
-                    # Usually it's nice to have root folder.
-                    # Let's verify KiCad standard. 
-                    # Standard: Zip contains the plugin folder ID? Or just contents?
-                    # Usually `extract_pins_plugin/metadata.json`.
                     pass
-                    
                 file_path = os.path.join(root, file)
-                # We want the zip to contain the directory "extract_pins_plugin/" at root
                 arcname = os.path.relpath(file_path, start=plugin_path.parent)
                 zipf.write(file_path, arcname)
     
@@ -50,24 +41,18 @@ def main():
     base_path = Path('.')
     plugin_path = base_path / PLUGIN_DIR
     
-    # Read metadata
     with open(plugin_path / "metadata.json", "r") as f:
         metadata = json.load(f)
     
     version = metadata['versions'][0]['version']
     identifier = metadata['identifier']
     
-    # Create Zip
     zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR)
     
-    # Get File Stats
     file_size = os.path.getsize(zip_path)
     sha256 = calculate_sha256(zip_path)
-    timestamp = int(datetime.datetime.now().timestamp())
     
-    # Construct Version Info
     version_info = metadata['versions'][0]
-    # Update with PCM requirement details
     version_info.update({
         "download_sha256": sha256,
         "download_size": file_size,
@@ -76,14 +61,12 @@ def main():
         "platforms": ["windows", "linux", "macos"]
     })
     
-    # Calculate install size
     install_size = 0
     with zipfile.ZipFile(zip_path, 'r') as zipf:
         for info in zipf.infolist():
             install_size += info.file_size
     version_info['install_size'] = install_size
 
-    # Construct Package
     package = {
         "name": metadata['name'],
         "description": metadata['description'],
@@ -97,9 +80,53 @@ def main():
     }
     
     os.makedirs(PCM_DIR, exist_ok=True)
-    repo_file = Path(PCM_DIR) / "repository.json"
+    packages_file = Path(PCM_DIR) / "pkgs.json"
+    repo_file = Path(PCM_DIR) / "repo.json"
     
-    # Initialize repository structure
+    # --- PACKAGES.JSON (Root List) ---
+    packages_list = []
+    if packages_file.exists():
+        try:
+            with open(packages_file, 'r') as f:
+                existing = json.load(f)
+                if isinstance(existing, list):
+                    packages_list = existing
+                elif isinstance(existing, dict) and 'packages' in existing:
+                    packages_list = existing['packages']
+        except:
+            pass
+
+    updated = False
+    for i, pkg in enumerate(packages_list):
+        if pkg['identifier'] == identifier:
+            v_exists = False
+            for v_idx, v in enumerate(pkg['versions']):
+                if v['version'] == version:
+                    pkg['versions'][v_idx] = version_info
+                    v_exists = True
+                    break
+            if not v_exists:
+                pkg['versions'].insert(0, version_info)
+            pkg['description'] = package['description']
+            pkg['description_full'] = package['description_full']
+            updated = True
+            break
+            
+    if not updated:
+        packages_list.append(package)
+    
+    with open(packages_file, 'w') as f:
+        json.dump(packages_list, f, indent=4)
+        
+    print(f"Updated {packages_file}")
+    
+    # --- REPOSITORY.JSON ---
+    packages_timestamp = int(datetime.datetime.now().timestamp())
+    
+    # URL to the raw packages.json file on GitHub
+    # Note: Using main branch as the stable source
+    packages_url = "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json"
+    
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",
         "name": "KiWay Plugin Repository",
@@ -107,55 +134,16 @@ def main():
             "name": "Wayri (Yawar)",
             "contact": {"github": "https://github.com/wayri"}
         },
-        "packages": []
+        "packages": {
+            "url": packages_url,
+            "update_timestamp": packages_timestamp
+        }
     }
-    
-    # Load existing if available and valid
-    if repo_file.exists():
-        try:
-            with open(repo_file, 'r') as f:
-                existing = json.load(f)
-                if isinstance(existing.get('packages'), list):
-                    repository = existing
-        except:
-            pass
-
-    # Update/Add Package
-    packages = repository['packages']
-    updated = False
-    for i, pkg in enumerate(packages):
-        if pkg['identifier'] == identifier:
-            # For simplicity, we fully replace the package entry with the new metadata
-            # In a pro repo, you'd append the new version to pkg['versions']
-            # Let's try to append version if package exists
-            
-            # Check if version exists
-            v_exists = False
-            for v_idx, v in enumerate(pkg['versions']):
-                if v['version'] == version:
-                    pkg['versions'][v_idx] = version_info # Update existing version
-                    v_exists = True
-                    break
-            if not v_exists:
-                pkg['versions'].insert(0, version_info) # Add new version at top
-                
-            # Update other metadata in case description changed
-            pkg['description'] = package['description']
-            pkg['description_full'] = package['description_full']
-            
-            updated = True
-            break
-            
-    if not updated:
-        packages.append(package)
-    
-    repository['packages'] = packages
     
     with open(repo_file, 'w') as f:
         json.dump(repository, f, indent=4)
         
-    print(f"Success! Updated {repo_file}")
-    print(f"Release Zip: {zip_path}")
+    print(f"Updated {repo_file}")
     print(f"SHA256: {sha256}")
 
 if __name__ == "__main__":

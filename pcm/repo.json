@@ -1,0 +1,14 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "KiWay Plugin Repository",
+    "maintainer": {
+        "name": "Wayri (Yawar)",
+        "contact": {
+            "github": "https://github.com/wayri"
+        }
+    },
+    "packages": {
+        "url": "https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json",
+        "update_timestamp": 1769549475
+    }
+}

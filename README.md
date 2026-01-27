@@ -1,14 +1,29 @@
-# KiCAD_Plugins
-Some Plugins for use with KiCAD;
+# KiWay Plugins for KiCAD
+
+A collection of powerful plugins for KiCAD, designed to automate documentation and analysis.
 
 ## List of Plugins
-+ Fanout Plugin: Helps fanning out BGA/LGA pads
-+ Pin Extraction Plugin: Helps in generating Pinouts (tables, with connectors and pins/net-labels)
 
-## Code and Docs
+### 1. KiWay Extract Pins (v2.0.0)
+A comprehensive documentation and analysis tool.
+- **Extract Pins**: Generate CSV/Markdown/JSON pinouts from any component
+- **Signal Flow**: Trace connections between components (Source → Destination)
+- **IC Analysis**: Generate charts of all pins and their destinations for specific ICs
+- **Diagrams**: Create self-contained SVG block diagrams and flow charts
+- **Automation**: Full CLI interface for scripting
 
-The plugin Code can be found in the Develop Branch
-The Wiki for this repository contains the explanation for the Code for all plugins
+## Installation
 
-+ [Pin Extract Plugin - Wiki](https://github.com/wayri/KiCAD_Plugins/wiki/KiCad-Pin-Extraction-Plugin:-Developer-Documentation)
+### Method 1: Plugin Manager (Recommended)
+1. Open **KiCAD Plugin and Content Manager**
+2. Add Repository: `https://raw.githubusercontent.com/wayri/KiWay/main/pcm/repository.json`
+3. Install **KiWay Extract Pins**
 
+### Method 2: Manual
+Copy the `extract_pins_plugin` folder to your KiCAD plugins directory:
+- Windows: `Documents\KiCad\9.0\scripting\plugins\`
+- Linux: `~/.local/share/kicad/9.0/scripting/plugins/`
+
+## Documentation
+- [Extract Pins Plugin Documentation](extract_pins_plugin/ReadMe.md)
+- [Developer Wiki](https://github.com/wayri/KiCAD_Plugins/wiki/KiCad-Pin-Extraction-Plugin:-Developer-Documentation)
