@@ -49,7 +49,7 @@ class ExtractPinsPlugin(pcbnew.ActionPlugin):
         self.description = "Opens a GUI to extract pin data, analyze signal flow, and generate diagrams."
         self.show_toolbar_button = True # Set to True to display a button on the toolbar
         # Define the path to the optional icon file. It should be in the same directory.
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'epp_favicon.png')
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'extract_pins_plugin_favicon.png')
         self.version = "2.0.0"
 
     def Run(self):

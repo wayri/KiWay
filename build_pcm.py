@@ -32,7 +32,8 @@ def create_plugin_zip(plugin_path, version, output_dir):
                 if file.endswith('.pyc') or file == 'metadata.json': 
                     pass
                 file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, start=plugin_path.parent)
+                # Flatten the structure: start relpath from the plugin folder itself
+                arcname = os.path.relpath(file_path, start=plugin_path)
                 zipf.write(file_path, arcname)
     
     return zip_path, zip_filename
