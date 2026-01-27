@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KiWay Extract Pins Plugin - Help Guide v2.0</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --accent: #0f3460;
+            --highlight: #e94560;
+            --text: #eaeaea;
+            --text-dim: #a0a0a0;
+            --success: #4ecdc4;
+            --warning: #ffdd57;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--highlight);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            color: var(--success);
+            font-size: 1.2em;
+        }
+        
+        h2 {
+            color: var(--success);
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--accent);
+        }
+        
+        h3 {
+            color: var(--warning);
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.2);
+        }
+        
+        .feature-card h4 {
+            color: var(--highlight);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.95em;
+        }
+        
+        code {
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .tab-section {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .tab-header {
+            display: inline-block;
+            background: var(--highlight);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--accent);
+        }
+        
+        th {
+            background: var(--accent);
+            color: var(--success);
+        }
+        
+        tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+        
+        .tip {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning {
+            background: rgba(255, 221, 87, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .shortcut {
+            display: inline-block;
+            background: var(--accent);
+            border: 1px solid var(--success);
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 2px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--accent);
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔌 KiWay Extract Pins Plugin</h1>
+            <p class="version">Version 2.0.0</p>
+            <p>Extract component data, analyze signal flow, and generate documentation from KiCAD PCBs</p>
+        </header>
+
+        <h2>✨ Features Overview</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📊 Pin Extraction</h4>
+                <p>Extract pin and net information from any component to CSV, Markdown, or JSON formats. Filter by reference, value, net name, or connector type.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔀 Signal Flow Analysis</h4>
+                <p>Generate source-to-destination signal tables. Trace connections between connectors, ICs, and any components.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📋 IC Signal Charts</h4>
+                <p>Create complete pin-to-destination mapping for ICs. Perfect for debugging and documentation.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📐 SVG Diagrams</h4>
+                <p>Generate self-contained block diagrams. No external dependencies - pure SVG output with color-coded nets.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⚡ Power Net Grouping</h4>
+                <p>Automatically classify GND, VCC, VDD as power nets. Sort and group separately from signal nets.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔄 Auto-Refresh</h4>
+                <p>Enable auto-refresh to automatically add selected components from PCB to your list in real-time.</p>
+            </div>
+        </div>
+
+        <h2>🖥️ GUI Usage</h2>
+
+        <h3>Getting Started</h3>
+        <ol>
+            <li>Open your PCB in KiCAD PCB Editor</li>
+            <li>Optionally select some components on the PCB</li>
+            <li>Go to <code>Tools → External Plugins → Extract Component Pins with GUI</code></li>
+            <li>The plugin dialog opens with 4 tabs</li>
+        </ol>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 1: Extract Pins</span>
+            <p>The main extraction tab for component pin data.</p>
+            
+            <h4>Component Selection</h4>
+            <ul>
+                <li><strong>Auto-Refresh:</strong> Enable to automatically add components as you click them on the PCB</li>
+                <li><strong>Refresh Button:</strong> Manually get current PCB selection</li>
+                <li><strong>Multi-select:</strong> Check to add to existing list instead of replacing</li>
+                <li><strong>Remove:</strong> Remove selected items from the list</li>
+            </ul>
+
+            <h4>Filters (Wildcards Supported!)</h4>
+            <table>
+                <tr><th>Filter</th><th>Example</th><th>Description</th></tr>
+                <tr><td>Reference</td><td><code>J*</code></td><td>Match component references</td></tr>
+                <tr><td>Net</td><td><code>SPI_*,I2C_*</code></td><td>Filter by net names</td></tr>
+                <tr><td>Value</td><td><code>10k*</code></td><td>Filter by component value</td></tr>
+            </table>
+
+            <h4>Options</h4>
+            <ul>
+                <li><strong>Ignore Unconnected:</strong> Skip pins with no connection</li>
+                <li><strong>Ignore Power Nets:</strong> Exclude GND, VCC, VDD, etc.</li>
+                <li><strong>Sort by Net Type:</strong> Group signals first, then power</li>
+                <li><strong>Highlight Nets:</strong> Color-code nets in Markdown output</li>
+            </ul>
+
+            <h4>Export Buttons</h4>
+            <ul>
+                <li><strong>Export Selected:</strong> Export current list</li>
+                <li><strong>Export J*:</strong> Export all connectors</li>
+                <li><strong>Export by Pattern:</strong> Use the reference filter pattern</li>
+                <li><strong>Unique Nets:</strong> Extract net names only</li>
+            </ul>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 2: Signal Flow</span>
+            <p>Analyze connections between source and destination components.</p>
+            
+            <h4>Usage</h4>
+            <ol>
+                <li>Enter <strong>Source</strong> pattern (e.g., <code>J*</code> for all connectors)</li>
+                <li>Enter <strong>Destination</strong> pattern (e.g., <code>U1</code> for MCU)</li>
+                <li>Click <strong>Preview</strong> to see results</li>
+                <li>Export to CSV, Markdown, or SVG diagram</li>
+            </ol>
+
+            <div class="tip">
+                <strong>💡 Tip:</strong> Use <code>J*</code> → <code>U*</code> to see all connector-to-IC connections!
+            </div>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 3: IC Signal Chart</span>
+            <p>Generate complete pin mapping for a specific IC.</p>
+            
+            <h4>Usage</h4>
+            <ol>
+                <li>Select an IC from the dropdown (e.g., U1)</li>
+                <li>Choose whether to include power nets</li>
+                <li>Click <strong>Preview</strong> to see all pin connections</li>
+                <li>Export to CSV, Markdown, or SVG chart</li>
+            </ol>
+
+            <p>The output shows for each IC pin:</p>
+            <ul>
+                <li>Pin number/name</li>
+                <li>Connected net name</li>
+                <li>Destination component and pin</li>
+                <li>Whether it's a power or signal net</li>
+            </ul>
+        </div>
+
+        <div class="tab-section">
+            <span class="tab-header">Tab 4: Diagrams</span>
+            <p>Generate self-contained SVG block diagrams.</p>
+            
+            <h4>Diagram Types</h4>
+            <ul>
+                <li><strong>Component Blocks:</strong> Single component with all pins listed</li>
+                <li><strong>Flow Diagrams:</strong> Connections between multiple components</li>
+            </ul>
+
+            <p>Diagrams are pure SVG - no external dependencies needed. Open in any browser or vector editor.</p>
+        </div>
+
+        <h2>💻 CLI Usage</h2>
+        
+        <p>The plugin includes a full command-line interface for automation and scripting.</p>
+
+        <h3>Basic Commands</h3>
+        <pre><code># Show help
+python -m extract_pins_plugin --help
+
+# List all components
+python -m extract_pins_plugin list board.kicad_pcb
+
+# Extract J* connectors to CSV
+python -m extract_pins_plugin extract --refs "J*" --format csv board.kicad_pcb
+
+# Signal flow analysis
+python -m extract_pins_plugin signal-flow --source "J*" --dest "U1" board.kicad_pcb
+
+# IC signal chart
+python -m extract_pins_plugin ic-chart --ic "U1" --format svg board.kicad_pcb
+
+# Generate diagram
+python -m extract_pins_plugin diagram --refs "U1,J1,J2" board.kicad_pcb</code></pre>
+
+        <h3>CLI Options</h3>
+        <table>
+            <tr><th>Option</th><th>Description</th></tr>
+            <tr><td><code>--refs "pattern"</code></td><td>Reference patterns (wildcards: *, ?)</td></tr>
+            <tr><td><code>--format csv|md|json|svg</code></td><td>Output format</td></tr>
+            <tr><td><code>-o, --output file</code></td><td>Output file (stdout if omitted)</td></tr>
+            <tr><td><code>--ignore-power</code></td><td>Exclude power nets</td></tr>
+            <tr><td><code>--sort-by-type</code></td><td>Group signals before power</td></tr>
+            <tr><td><code>--net-filter "pattern"</code></td><td>Filter by net name</td></tr>
+        </table>
+
+        <h2>🔤 Wildcard Patterns</h2>
+        
+        <p>All filters support wildcards for flexible matching:</p>
+        
+        <table>
+            <tr><th>Pattern</th><th>Matches</th><th>Example Use</th></tr>
+            <tr><td><code>J*</code></td><td>J1, J2, J10, JCONN1</td><td>All connectors</td></tr>
+            <tr><td><code>U?</code></td><td>U1, U2 (not U10)</td><td>Single digit ICs</td></tr>
+            <tr><td><code>*_CLK</code></td><td>SPI_CLK, I2C_CLK</td><td>All clock signals</td></tr>
+            <tr><td><code>J*,U*</code></td><td>All J and U components</td><td>Multiple patterns</td></tr>
+            <tr><td><code>SPI_*,I2C_*</code></td><td>SPI and I2C nets</td><td>Bus filtering</td></tr>
+        </table>
+
+        <h2>📁 Output Formats</h2>
+
+        <h3>CSV</h3>
+        <p>Clean, one-row-per-pin format. Opens directly in Excel/Google Sheets.</p>
+
+        <h3>Markdown</h3>
+        <p>Human-readable tables. View in any Markdown viewer or GitHub.</p>
+
+        <h3>JSON</h3>
+        <p>Structured data for programmatic processing and integration.</p>
+
+        <h3>SVG</h3>
+        <p>Vector diagrams with:</p>
+        <ul>
+            <li>Color-coded net types (signal/power/ground)</li>
+            <li>Component blocks with pin details</li>
+            <li>Connection paths with labels</li>
+            <li>Legend and summary</li>
+        </ul>
+
+        <h2>⚡ Power Net Classification</h2>
+        
+        <p>The plugin automatically identifies power nets:</p>
+        
+        <table>
+            <tr><th>Category</th><th>Patterns</th></tr>
+            <tr><td>Supply</td><td>VCC*, VDD*, 3V3*, 5V*, 12V*, VBAT*, VIN*</td></tr>
+            <tr><td>Ground</td><td>GND*, AGND*, DGND*, PGND*, VSS*</td></tr>
+            <tr><td>Power</td><td>PWR*, +*V, V+, V-</td></tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Use "Sort by Net Type" to group signal nets first, making it easier to focus on your design's logic connections.
+        </div>
+
+        <h2>📝 Example Workflows</h2>
+
+        <h3>Document Connector Pinouts</h3>
+        <ol>
+            <li>Open plugin</li>
+            <li>Set Reference filter to <code>J*</code></li>
+            <li>Click "Export by Pattern"</li>
+            <li>Save CSV for spreadsheet, MD for documentation</li>
+        </ol>
+
+        <h3>Debug MCU Connections</h3>
+        <ol>
+            <li>Go to "IC Signal Chart" tab</li>
+            <li>Select your MCU (e.g., U1)</li>
+            <li>Click "Preview"</li>
+            <li>Export SVG for visual reference</li>
+        </ol>
+
+        <h3>Trace Signal Path</h3>
+        <ol>
+            <li>Go to "Signal Flow" tab</li>
+            <li>Set Source: <code>J1</code></li>
+            <li>Set Destination: <code>U1</code></li>
+            <li>Enable "Include Intermediates"</li>
+            <li>Preview to see complete path</li>
+        </ol>
+
+        <footer>
+            <p>KiWay Extract Pins Plugin v2.0.0</p>
+            <p>Created by Wayri (Yawar)</p>
+            <p>Licensed under GPL-3.0</p>
+        </footer>
+    </div>
+</body>
+</html>
