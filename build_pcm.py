@@ -18,7 +18,7 @@ def calculate_sha256(file_path):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def create_plugin_zip(plugin_path, version, output_dir):
+def create_plugin_zip(plugin_path, version, output_dir, metadata):
     os.makedirs(output_dir, exist_ok=True)
     zip_filename = f"{plugin_path.name}-{version}.zip"
     zip_path = os.path.join(output_dir, zip_filename)
@@ -32,8 +32,9 @@ def create_plugin_zip(plugin_path, version, output_dir):
                 if file.endswith('.pyc') or file == 'metadata.json': 
                     pass
                 file_path = os.path.join(root, file)
-                # Flatten the structure: start relpath from the plugin folder itself
-                arcname = os.path.relpath(file_path, start=plugin_path)
+                # Nest under identifier folder
+                rel_path = os.path.relpath(file_path, start=plugin_path)
+                arcname = os.path.join(metadata['identifier'], rel_path)
                 zipf.write(file_path, arcname)
     
     return zip_path, zip_filename
@@ -48,7 +49,7 @@ def main():
     version = metadata['versions'][0]['version']
     identifier = metadata['identifier']
     
-    zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR)
+    zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR, metadata)
     
     file_size = os.path.getsize(zip_path)
     sha256 = calculate_sha256(zip_path)
