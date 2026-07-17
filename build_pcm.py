@@ -99,7 +99,7 @@ def main():
         if 'resources' not in metadata:
             metadata['resources'] = {"homepage": "https://github.com/wayri/KiWay"}
         if 'icon' not in metadata['resources']:
-            metadata['resources']['icon'] = f"https://raw.githubusercontent.com/wayri/KiWay/main/{plugin_path.name}/icon.png"
+            metadata['resources']['icon'] = f"https://raw.githubusercontent.com/wayri/KiWay/develop/{plugin_path.name}/icon.png"
 
         package = {
             "name": metadata['name'],
@@ -144,9 +144,9 @@ def main():
     packages_timestamp = int(datetime.datetime.now().timestamp())
     
     # URL to the raw packages.json file on GitHub
-    # Note: Using main branch as the stable source
+    # KiWay's default branch is develop; keep the feed URL aligned with it.
     # Added timestamp query to BUST GITHUB RAW CACHE
-    packages_url = f"https://raw.githubusercontent.com/wayri/KiWay/main/pcm/pkgs.json?t={packages_timestamp}"
+    packages_url = f"https://raw.githubusercontent.com/wayri/KiWay/develop/pcm/pkgs.json?t={packages_timestamp}"
     
     repository = {
         "$schema": "https://go.kicad.org/pcm/schemas/v1",

@@ -97,7 +97,7 @@
             "license": "GPL-3.0",
             "resources": {
                 "homepage": "https://github.com/wayri/KiWay",
-                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/connector_icd_plugin/icon.png"
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/connector_icd_plugin/icon.png"
             },
             "versions": [
                 {
@@ -131,7 +131,7 @@
             "license": "GPL-3.0",
             "resources": {
                 "homepage": "https://github.com/wayri/KiWay",
-                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/fanout_generator_plugin/icon.png"
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/fanout_generator_plugin/icon.png"
             },
             "versions": [
                 {
@@ -165,7 +165,7 @@
             "license": "GPL-3.0",
             "resources": {
                 "homepage": "https://github.com/wayri/KiWay",
-                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/net_hygiene_plugin/icon.png"
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/net_hygiene_plugin/icon.png"
             },
             "versions": [
                 {
@@ -199,7 +199,7 @@
             "license": "GPL-3.0",
             "resources": {
                 "homepage": "https://github.com/wayri/KiWay",
-                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/test_coverage_plugin/icon.png"
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/test_coverage_plugin/icon.png"
             },
             "versions": [
                 {
@@ -233,7 +233,7 @@
             "license": "GPL-3.0",
             "resources": {
                 "homepage": "https://github.com/wayri/KiWay",
-                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/via_stitching_plugin/icon.png"
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/via_stitching_plugin/icon.png"
             },
             "versions": [
                 {
