@@ -6,7 +6,6 @@ import datetime
 from pathlib import Path
 
 # Configuration
-PLUGIN_DIR = "extract_pins_plugin"
 PCM_DIR = "pcm"
 RELEASES_DIR = "releases"
 REPO_URL_BASE = "https://github.com/wayri/KiWay/releases/download" 
@@ -17,6 +16,12 @@ def calculate_sha256(file_path):
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
+
+def discover_plugins(base_path):
+    return sorted(
+        path for path in base_path.iterdir()
+        if path.is_dir() and (path / "metadata.json").exists()
+    )
 
 def create_plugin_zip(plugin_path, version, output_dir, metadata):
     os.makedirs(output_dir, exist_ok=True)
@@ -29,8 +34,8 @@ def create_plugin_zip(plugin_path, version, output_dir, metadata):
         for root, dirs, files in os.walk(plugin_path):
             dirs[:] = [d for d in dirs if d not in ['__pycache__', '.git', '.vscode']]
             for file in files:
-                if file.endswith('.pyc') or file == 'metadata.json': 
-                    pass
+                if file.endswith('.pyc'):
+                    continue
                 file_path = os.path.join(root, file)
                 # Nest under identifier folder
                 rel_path = os.path.relpath(file_path, start=plugin_path)
@@ -43,50 +48,6 @@ def create_plugin_zip(plugin_path, version, output_dir, metadata):
 
 def main():
     base_path = Path('.')
-    plugin_path = base_path / PLUGIN_DIR
-    
-    with open(plugin_path / "metadata.json", "r") as f:
-        metadata = json.load(f)
-    
-    version = metadata['versions'][0]['version']
-    identifier = metadata['identifier']
-    
-    zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR, metadata)
-    
-    file_size = os.path.getsize(zip_path)
-    sha256 = calculate_sha256(zip_path)
-    
-    version_info = metadata['versions'][0]
-    version_info.update({
-        "download_sha256": sha256,
-        "download_size": file_size,
-        "download_url": f"{REPO_URL_BASE}/v{version}/{zip_filename}",
-        "install_size": 0,
-        "platforms": ["windows", "linux", "macos"]
-    })
-    
-    install_size = 0
-    with zipfile.ZipFile(zip_path, 'r') as zipf:
-        for info in zipf.infolist():
-            install_size += info.file_size
-    version_info['install_size'] = install_size
-
-    # Construct Package
-    # Add icon to resources
-    if 'icon' not in metadata['resources']:
-        metadata['resources']['icon'] = "https://raw.githubusercontent.com/wayri/KiWay/main/extract_pins_plugin/extract_pins_plugin_favicon.png"
-
-    package = {
-        "name": metadata['name'],
-        "description": metadata['description'],
-        "description_full": metadata['description_full'],
-        "identifier": metadata['identifier'],
-        "type": metadata['type'],
-        "author": metadata['author'],
-        "license": metadata['license'],
-        "resources": metadata['resources'],
-        "versions": [version_info]
-    }
     
     os.makedirs(PCM_DIR, exist_ok=True)
     packages_file = Path(PCM_DIR) / "pkgs.json"
@@ -104,13 +65,56 @@ def main():
                 elif isinstance(existing, list):
                     # Migration from root list
                     packages_data['packages'] = existing
-        except:
+        except Exception:
             pass
 
     packages_list = packages_data['packages']
-    updated = False
-    for i, pkg in enumerate(packages_list):
-        if pkg['identifier'] == identifier:
+    existing_by_id = {pkg.get('identifier'): pkg for pkg in packages_list}
+
+    for plugin_path in discover_plugins(base_path):
+        with open(plugin_path / "metadata.json", "r") as f:
+            metadata = json.load(f)
+
+        version = metadata['versions'][0]['version']
+        identifier = metadata['identifier']
+        zip_path, zip_filename = create_plugin_zip(plugin_path, version, RELEASES_DIR, metadata)
+
+        file_size = os.path.getsize(zip_path)
+        sha256 = calculate_sha256(zip_path)
+        version_info = dict(metadata['versions'][0])
+        version_info.update({
+            "download_sha256": sha256,
+            "download_size": file_size,
+            "download_url": f"{REPO_URL_BASE}/v{version}/{zip_filename}",
+            "install_size": 0,
+            "platforms": ["windows", "linux", "macos"]
+        })
+
+        install_size = 0
+        with zipfile.ZipFile(zip_path, 'r') as zipf:
+            for info in zipf.infolist():
+                install_size += info.file_size
+        version_info['install_size'] = install_size
+
+        if 'resources' not in metadata:
+            metadata['resources'] = {"homepage": "https://github.com/wayri/KiWay"}
+        if 'icon' not in metadata['resources']:
+            metadata['resources']['icon'] = f"https://raw.githubusercontent.com/wayri/KiWay/main/{plugin_path.name}/icon.png"
+
+        package = {
+            "name": metadata['name'],
+            "description": metadata['description'],
+            "description_full": metadata['description_full'],
+            "identifier": identifier,
+            "type": metadata['type'],
+            "author": metadata['author'],
+            "license": metadata['license'],
+            "resources": metadata['resources'],
+            "versions": [version_info]
+        }
+
+        pkg = existing_by_id.get(identifier)
+        if pkg:
             v_exists = False
             for v_idx, v in enumerate(pkg['versions']):
                 if v['version'] == version:
@@ -119,14 +123,15 @@ def main():
                     break
             if not v_exists:
                 pkg['versions'].insert(0, version_info)
+            pkg['name'] = package['name']
             pkg['description'] = package['description']
             pkg['description_full'] = package['description_full']
             pkg['resources'] = package['resources']
-            updated = True
-            break
-            
-    if not updated:
-        packages_list.append(package)
+        else:
+            packages_list.append(package)
+            existing_by_id[identifier] = package
+
+        print(f"Updated package {identifier} ({version})")
     
     packages_data['packages'] = packages_list
     
@@ -160,7 +165,7 @@ def main():
         json.dump(repository, f, indent=4)
         
     print(f"Updated {repo_file}")
-    print(f"SHA256: {sha256}")
+    print(f"Packages: {len(packages_list)}")
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@
 KIWAY EXTRACT PINS PLUGIN
 
 @author - Wayri (Yawar)
-@version - 2.0.0
+@version - 2.1.0
 @date - 2025
 
 ALLOWS USER TO EXTRACT ALL THE NET NAMES IN MARKDOWN OR CSV FORMAT FROM CONNECTORS LIKE J1, J2 ETC, OR USER SELECTIONS OR ANY COMPONENT
@@ -26,7 +26,13 @@ import pcbnew
 import wx
 import os
 
-# Try to import the v2 dialog, fall back to v1 if not available
+# Try to import the advanced dashboard, then fall back to the v2 dialog.
+try:
+    from .plugin_ui import PluginUI
+    UI_VERSION = "dashboard"
+except ImportError:
+    PluginUI = None
+
 try:
     from .plugin_dialog_v2 import PluginDialogV2 as PluginDialog
     DIALOG_VERSION = "v2.0"
@@ -46,11 +52,11 @@ class ExtractPinsPlugin(pcbnew.ActionPlugin):
         """
         self.name = "Extract Component Pins with GUI" # The name visible in KiCad's 'Tools -> External Plugins' menu
         self.category = "Utilities" # Category under which the plugin will be listed
-        self.description = "Opens a GUI to extract pin data, analyze signal flow, and generate diagrams."
+        self.description = "Extract pins, trace interfaces, build TM/TC tables, resolve test points, and generate docs."
         self.show_toolbar_button = True # Set to True to display a button on the toolbar
         # Define the path to the optional icon file. It should be in the same directory.
         self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
-        self.version = "2.0.0"
+        self.version = "2.1.0"
 
     def Run(self):
         """
@@ -74,9 +80,16 @@ class ExtractPinsPlugin(pcbnew.ActionPlugin):
             if result != wx.YES:
                 return
 
-        # Create an instance of our custom PluginDialog.
-        # 'None' is passed as the parent window, making it a top-level dialog.
-        # The list of selected footprints is passed to the dialog for processing.
+        # Prefer the advanced wx.Frame dashboard.  ActionPlugin registration is
+        # handled by extract_pins_plugin/__init__.py calling
+        # ExtractPinsPlugin().register(); KiCad then invokes this Run() method.
+        if PluginUI is not None:
+            print("DEBUG: Launching KiWay dashboard")
+            frame = PluginUI(None, board=board)
+            frame.Show()
+            return
+
+        # Fallback for minimal KiCad Python environments.
         print(f"DEBUG: Launching dialog {DIALOG_VERSION}")
         dialog = PluginDialog(None, selected_footprints)
         

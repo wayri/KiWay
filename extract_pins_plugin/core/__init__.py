@@ -5,6 +5,10 @@ from .data_extractor import DataExtractor, DEFAULT_POWER_NET_PATTERNS
 from .signal_flow import SignalFlowAnalyzer
 from .formatters import MarkdownFormatter, CSVFormatter, JSONFormatter, get_formatter
 from .diagram_generator import SVGDiagramGenerator
+from .schematic_graph import SchematicGraphParser, InterfaceSignal
+from .test_point_extractor import TestPointExtractor
+from .layout_assistant import LayoutAssistant
+from .doc_generator import DocGenerator
 
 __all__ = [
     'DataExtractor',
@@ -14,5 +18,10 @@ __all__ = [
     'CSVFormatter',
     'JSONFormatter',
     'get_formatter',
-    'SVGDiagramGenerator'
+    'SVGDiagramGenerator',
+    'SchematicGraphParser',
+    'InterfaceSignal',
+    'TestPointExtractor',
+    'LayoutAssistant',
+    'DocGenerator',
 ]

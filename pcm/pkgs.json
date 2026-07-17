@@ -2,8 +2,8 @@
     "packages": [
         {
             "name": "KiWay Extract Pins",
-            "description": "A powerful plugin for extracting pin data from PCB components and analyzing signal flow.",
-            "description_full": "KiWay Extract Pins is a comprehensive documentation and analysis plugin for KiCAD.\n\n**Features:**\n- Extract component pin data to CSV, Markdown, or JSON\n- Generate signal flow tables between components\n- Create IC signal charts showing all connections\n- CLI support for automation and scripting\n- Flexible filtering options\n\nTargets KiCAD 9 and later.",
+            "description": "Advanced pin, interface, test-point, and TM/TC documentation generator for KiCad.",
+            "description_full": "KiWay Extract Pins is a comprehensive documentation and analysis plugin for KiCAD.\n\n**Features:**\n- Extract component pin data to CSV, Markdown, HTML, or JSON\n- Build a networkx connectivity graph from pcbnew board data and optional KiCad XML netlists\n- Trace through passive parts and custom NetTie_Path pass-throughs\n- Resolve test points back to source IC pins and functions\n- Parse board-sequence labels such as DEMO_CTRL_DEMO_SENSOR_SIGNAL_SPI1_CLK_1_TD for TM/TC tables\n- Group differential pairs, buses, connectors, peripherals, and logical interfaces\n- Create native KiCad PCB groups for logical interfaces\n- Generate ICD/TM-TC Markdown, HTML, and CSV deliverables\n- CLI support for automation and scripting\n\nOptional Python packages for full dashboard capability: networkx, matplotlib, and markdown.\n\nTargets KiCAD 9 and later.",
             "identifier": "kiway.extract.pins",
             "type": "plugin",
             "author": {
@@ -19,6 +19,20 @@
             },
             "versions": [
                 {
+                    "version": "2.1.0",
+                    "status": "stable",
+                    "kicad_version": "9.0",
+                    "download_sha256": "75d702583311b62db39109a6efc8e0f485e18c79d1455756ac6704c73e429da7",
+                    "download_size": 375143,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v2.1.0/extract_pins_plugin-2.1.0.zip",
+                    "install_size": 603079,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                },
+                {
                     "version": "2.0.0",
                     "status": "stable",
                     "kicad_version": "9.0",
@@ -26,6 +40,40 @@
                     "download_size": 360875,
                     "download_url": "https://github.com/wayri/KiWay/releases/download/v2.0.0/extract_pins_plugin-2.0.0.zip",
                     "install_size": 557209,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "KiWay Bulk Label Editor",
+            "description": "Bulk edit labels, PCB text, footprint references, values, and fields with wildcard or regex rules.",
+            "description_full": "KiWay Bulk Label Editor provides a safe preview-and-apply workflow for renaming repeated channel labels and component text inside KiCad. It supports wildcard captures such as CH*_MAIN -> CH*_REDUNDANT, regex replacements, and scoped edits for references, values, fields, and PCB text.",
+            "identifier": "kiway.bulk.label.editor",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/bulk_label_editor_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "dc03e9cc8ae7c8a3fdf7c6c19c5eed9853deaead94fbfa9bf29b0b03006dccbd",
+                    "download_size": 304071,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/bulk_label_editor_plugin-0.1.0.zip",
+                    "install_size": 319679,
                     "platforms": [
                         "windows",
                         "linux",
