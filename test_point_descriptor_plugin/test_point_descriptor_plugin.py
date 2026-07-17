@@ -94,7 +94,7 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
         self.description = "Extract test-point nets, descriptors, and TM/TC metadata to engineering documents."
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.version = "0.1.0"
+        self.version = "0.2.0"
 
     def Run(self) -> None:
         TestPointFrame(None, pcbnew.GetBoard()).Show()
@@ -185,4 +185,3 @@ class TestPointFrame(wx.Frame):
         document = "<!doctype html><html><head><meta charset='utf-8'><style>body{font-family:Arial;margin:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccd3da;padding:6px;text-align:left}th{background:#edf2f7}</style></head><body><h1>Test Point Descriptor Report</h1>" + table + "</body></html>"
         with open(path, "w", encoding="utf-8") as handle: handle.write(document)
         self.status.SetLabel(f"Wrote {path}")
-
