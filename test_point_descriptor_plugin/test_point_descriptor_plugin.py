@@ -5,10 +5,13 @@ from __future__ import annotations
 import csv
 import html
 import os
+import re
 from typing import Any, Dict, Iterable, List, Sequence
 
 import pcbnew
 import wx
+
+from .help_utils import open_help
 
 
 TYPE_LABELS = {
@@ -35,16 +38,35 @@ def _fields(footprint: Any) -> Dict[str, str]:
 
 
 def parse_net_descriptor(net_name: str, board_order: Sequence[str] = ()) -> Dict[str, str]:
-    tokens = [token for token in str(net_name).split("_") if token]
-    kind = next((token for token in tokens if token.upper() in TYPE_LABELS), "")
-    marker = next((index for index, token in enumerate(tokens) if token.upper() == "SIGNAL"), -1)
-    before_signal = tokens[:marker] if marker >= 0 else tokens
-    boards = [token for token in before_signal if token.upper() in {item.upper() for item in board_order}]
-    if not boards and marker > 0:
-        boards = before_signal
-    signal_tokens = tokens[marker + 1:] if marker >= 0 else tokens
-    if kind and kind in signal_tokens:
-        signal_tokens = signal_tokens[:signal_tokens.index(kind)]
+    raw = str(net_name or "")
+    upper = raw.upper()
+    board_hits = []
+    for board in board_order:
+        board = str(board).strip().upper()
+        if not board:
+            continue
+        for match in re.finditer(re.escape(board), upper):
+            before = upper[match.start() - 1] if match.start() else ""
+            after = upper[match.end()] if match.end() < len(upper) else ""
+            if before.isalnum() or after.isalnum():
+                continue
+            board_hits.append((match.start(), match.end(), board))
+    board_hits.sort(key=lambda item: (item[0], item[1]))
+    spans = []
+    for hit in board_hits:
+        if not spans or hit[0] >= spans[-1][1]:
+            spans.append(hit)
+    boards = [item[2] for item in spans]
+    markers = list(re.finditer(r"(?<![A-Z0-9])(TM|TC|TA|TD|CA|CD)(?![A-Z0-9])", upper))
+    kind = markers[0].group(1) if markers else ""
+    masked = list(upper)
+    for start, end, _board in spans:
+        for index in range(start, end):
+            masked[index] = " "
+    for marker_match in markers:
+        for index in range(marker_match.start(), marker_match.end()):
+            masked[index] = " "
+    signal_tokens = [token for token in re.findall(r"[A-Z0-9]+", "".join(masked)) if token not in {"SIGNAL", "SIG", "NET"}]
     source = boards[0] if boards else ""
     destination = boards[1] if len(boards) > 1 else ""
     return {
@@ -94,10 +116,16 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
         self.description = "Extract test-point nets, descriptors, and TM/TC metadata to engineering documents."
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.version = "0.2.0"
+        self.version = "0.3.0"
 
     def Run(self) -> None:
-        TestPointFrame(None, pcbnew.GetBoard()).Show()
+        try:
+            board = pcbnew.GetBoard()
+            if board is None or not hasattr(board, "GetFootprints"):
+                raise RuntimeError("Open a PCB in PCB Editor first.")
+            TestPointFrame(None, board).Show()
+        except Exception as exc:
+            wx.MessageBox(str(exc), "KiWay Test Point Descriptor Extractor", wx.OK | wx.ICON_ERROR)
 
 
 class TestPointFrame(wx.Frame):
@@ -126,6 +154,9 @@ class TestPointFrame(wx.Frame):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             row.Add(button, 0, wx.ALL, 5)
+        help_btn = wx.Button(panel, label="Help")
+        help_btn.Bind(wx.EVT_BUTTON, lambda _event: open_help(self))
+        row.Add(help_btn, 0, wx.ALL, 5)
         root.Add(row, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
         self.status = wx.StaticText(panel, label="Ready.")
         root.Add(self.status, 0, wx.EXPAND | wx.ALL, 6)
