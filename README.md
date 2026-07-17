@@ -54,13 +54,27 @@ Reports every board net with its TP/TestPoint coverage status, test-point refere
 
 ## Installation
 
-### Method 1: Plugin Manager
+### Method 1: KiCad Plugin and Content Manager
 
-1. Open **KiCad Plugin and Content Manager**
-2. Click **Manage Repositories** -> **Add**
-3. Add Repository: `https://raw.githubusercontent.com/wayri/KiWay/main/pcm/repo.json`
-4. Save and select "KiWay Plugin Repository" from the dropdown
-5. Install the desired KiWay plugin package
+1. Open the **KiCad Project Manager**.
+2. Open **Plugin and Content Manager**.
+3. Select the **Repositories** tab.
+4. Click **Manage...**.
+5. Click the **Add repository** button, then enter this complete URL:
+
+   `https://raw.githubusercontent.com/wayri/KiWay/develop/pcm/repo.json`
+
+6. Confirm the repository and close the repository manager.
+7. Select **KiWay Plugin Repository** in the repository dropdown.
+8. Select a plugin and click **Install**.
+9. Apply the pending changes if KiCad shows an **Apply Pending Changes** button.
+10. Restart the KiCad PCB Editor so the ActionPlugins are registered.
+
+If the repository does not appear immediately, close and reopen the Plugin and Content Manager, or remove and re-add the repository URL to clear its cached feed.
+
+The repository feed is also directly viewable here:
+
+`https://raw.githubusercontent.com/wayri/KiWay/develop/pcm/repo.json`
 
 ### Method 2: Manual Installation
 
@@ -70,6 +84,10 @@ Reports every board net with its TP/TestPoint coverage status, test-point refere
    - Linux KiCad 10 scripting plugins: `~/.local/share/kicad/10.0/scripting/plugins/`
    - macOS KiCad 10 scripting plugins: `~/Library/Application Support/kicad/10.0/scripting/plugins/`
 3. Restart KiCad.
+
+For an existing KiCad 10 Windows installation, the scripting plugin directory is usually:
+
+`%APPDATA%\kicad\10.0\scripting\plugins\`
 
 ## Building PCM Packages
 
