@@ -1,0 +1,13 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "KiWay Test Point Descriptor Extractor",
+    "description": "Extract test-point descriptors, nets, and TM/TC metadata to engineering documents.",
+    "description_full": "Scans TP and TestPoint footprints, extracts descriptor/function fields and connected nets, parses board-sequence TM/TC labels, and exports live tables to CSV, Markdown, and HTML.",
+    "identifier": "kiway.test.point.descriptor",
+    "type": "plugin",
+    "author": {"name": "Wayri (Yawar)", "contact": {"github": "https://github.com/wayri"}},
+    "license": "GPL-3.0",
+    "resources": {"homepage": "https://github.com/wayri/KiWay"},
+    "versions": [{"version": "0.1.0", "status": "development", "kicad_version": "9.0"}]
+}
+
