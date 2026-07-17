@@ -24,13 +24,33 @@ A preview-and-apply editor for repeated channel labels and component text.
 - Regex replacement for advanced renaming
 - Scoped edits for footprint references, values, custom fields, and PCB text
 
-## Roadmap Plugin Ideas
+### 3. KiWay Fanout Generator (v0.1.0)
 
-- **KiWay Fanout Generator**: BGA/QFN escape fanout strategies, via grids, differential-pair fanout, length-aware escape patterns, rule-driven layer assignment, and review overlays.
-- **KiWay Via Stitching**: Copper-zone aware via stitching, shielding fences, RF keepout support, return-path stitching around high-speed routes, and DRC-friendly via pattern presets.
-- **KiWay Connector ICD Builder**: Multi-board connector map extraction, pin compatibility checks, mating connector BOM validation, harness CSV export, and mismatch reports.
-- **KiWay Net Hygiene**: Naming convention linting, source/destination inference, duplicate label detection, power-domain checks, and orphan signal reports.
-- **KiWay Test Coverage Planner**: TP coverage scoring per interface, fixture probe planning, no-test-access reports, and manufacturing test exports.
+Creates conservative radial fanout tracks from a selected footprint or all SMD footprints, preserving pad layer and net assignment. Track width and fanout length are configurable.
+
+### 4. KiWay Via Stitching (v0.1.0)
+
+Creates an unconnected via-stitching grid inside the board outline bounding box with configurable spacing, edge inset, drill, and via diameter.
+
+### 5. KiWay Connector ICD Builder (v0.1.0)
+
+Detects connector-like footprints and exports connector, part, pin, net, and pad-type tables to CSV for ICD and harness reviews.
+
+### 6. KiWay Net Hygiene (v0.1.0)
+
+Scans for unconnected pads, duplicate references, single-pad nets, and suspicious net names, then exports a review CSV.
+
+### 7. KiWay Test Coverage Planner (v0.1.0)
+
+Reports every board net with its TP/TestPoint coverage status, test-point references, and coverage count.
+
+## Planned Enhancements
+
+- **Fanout improvements**: BGA/QFN escape strategies, differential-pair fanout, length-aware escape patterns, rule-driven layer assignment, and review overlays.
+- **Via stitching improvements**: Copper-zone awareness, shielding fences, RF keepout support, return-path stitching, and DRC-friendly presets.
+- **Connector ICD improvements**: Multi-board connector maps, pin compatibility checks, mating connector BOM validation, and mismatch reports.
+- **Net hygiene improvements**: Naming-convention linting, source/destination inference, power-domain checks, and orphan-signal reports.
+- **Test coverage improvements**: Coverage scoring per interface, fixture probe planning, and manufacturing test exports.
 
 ## Installation
 
@@ -46,9 +66,9 @@ A preview-and-apply editor for repeated channel labels and component text.
 
 1. Download a release zip from the repository releases page.
 2. Extract the plugin folder into your KiCad third-party plugins directory:
-   - Windows: `%UserProfile%\Documents\KiCad\9.0\3rdparty\plugins\`
-   - Linux: `~/.local/share/kicad/9.0/3rdparty/plugins/`
-   - macOS: `~/Library/Application Support/kicad/9.0/3rdparty/plugins/`
+   - Windows KiCad 10 scripting plugins: `%APPDATA%\kicad\10.0\scripting\plugins\`
+   - Linux KiCad 10 scripting plugins: `~/.local/share/kicad/10.0/scripting/plugins/`
+   - macOS KiCad 10 scripting plugins: `~/Library/Application Support/kicad/10.0/scripting/plugins/`
 3. Restart KiCad.
 
 ## Building PCM Packages

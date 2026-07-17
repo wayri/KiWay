@@ -81,6 +81,176 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "KiWay Connector ICD Builder",
+            "description": "Export connector pin and net tables for interface control documents.",
+            "description_full": "Detects connector-like footprints by reference/value and exports connector, part, pin, net, and pad-type rows to CSV for ICD and harness reviews.",
+            "identifier": "kiway.connector.icd",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/connector_icd_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "ead1a11b222a18759bbf8661897f50c11c4a2878580fd1c14f78acb89f7d5fd0",
+                    "download_size": 302700,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/connector_icd_plugin-0.1.0.zip",
+                    "install_size": 313833,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "KiWay Fanout Generator",
+            "description": "Generate conservative radial fanout tracks from SMD pads.",
+            "description_full": "Creates reviewable radial fanout tracks from selected or all SMD footprints. Track width and length are configurable; the tool preserves pad layer and net code.",
+            "identifier": "kiway.fanout.generator",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/fanout_generator_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "9dd4fe7a7f3587537e1c297a56f4ce8d83481a2b3a35e229fe869c55f21baadc",
+                    "download_size": 302947,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/fanout_generator_plugin-0.1.0.zip",
+                    "install_size": 314958,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "KiWay Net Hygiene",
+            "description": "Find common PCB net and reference quality issues.",
+            "description_full": "Scans footprints and pads for unconnected pads, duplicate references, single-pad nets, and suspicious generated net names, then exports a CSV review report.",
+            "identifier": "kiway.net.hygiene",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/net_hygiene_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "fd229a201725db8f3e60e7232d6abddfd7d77f84ad8abd9c82e07b7040f9f1f5",
+                    "download_size": 302788,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/net_hygiene_plugin-0.1.0.zip",
+                    "install_size": 314138,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "KiWay Test Coverage Planner",
+            "description": "Report board-net coverage by test points.",
+            "description_full": "Builds a complete board-net coverage table from TP/TestPoint footprints, showing which nets are covered, which are missing test access, and how many test points exist per net.",
+            "identifier": "kiway.test.coverage",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/test_coverage_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "3e82f98becee2900902baefdee93ad2b90cb4902df39915a9e50eed4dd3df959",
+                    "download_size": 302699,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/test_coverage_plugin-0.1.0.zip",
+                    "install_size": 313893,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "KiWay Via Stitching",
+            "description": "Generate a configurable ground-via stitching grid.",
+            "description_full": "Places unconnected stitching vias on a configurable grid inside the board outline bounding box, with spacing, edge inset, drill, and diameter controls.",
+            "identifier": "kiway.via.stitching",
+            "type": "plugin",
+            "author": {
+                "name": "Wayri (Yawar)",
+                "contact": {
+                    "github": "https://github.com/wayri"
+                }
+            },
+            "license": "GPL-3.0",
+            "resources": {
+                "homepage": "https://github.com/wayri/KiWay",
+                "icon": "https://raw.githubusercontent.com/wayri/KiWay/main/via_stitching_plugin/icon.png"
+            },
+            "versions": [
+                {
+                    "version": "0.1.0",
+                    "status": "development",
+                    "kicad_version": "9.0",
+                    "download_sha256": "d802a53d38a7db1bff82ba63f0f4a5f7414d715aebea477d6095a7c51aea30a3",
+                    "download_size": 302687,
+                    "download_url": "https://github.com/wayri/KiWay/releases/download/v0.1.0/via_stitching_plugin-0.1.0.zip",
+                    "install_size": 314263,
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "macos"
+                    ]
+                }
+            ]
         }
     ]
 }

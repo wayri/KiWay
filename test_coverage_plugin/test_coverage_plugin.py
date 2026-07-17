@@ -1,0 +1,70 @@
+"""Test-point coverage report for board nets."""
+
+from __future__ import annotations
+
+import csv
+import os
+from typing import Any, Dict, List
+
+import pcbnew
+import wx
+
+
+def coverage_rows(board: Any) -> List[Dict[str, str]]:
+    testpoints = []
+    covered = set()
+    for fp in board.GetFootprints():
+        ref = fp.GetReference(); value = fp.GetValue()
+        is_tp = ref.upper().startswith("TP") or "TESTPOINT" in value.upper()
+        for pad in fp.Pads():
+            net = pad.GetNetname() if hasattr(pad, "GetNetname") else ""
+            if is_tp and net: testpoints.append((ref, net)); covered.add(net)
+    nets = set()
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            net = pad.GetNetname() if hasattr(pad, "GetNetname") else ""
+            if net: nets.add(net)
+    rows = []
+    for net in sorted(nets):
+        points = [ref for ref, point_net in testpoints if point_net == net]
+        rows.append({"Net": net, "Test Points": ", ".join(points), "Status": "Covered" if points else "Missing", "Count": str(len(points))})
+    return rows
+
+
+class TestCoveragePlugin(pcbnew.ActionPlugin):
+    def defaults(self) -> None:
+        self.name = "KiWay Test Coverage Planner"
+        self.category = "Inspection"
+        self.description = "Report board-net coverage by test points."
+        self.show_toolbar_button = True
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
+        self.version = "0.1.0"
+
+    def Run(self) -> None: TestCoverageFrame(None, pcbnew.GetBoard()).Show()
+
+
+class TestCoverageFrame(wx.Frame):
+    def __init__(self, parent: Any, board: Any) -> None:
+        super().__init__(parent, title="KiWay Test Coverage Planner", size=(820, 560))
+        self.board = board; self.rows: List[Dict[str, str]] = []
+        panel = wx.Panel(self); root = wx.BoxSizer(wx.VERTICAL)
+        self.list = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        for idx, label in enumerate(("Net", "Test Points", "Status", "Count")): self.list.InsertColumn(idx, label, width=270 if idx < 2 else 120)
+        root.Add(self.list, 1, wx.EXPAND | wx.ALL, 8)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        for label, handler in (("Scan", self.scan), ("Export CSV", self.export_csv)):
+            button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); row.Add(button, 0, wx.ALL, 5)
+        root.Add(row, 0, wx.ALIGN_RIGHT); panel.SetSizer(root); self.scan(None); self.Centre()
+
+    def scan(self, _event: Any) -> None:
+        self.rows = coverage_rows(self.board); self.list.DeleteAllItems()
+        for row in self.rows:
+            i = self.list.InsertItem(self.list.GetItemCount(), row["Net"])
+            for col, key in enumerate(("Test Points", "Status", "Count"), 1): self.list.SetItem(i, col, row[key])
+
+    def export_csv(self, _event: Any) -> None:
+        with wx.FileDialog(self, "Export test coverage", wildcard="CSV files (*.csv)|*.csv", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialog:
+            if dialog.ShowModal() != wx.ID_OK: return
+            with open(dialog.GetPath(), "w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["Net", "Test Points", "Status", "Count"]); writer.writeheader(); writer.writerows(self.rows)
+

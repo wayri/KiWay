@@ -1,0 +1,6 @@
+"""KiWay Net Hygiene plugin entry point."""
+
+from .net_hygiene_plugin import NetHygienePlugin
+
+NetHygienePlugin().register()
+
