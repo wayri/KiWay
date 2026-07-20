@@ -13,6 +13,7 @@ import wx
 
 from .help_utils import open_help
 from .selection_utils import footprint, select_items
+from .guided_ui import add_workflow
 
 
 TYPE_LABELS = {
@@ -136,6 +137,11 @@ class TestPointFrame(wx.Frame):
         self.rows: List[Dict[str, str]] = []
         panel = wx.Panel(self)
         root = wx.BoxSizer(wx.VERTICAL)
+        self.workflow = add_workflow(
+            panel, root, "Test Point Descriptor Extractor",
+            "Configure descriptor conventions, preview parsed records, then export reviewed documentation.",
+            ("Configure", "Review preview", "Export"),
+        )
         options = wx.FlexGridSizer(0, 2, 6, 8)
         self.field = wx.TextCtrl(panel, value="TP_Descriptor")
         self.boards = wx.TextCtrl(panel, value="DEMO_CTRL,DEMO_SENSOR,DEMO_POWER,DEMO_IO")
@@ -152,7 +158,7 @@ class TestPointFrame(wx.Frame):
             self.list.InsertColumn(index, label, width=145 if index not in (2, 7) else 210)
         root.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         row = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("Extract", self.extract), ("Export CSV", self.export_csv), ("Export Markdown", self.export_markdown), ("Export HTML", self.export_html)):
+        for label, handler in (("Extract Preview", self.extract), ("Export CSV", self.export_csv), ("Export Markdown", self.export_markdown), ("Export HTML", self.export_html)):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             row.Add(button, 0, wx.ALL, 5)
@@ -177,6 +183,7 @@ class TestPointFrame(wx.Frame):
             for col, key in enumerate(keys[1:], 1):
                 self.list.SetItem(index, col, row.get(key, ""))
         self.status.SetLabel(f"Extracted {len(self.rows)} test-point records.")
+        self.workflow.set_step(1 if self.rows else 0, "Cross-select uncertain rows and verify parsed endpoints/types before export." if self.rows else "Check the descriptor field and TP naming, then Extract again.")
 
     def extract(self, _event: Any) -> None:
         board_order = [item.strip() for item in self.boards.GetValue().split(",") if item.strip()]
@@ -189,6 +196,8 @@ class TestPointFrame(wx.Frame):
             wx.MessageBox("Select a test-point row first.", "KiWay", wx.OK | wx.ICON_INFORMATION)
             return
         select_items(self.board, [footprint(self.board, self.rows[index].get("TP Reference", ""))])
+        self.status.SetLabel(f"Selected {self.rows[index].get('TP Reference', '')} on the PCB.")
+        self.workflow.set_step(2, "Continue reviewing records or export the approved document.")
 
     def _save_path(self, wildcard: str) -> str:
         with wx.FileDialog(self, "Export test-point documentation", wildcard=wildcard, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialog:
@@ -203,6 +212,7 @@ class TestPointFrame(wx.Frame):
         with open(path, "w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=keys); writer.writeheader(); writer.writerows(self.rows)
         self.status.SetLabel(f"Wrote {path}")
+        self.workflow.set_step(3, "Open the exported CSV and complete review/sign-off.")
 
     def _markdown(self) -> str:
         keys = list(self.rows[0].keys()) if self.rows else ["TP Reference", "Net Name", "Descriptor"]
@@ -216,6 +226,7 @@ class TestPointFrame(wx.Frame):
         if path:
             with open(path, "w", encoding="utf-8") as handle: handle.write(self._markdown())
             self.status.SetLabel(f"Wrote {path}")
+            self.workflow.set_step(3, "Open the exported Markdown and complete review/sign-off.")
 
     def export_html(self, _event: Any) -> None:
         path = self._save_path("HTML files (*.html)|*.html")
@@ -228,3 +239,4 @@ class TestPointFrame(wx.Frame):
         document = "<!doctype html><html><head><meta charset='utf-8'><style>body{font-family:Arial;margin:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccd3da;padding:6px;text-align:left}th{background:#edf2f7}</style></head><body><h1>Test Point Descriptor Report</h1>" + table + "</body></html>"
         with open(path, "w", encoding="utf-8") as handle: handle.write(document)
         self.status.SetLabel(f"Wrote {path}")
+        self.workflow.set_step(3, "Open the exported HTML and complete review/sign-off.")
