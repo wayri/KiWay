@@ -12,6 +12,7 @@ import pcbnew
 import wx
 
 from .help_utils import open_help
+from .selection_utils import footprint, select_items
 
 
 TYPE_LABELS = {
@@ -145,6 +146,7 @@ class TestPointFrame(wx.Frame):
         options.AddGrowableCol(1, 1)
         root.Add(options, 0, wx.EXPAND | wx.ALL, 8)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.select_test_point)
         columns = ("TP Reference", "Net Name", "Descriptor", "Type", "Source Board", "Destination Board", "Signal", "Notes")
         for index, label in enumerate(columns):
             self.list.InsertColumn(index, label, width=145 if index not in (2, 7) else 210)
@@ -154,6 +156,9 @@ class TestPointFrame(wx.Frame):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             row.Add(button, 0, wx.ALL, 5)
+        select = wx.Button(panel, label="Select on PCB")
+        select.Bind(wx.EVT_BUTTON, self.select_test_point)
+        row.Add(select, 0, wx.ALL, 5)
         help_btn = wx.Button(panel, label="Help")
         help_btn.Bind(wx.EVT_BUTTON, lambda _event: open_help(self))
         row.Add(help_btn, 0, wx.ALL, 5)
@@ -177,6 +182,13 @@ class TestPointFrame(wx.Frame):
         board_order = [item.strip() for item in self.boards.GetValue().split(",") if item.strip()]
         self.rows = extract_test_points(self.board, self.field.GetValue().strip() or "TP_Descriptor", board_order)
         self._refresh_list()
+
+    def select_test_point(self, event: Any) -> None:
+        index = event.GetIndex() if hasattr(event, "GetIndex") else self.list.GetFirstSelected()
+        if index < 0 or index >= len(self.rows):
+            wx.MessageBox("Select a test-point row first.", "KiWay", wx.OK | wx.ICON_INFORMATION)
+            return
+        select_items(self.board, [footprint(self.board, self.rows[index].get("TP Reference", ""))])
 
     def _save_path(self, wildcard: str) -> str:
         with wx.FileDialog(self, "Export test-point documentation", wildcard=wildcard, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialog:
