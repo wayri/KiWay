@@ -2,5 +2,8 @@
 
 from .test_point_descriptor_plugin import TestPointDescriptorPlugin
 
-TestPointDescriptorPlugin().register()
+import wx
+
+if wx.GetApp() is not None:
+    TestPointDescriptorPlugin().register()
 
