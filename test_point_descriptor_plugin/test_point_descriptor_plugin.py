@@ -80,6 +80,70 @@ def parse_net_descriptor(net_name: str, board_order: Sequence[str] = ()) -> Dict
     }
 
 
+def _pin_function(pad: Any) -> str:
+    for name in ("GetPinFunction", "GetName"):
+        getter = getattr(pad, name, None)
+        if callable(getter):
+            try:
+                value = getter()
+            except Exception:
+                continue
+            if value:
+                return str(value)
+    return ""
+
+
+def _is_pass_through(footprint: Any) -> bool:
+    reference = str(footprint.GetReference()).upper()
+    fields = _fields(footprint)
+    return reference.startswith(("R", "C", "L", "FB", "F", "JP", "JMP")) or bool(str(fields.get("NetTie_Path", "")).strip())
+
+
+def resolve_connected_ics(board: Any, start_net: str, max_hops: int = 8) -> List[Dict[str, str]]:
+    """Trace a TP net through series parts to terminal IC pins."""
+    net_map: Dict[str, List[Any]] = {}
+    for footprint in board.GetFootprints():
+        for pad in footprint.Pads():
+            net_name = str(getattr(pad, "GetNetname", lambda: "")())
+            if net_name:
+                net_map.setdefault(net_name, []).append((footprint, pad))
+    queue = [(start_net, [], [f"[{start_net}]"])]
+    seen_nets = {start_net}
+    endpoints: Dict[tuple[str, str], Dict[str, str]] = {}
+    while queue:
+        net_name, intermediates, path = queue.pop(0)
+        if len(intermediates) > max_hops:
+            continue
+        for footprint, pad in net_map.get(net_name, []):
+            reference = str(footprint.GetReference())
+            upper = reference.upper()
+            pin = str(pad.GetNumber())
+            if upper.startswith(("U", "IC", "Q", "M")):
+                endpoints.setdefault((reference, pin), {
+                    "Reference": reference,
+                    "Pin": pin,
+                    "Pin Function": _pin_function(pad),
+                    "Value": str(footprint.GetValue()),
+                    "Terminal Net": net_name,
+                    "Intermediates": ", ".join(intermediates),
+                    "Path": " -> ".join(path + [f"{reference}.{pin}"]),
+                })
+                continue
+            if not _is_pass_through(footprint) or reference in intermediates:
+                continue
+            for other_pad in footprint.Pads():
+                other_net = str(getattr(other_pad, "GetNetname", lambda: "")())
+                if not other_net or other_net == net_name or other_net in seen_nets:
+                    continue
+                seen_nets.add(other_net)
+                queue.append((
+                    other_net,
+                    intermediates + [reference],
+                    path + [f"{reference}.{pin}", f"{reference}.{other_pad.GetNumber()}", f"[{other_net}]"],
+                ))
+    return sorted(endpoints.values(), key=lambda row: (row["Reference"], row["Pin"]))
+
+
 def extract_test_points(board: Any, descriptor_field: str = "TP_Descriptor", board_order: Sequence[str] = ()) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
     for footprint in board.GetFootprints():
@@ -94,6 +158,7 @@ def extract_test_points(board: Any, descriptor_field: str = "TP_Descriptor", boa
         for pad in footprint.Pads():
             net = str(pad.GetNetname()) if hasattr(pad, "GetNetname") else ""
             parsed = parse_net_descriptor(net, board_order)
+            endpoints = resolve_connected_ics(board, net)
             rows.append({
                 "TP Reference": reference,
                 "Value": value,
@@ -106,6 +171,13 @@ def extract_test_points(board: Any, descriptor_field: str = "TP_Descriptor", boa
                 "Source Board": parsed["Source Board"],
                 "Destination Board": parsed["Destination Board"],
                 "Signal": parsed["Signal"],
+                "Connected IC": "; ".join(item["Reference"] for item in endpoints),
+                "IC Pin": "; ".join(item["Pin"] for item in endpoints),
+                "IC Pin Function": "; ".join(item["Pin Function"] for item in endpoints),
+                "IC Value": "; ".join(item["Value"] for item in endpoints),
+                "Terminal Net": "; ".join(item["Terminal Net"] for item in endpoints),
+                "Intermediate Components": "; ".join(item["Intermediates"] for item in endpoints),
+                "Trace Path": " | ".join(item["Path"] for item in endpoints),
                 "Notes": fields.get("Notes", fields.get("Comment", "")),
             })
     return rows
@@ -118,7 +190,7 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
         self.description = "Extract test-point nets, descriptors, and TM/TC metadata to engineering documents."
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.version = "0.4.1"
+        self.version = "0.5.0"
 
     def Run(self) -> None:
         try:
@@ -153,7 +225,7 @@ class TestPointFrame(wx.Frame):
         root.Add(options, 0, wx.EXPAND | wx.ALL, 8)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.select_test_point)
-        columns = ("TP Reference", "Net Name", "Descriptor", "Type", "Source Board", "Destination Board", "Signal", "Notes")
+        columns = ("TP Reference", "Net Name", "Descriptor", "Type", "Connected IC", "IC Pin", "IC Pin Function", "Terminal Net", "Intermediate Components", "Trace Path", "Source Board", "Destination Board", "Signal", "Notes")
         for index, label in enumerate(columns):
             self.list.InsertColumn(index, label, width=145 if index not in (2, 7) else 210)
         root.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
@@ -177,7 +249,7 @@ class TestPointFrame(wx.Frame):
 
     def _refresh_list(self) -> None:
         self.list.DeleteAllItems()
-        keys = ("TP Reference", "Net Name", "Descriptor", "Type", "Source Board", "Destination Board", "Signal", "Notes")
+        keys = ("TP Reference", "Net Name", "Descriptor", "Type", "Connected IC", "IC Pin", "IC Pin Function", "Terminal Net", "Intermediate Components", "Trace Path", "Source Board", "Destination Board", "Signal", "Notes")
         for row in self.rows:
             index = self.list.InsertItem(self.list.GetItemCount(), row.get(keys[0], ""))
             for col, key in enumerate(keys[1:], 1):
@@ -195,8 +267,10 @@ class TestPointFrame(wx.Frame):
         if index < 0 or index >= len(self.rows):
             wx.MessageBox("Select a test-point row first.", "KiWay", wx.OK | wx.ICON_INFORMATION)
             return
-        select_items(self.board, [footprint(self.board, self.rows[index].get("TP Reference", ""))])
-        self.status.SetLabel(f"Selected {self.rows[index].get('TP Reference', '')} on the PCB.")
+        references = [self.rows[index].get("TP Reference", "")]
+        references.extend(item.strip() for item in self.rows[index].get("Connected IC", "").split(";") if item.strip())
+        select_items(self.board, [footprint(self.board, reference) for reference in references])
+        self.status.SetLabel(f"Selected TP and {len(references) - 1} connected IC endpoint(s) on the PCB.")
         self.workflow.set_step(2, "Continue reviewing records or export the approved document.")
 
     def _save_path(self, wildcard: str) -> str:
