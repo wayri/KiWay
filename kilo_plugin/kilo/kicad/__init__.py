@@ -1,0 +1,1 @@
+"""KiCad file-format adapters."""
