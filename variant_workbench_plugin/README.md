@@ -1,6 +1,6 @@
-# KiWay Design Variant Workbench 0.5.1
+# KiWay Design Variant Workbench 0.5.2
 
-A standalone Python/Tkinter application **and KiCad 10 IPC plugin** for working with KiCad design variants safely.
+A standalone Python/Tkinter application and KiCad 10 ActionPlugin for working with KiCad design variants safely. The menu action passes the active project to a detached Workbench process.
 
 The original reason this tool exists is still a first-class feature: **choose a named variant and make it the new `<Default>` without silently changing the effective configuration of the other variants**. In 0.5.0 that operation has its own dedicated **Merge / Set Default** tab and is kept separate from ordinary variant editing.
 
@@ -264,13 +264,13 @@ Compatibility logic also retains support for the older pre-2026-03-06 variant `i
 
 ## Installation and standalone use
 
-Install **KiWay Design Variant Workbench** from the KiWay repository in KiCad's Plugin and Content Manager. For a manual installation, extract the complete package into KiCad's IPC plugin home:
+Install **KiWay Design Variant Workbench** from the KiWay repository in KiCad's Plugin and Content Manager. For a manual installation, extract the complete package into KiCad's ActionPlugin directory:
 
-- Windows: `~/Documents/KiCad/10.0/plugins`
-- macOS: `~/Documents/KiCad/10.0/plugins`
-- Linux: `~/.local/share/KiCad/10.0/plugins`
+- Windows: `~/Documents/KiCad/10.0/3rdparty/plugins/kiway_variant_workbench`
+- macOS: `~/Documents/KiCad/10.0/3rdparty/plugins/kiway_variant_workbench`
+- Linux: `~/.local/share/KiCad/10.0/3rdparty/plugins/kiway_variant_workbench`
 
-Restart KiCad after installation. KiCad creates the isolated Python environment and installs `requirements.txt` on first load.
+Restart KiCad after installation. The PCB Editor ActionPlugin starts the independent Workbench with the active schematic when it can be resolved.
 
 The same standard-library engine can be run outside KiCad from the installed/package directory:
 
@@ -282,7 +282,7 @@ Pass a schematic path and CLI options for non-GUI automation as shown below.
 
 ### Why the plugin launches an independent Workbench process
 
-KiCad 10's IPC API is PCB-editor focused and does not provide the live schematic editing surface needed for these operations. The plugin therefore uses `kicad-python` only to identify the active project, then launches the Workbench as a **detached process**.
+KiCad 10 does not provide the live schematic editing surface needed for these operations. The ActionPlugin resolves the active project from the open PCB, then launches the Workbench as a **detached process**.
 
 This is deliberate: the Workbench remains open while you save/close KiCad before applying a schematic/project-file transformation.
 
@@ -291,7 +291,7 @@ Plugin workflow:
 ```text
 PCB Editor → Design Variant Workbench
                 ↓
-       active project detected through IPC
+       active project detected from PCB path
                 ↓
        independent Workbench window
                 ↓
@@ -304,13 +304,13 @@ PCB Editor → Design Variant Workbench
 
 Manufacturing exports in KiCad 10 are generated through `kicad-cli`, which is the supported route used by the Workbench.
 
-Plugin dependency:
+Optional standalone IPC dependency:
 
 ```text
 kicad-python==0.7.1
 ```
 
-KiCad creates/manages the IPC plugin's Python virtual environment and installs declared dependencies on first load.
+The PCB Editor launcher itself does not depend on IPC readiness. Standalone IPC project detection remains available when `kicad-python` is installed.
 
 ---
 
@@ -406,7 +406,8 @@ The KiWay PCM archive contains only the runtime, documentation, manifests, and i
 
 ```text
 variant_workbench_plugin/
-|-- plugin.json
+|-- __init__.py
+|-- legacy_action_plugin.py
 |-- metadata.json
 |-- requirements.txt
 |-- variant_manager_plugin.py

@@ -34,7 +34,7 @@ import webbrowser
 from typing import Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Union
 
 APP_NAME = "KiWay Design Variant Workbench"
-APP_VERSION = "0.5.1"
+APP_VERSION = "0.5.2"
 BOM_LOGIC_FIX_VERSION = 20260306
 SUPPORTED_MIN_VARIANT_VERSION = 20250922
 
@@ -3110,7 +3110,7 @@ def run_gui(initial: Optional[str] = None, plugin_mode: bool = False, launch_not
             hdr.grid(row=0, column=0, sticky='ew')
             hdr.columnconfigure(1, weight=1)
             ttk.Label(hdr, text='KiCad Design Variant Workbench', style='Title.TLabel').grid(row=0, column=0, sticky='w')
-            badge = f'v{APP_VERSION}' + ('  •  KiCad IPC plugin' if self.plugin_mode else '')
+            badge = f'v{APP_VERSION}' + ('  •  KiCad PCB Editor plugin' if self.plugin_mode else '')
             ttk.Label(hdr, text=badge).grid(row=0, column=1, sticky='w', padx=(10, 0))
             ttk.Label(hdr, textvariable=self.health_var).grid(row=0, column=2, sticky='e')
             ttk.Button(
