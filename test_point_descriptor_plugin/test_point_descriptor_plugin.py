@@ -190,7 +190,7 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
         self.description = "Extract test-point nets, descriptors, and TM/TC metadata to engineering documents."
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.version = "0.5.1"
+        self.version = "0.6.0"
 
     def Run(self) -> None:
         try:
@@ -204,7 +204,8 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
 
 class TestPointFrame(wx.Frame):
     def __init__(self, parent: Any, board: Any) -> None:
-        super().__init__(parent, title="KiWay Test Point Descriptor Extractor", size=(1120, 650))
+        super().__init__(parent, title="KiWay Test Point Descriptor Extractor", size=(1280, 720), style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
+        self.SetMinSize((960, 600))
         self.board = board
         self.rows: List[Dict[str, str]] = []
         panel = wx.Panel(self)
@@ -214,6 +215,7 @@ class TestPointFrame(wx.Frame):
             "Configure descriptor conventions, preview parsed records, then export reviewed documentation.",
             ("Configure", "Review preview", "Export"),
         )
+        options_box = wx.StaticBoxSizer(wx.StaticBox(panel, label="Extraction Rules"), wx.VERTICAL)
         options = wx.FlexGridSizer(0, 2, 6, 8)
         self.field = wx.TextCtrl(panel, value="TP_Descriptor")
         self.boards = wx.TextCtrl(panel, value="DEMO_CTRL,DEMO_SENSOR,DEMO_POWER,DEMO_IO")
@@ -222,14 +224,15 @@ class TestPointFrame(wx.Frame):
         options.Add(wx.StaticText(panel, label="Board order (comma separated):"), 0, wx.ALIGN_CENTER_VERTICAL)
         options.Add(self.boards, 1, wx.EXPAND)
         options.AddGrowableCol(1, 1)
-        root.Add(options, 0, wx.EXPAND | wx.ALL, 8)
+        options_box.Add(options, 0, wx.EXPAND | wx.ALL, 8)
+        root.Add(options_box, 0, wx.EXPAND | wx.ALL, 8)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.select_test_point)
         columns = ("TP Reference", "Net Name", "Descriptor", "Type", "Connected IC", "IC Pin", "IC Pin Function", "Terminal Net", "Intermediate Components", "Trace Path", "Source Board", "Destination Board", "Signal", "Notes")
         for index, label in enumerate(columns):
             self.list.InsertColumn(index, label, width=145 if index not in (2, 7) else 210)
         root.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
-        row = wx.BoxSizer(wx.HORIZONTAL)
+        row = wx.WrapSizer(wx.HORIZONTAL)
         for label, handler in (("Extract Preview", self.extract), ("Export CSV", self.export_csv), ("Export Markdown", self.export_markdown), ("Export HTML", self.export_html)):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)

@@ -1,4 +1,4 @@
-# KiWay Design Variant Workbench 0.5.0
+# KiWay Design Variant Workbench 0.5.1
 
 A standalone Python/Tkinter application **and KiCad 10 IPC plugin** for working with KiCad design variants safely.
 

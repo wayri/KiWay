@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from typing import Optional, Tuple
@@ -79,9 +80,51 @@ def detect_active_root() -> Tuple[Optional[str], str]:
         return None, f'IPC auto-detection was unavailable ({e}). Choose a .kicad_sch manually; all Workbench features still work.'
 
 
+def _tk_python() -> str:
+    """Find a Python interpreter that can create the detached Tk workbench."""
+    candidates = []
+    configured = os.environ.get('KIWAY_VARIANT_PYTHON', '').strip()
+    if configured:
+        candidates.append(Path(configured).expanduser())
+    if os.name == 'nt':
+        local_programs = Path(os.environ.get('LOCALAPPDATA', '')) / 'Programs' / 'Python'
+        if local_programs.is_dir():
+            candidates.extend(sorted(local_programs.glob('Python*/pythonw.exe'), reverse=True))
+            candidates.extend(sorted(local_programs.glob('Python*/python.exe'), reverse=True))
+    for executable in ('pythonw', 'python3', 'python'):
+        resolved = shutil.which(executable)
+        if resolved:
+            candidates.append(Path(resolved))
+    candidates.append(Path(sys.executable))
+
+    checked = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve()
+            if resolved in checked or not resolved.is_file():
+                continue
+            checked.add(resolved)
+            probe = subprocess.run(
+                [str(resolved), '-c', 'import tkinter'],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=8,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0,
+            )
+            if probe.returncode == 0:
+                return str(resolved)
+        except Exception:
+            continue
+    raise RuntimeError(
+        'No Tk-capable Python interpreter was found. Install standard Python with Tcl/Tk, '
+        'or set KIWAY_VARIANT_PYTHON to its pythonw executable.'
+    )
+
+
 def launch_detached(initial: Optional[str], note: str) -> None:
     script = Path(__file__).resolve().with_name('kicad_variant_manager.py')
-    cmd = [sys.executable, str(script), '--plugin-mode', '--launch-note', note]
+    cmd = [_tk_python(), str(script), '--plugin-mode', '--launch-note', note]
     if initial:
         cmd.insert(2, initial)
     kwargs = dict(cwd=str(script.parent), stdin=subprocess.DEVNULL,

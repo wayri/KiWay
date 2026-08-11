@@ -1,4 +1,4 @@
-# KiWay Portable Assets 0.2.0
+# KiWay Portable Assets 0.2.1
 
 A KiCad 10 IPC action plugin for making a project self-contained without depending on the original footprint, symbol, or 3D-model library installation.
 
@@ -79,7 +79,7 @@ Restart KiCad. KiCad creates a per-plugin Python virtual environment and install
 Dependencies:
 
 - `kicad-python`
-- `wxPython`
+- `wxPython` supplied by KiCad's bundled Python runtime
 - `zstandard`
 
 The embedded-file codec also contains a native `libzstd` fallback, so systems where KiCad/system Zstandard is visible can still encode/decode native Embedded Files if the Python `zstandard` import is unavailable.

@@ -1,3 +1,2 @@
 kicad-python>=0.6.0
-wxPython~=4.2
 zstandard>=0.23
