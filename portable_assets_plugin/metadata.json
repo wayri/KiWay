@@ -1,0 +1,28 @@
+{
+  "$schema": "https://go.kicad.org/pcm/schemas/v1",
+  "name": "KiWay Portable Assets",
+  "description": "Make KiCad projects self-contained using reviewed footprint, symbol, and 3D-model snapshots.",
+  "description_full": "KiWay Portable Assets snapshots placed PCB footprints into a project-local library, relinks schematic symbols, embeds resolvable 3D models, creates an optional native Embedded Files recovery vault, and repairs missing footprint links from PCB geometry. A fresh unchanged analysis is required before each write. Network model retrieval is disabled by default. Lock-file checks, explicit confirmation, S-expression validation, timestamped backups, atomic replacement, and unresolved-model reporting protect project files.",
+  "identifier": "kiway-portable-assets",
+  "type": "plugin",
+  "author": {
+    "name": "Wayri (Yawar)",
+    "contact": {"github": "https://github.com/wayri"}
+  },
+  "maintainer": {
+    "name": "Wayri (Yawar)",
+    "contact": {"github": "https://github.com/wayri"}
+  },
+  "license": "MIT",
+  "resources": {
+    "homepage": "https://github.com/wayri/KiWay"
+  },
+  "versions": [
+    {
+      "version": "0.2.0",
+      "status": "testing",
+      "kicad_version": "10.0",
+      "runtime": "ipc"
+    }
+  ]
+}

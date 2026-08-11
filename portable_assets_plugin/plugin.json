@@ -1,0 +1,30 @@
+{
+  "$schema": "https://go.kicad.org/api/schemas/v1",
+  "identifier": "kiway-portable-assets",
+  "name": "KiWay Portable Assets",
+  "description": "Snapshot footprints and symbols into the project, embed 3D models, and repair missing footprint links from PCB geometry.",
+  "runtime": {
+    "type": "python",
+    "min_version": "3.9"
+  },
+  "actions": [
+    {
+      "identifier": "kiway-portable-assets",
+      "name": "KiWay Portable Assets",
+      "description": "Make the current KiCad project self-contained",
+      "show-button": true,
+      "scopes": [
+        "pcb"
+      ],
+      "entrypoint": "portable_project_action.py",
+      "icons-light": [
+        "icon-light-32.png",
+        "icon-light-64.png"
+      ],
+      "icons-dark": [
+        "icon-dark-32.png",
+        "icon-dark-64.png"
+      ]
+    }
+  ]
+}

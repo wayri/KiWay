@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KiWay Design Variant Workbench Help</title>
+<style>body{font:16px "Segoe UI",Arial,sans-serif;max-width:1100px;margin:28px auto;padding:0 22px;color:#202124;line-height:1.55}h1,h2{color:#28355e}h1{border-bottom:3px solid #5671c6;padding-bottom:10px}code,pre{background:#eef1fa}code{padding:2px 4px}pre{padding:12px;overflow:auto;border-left:4px solid #5671c6}.warn{background:#fff6df;border-left:4px solid #b57900;padding:12px 16px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd2e3;padding:7px;text-align:left;vertical-align:top}th{background:#edf0f8}img{width:100%;border:1px solid #c5cada}</style></head><body>
+<h1>KiWay Design Variant Workbench</h1>
+<p>Review and manage KiCad 10 variants while preserving the effective configuration of every unaffected variant.</p>
+<h2>Annotated interface walkthrough</h2><img src="help-workflow.png" alt="Variant Workbench tabs and guarded apply workflow">
+<h2>Core workflow</h2><ol><li>Load the top-level <code>.kicad_sch</code>.</li><li>Run Validate and PCB Sync Audit before changing data.</li><li>Choose a named variant and operation.</li><li>Preview the complete semantic/file change table.</li><li>Save and close KiCad editors.</li><li>Apply only after the lock indicator is clear. Inputs are hash-checked again and all backups are created before the first write.</li></ol>
+<div class="warn"><b>Do not bypass locks.</b> GUI and CLI writes are rejected while KiCad lock files exist. A stale preview is also rejected.</div>
+<h2>Tabs</h2><table><tr><th>Tab</th><th>Use</th></tr>
+<tr><td>Merge / Set Default</td><td>Promote, preserve, or swap Default while semantically rebasing other variants.</td></tr>
+<tr><td>Variant Matrix</td><td>Filter and stage named-variant Value, Footprint, field, DNP, BOM, POS, board, and simulation changes.</td></tr>
+<tr><td>Compare</td><td>Read-only property comparison with CSV export.</td></tr>
+<tr><td>Validate</td><td>Find unsafe shared instances, redundant overrides, empty fitted fields, and inconsistent flags.</td></tr>
+<tr><td>PCB Sync Audit</td><td>Read-only schematic-to-board parity check with repair guidance.</td></tr>
+<tr><td>Part Substitution</td><td>Stage guarded substitutions after electrical and footprint compatibility confirmation.</td></tr>
+<tr><td>Manufacturing Release</td><td>Preview exact <code>kicad-cli</code> commands, validate inputs, and generate a hashed release manifest.</td></tr>
+<tr><td>Manage</td><td>Rename, duplicate, delete, or clean named variants without changing Default.</td></tr></table>
+<h2>CLI examples</h2><pre>python kicad_variant_manager.py project.kicad_sch --list
+python kicad_variant_manager.py project.kicad_sch --lint
+python kicad_variant_manager.py project.kicad_sch --compare "&lt;Default&gt;" Production --csv compare.csv
+python kicad_variant_manager.py project.kicad_sch --promote Production --preview</pre>
+<p>Writing commands require interactive confirmation unless <code>--yes</code> is supplied. Lock checks, stale-input rejection, validation, backups, and atomic writes still apply with <code>--yes</code>.</p>
+<h2>Troubleshooting</h2><table><tr><th>Symptom</th><th>Resolution</th></tr>
+<tr><td>Apply blocked by lock files</td><td>Save and close every KiCad editor using this project, then preview again.</td></tr>
+<tr><td>Changed since preview</td><td>Reload the project and regenerate the preview; another process changed an input.</td></tr>
+<tr><td>PCB Sync errors</td><td>Update PCB from Schematic for the intended variant, save both files, reload, and audit again.</td></tr>
+<tr><td>Release command fails</td><td>Review the exact command, selected variant support, <code>kicad-cli</code> version, validation errors, and output permissions.</td></tr></table>
+<h2>Limitations</h2><p>The tool does not invent symbol pin mappings, infer substitution compatibility, or silently rewrite unsupported shared/multi-project instance structures. Manufacturing outputs remain subject to independent engineering and fabrication review.</p>
+</body></html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KiWay Portable Assets Help</title>
+<style>body{font:16px "Segoe UI",Arial,sans-serif;max-width:1100px;margin:28px auto;padding:0 22px;color:#202124;line-height:1.55}h1,h2{color:#17324d}h1{border-bottom:3px solid #2f7d68;padding-bottom:10px}code,pre{background:#eef5f2}code{padding:2px 4px}pre{padding:12px;overflow:auto;border-left:4px solid #2f7d68}.warn{background:#fff6df;border-left:4px solid #b57900;padding:12px 16px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #cad5d0;padding:7px;text-align:left;vertical-align:top}th{background:#e8f2ee}img{width:100%;border:1px solid #bcc9c4}</style></head><body>
+<h1>KiWay Portable Assets</h1>
+<p>Build a transferable project-local snapshot from the geometry and cached symbols already stored in a KiCad 10 project.</p>
+<h2>Annotated interface walkthrough</h2><img src="help-workflow.png" alt="Portable Assets workflow and safety gates">
+<h2>Safe workflow</h2><ol>
+<li>Save the project, launch the plugin, and configure footprint, symbol, vault, and 3D options.</li>
+<li>Leave network downloads disabled unless every remote model URL is trusted.</li>
+<li>Click <b>Analyze Project</b>. Review every asset, unresolved model, missing footprint, and warning.</li>
+<li>Close PCB and Schematic Editor. The detached IPC window remains open.</li>
+<li>Click <b>Make Project Portable</b>. A changed file or option invalidates the analysis and requires a new preview.</li>
+<li>Review the confirmation summary. Backups are created before atomic replacement.</li>
+<li>Reopen KiCad, inspect library links, run ERC/DRC, update PCB from schematic, and inspect the 3D Viewer.</li></ol>
+<div class="warn"><b>Use version control.</b> The plugin makes timestamped backups, but portability changes intentionally rewrite board, schematic, and library-table files.</div>
+<h2>Outputs</h2><table><tr><th>Output</th><th>Purpose</th></tr>
+<tr><td><code>.portable_assets/Portable.pretty</code></td><td>Exact placed-footprint snapshots, optionally one per reference.</td></tr>
+<tr><td><code>.portable_assets/symbols</code></td><td>Project-local symbol snapshots reconstructed from schematic caches.</td></tr>
+<tr><td><code>.portable_assets/manifest.json</code></td><td>Reference mapping and unresolved-model audit.</td></tr>
+<tr><td>Embedded Files vault</td><td>Optional recovery copy of generated footprint and symbol source files.</td></tr></table>
+<h2>Repair and restore</h2><p><b>Repair Missing Footprints</b> can recover a missing schematic footprint link only when that reference has a full placed footprint in the PCB. <b>Restore from Embedded Vault</b> recreates generated local-library files from the native KiCad vault. Both operations check locks, ask for confirmation, and create backups.</p>
+<h2>Troubleshooting</h2><table><tr><th>Symptom</th><th>Resolution</th></tr>
+<tr><td>Apply says preview is stale</td><td>Files or options changed. Analyze again and review the new result.</td></tr>
+<tr><td>Lock files detected</td><td>Save and close PCB/Schematic Editor. Do not delete a legitimate lock to bypass this safeguard.</td></tr>
+<tr><td>Model remains unresolved</td><td>Add a project/local search location or explicitly enable trusted URL retrieval. Existing links are left unchanged.</td></tr>
+<tr><td>Unplaced footprint cannot be recovered</td><td>The PCB has no authoritative geometry snapshot; restore the original library or use another known-good source.</td></tr></table>
+<h2>Limitations</h2><p>This targets modern KiCad 9/10 S-expression projects and is packaged for KiCad 10 IPC. It does not replace ERC, DRC, library review, 3D inspection, or a clean-machine transfer test.</p>
+</body></html>
