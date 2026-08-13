@@ -14,6 +14,7 @@ import wx
 from .help_utils import open_help
 from .selection_utils import footprint, select_items
 from .guided_ui import add_workflow
+from .fixture import collect_fixture_points, generate_fixture_board
 
 
 TYPE_LABELS = {
@@ -190,7 +191,7 @@ class TestPointDescriptorPlugin(pcbnew.ActionPlugin):
         self.description = "Extract test-point nets, descriptors, and TM/TC metadata to engineering documents."
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
-        self.version = "0.6.0"
+        self.version = "0.7.0"
 
     def Run(self) -> None:
         try:
@@ -208,6 +209,8 @@ class TestPointFrame(wx.Frame):
         self.SetMinSize((960, 600))
         self.board = board
         self.rows: List[Dict[str, str]] = []
+        self.sort_column = 0
+        self.sort_ascending = True
         panel = wx.Panel(self)
         root = wx.BoxSizer(wx.VERTICAL)
         self.workflow = add_workflow(
@@ -215,25 +218,35 @@ class TestPointFrame(wx.Frame):
             "Configure descriptor conventions, preview parsed records, then export reviewed documentation.",
             ("Configure", "Review preview", "Export"),
         )
-        options_box = wx.StaticBoxSizer(wx.StaticBox(panel, label="Extraction Rules"), wx.VERTICAL)
+        options_box = wx.BoxSizer(wx.VERTICAL)
+        options_heading = wx.StaticText(panel, label="Extraction Rules")
+        options_heading.SetFont(options_heading.GetFont().Bold())
+        options_box.Add(options_heading, 0, wx.LEFT | wx.RIGHT | wx.TOP, 4)
         options = wx.FlexGridSizer(0, 2, 6, 8)
         self.field = wx.TextCtrl(panel, value="TP_Descriptor")
         self.boards = wx.TextCtrl(panel, value="DEMO_CTRL,DEMO_SENSOR,DEMO_POWER,DEMO_IO")
+        self.consolidate = wx.CheckBox(panel, label="Consolidate duplicate TP/net records")
+        self.consolidate.SetValue(True)
+        self.probe_type = wx.ComboBox(panel, choices=["P75 spring probe", "P100 spring probe", "P160 spring probe", "Custom"], style=wx.CB_READONLY)
+        self.probe_type.SetSelection(0)
         options.Add(wx.StaticText(panel, label="Descriptor field:"), 0, wx.ALIGN_CENTER_VERTICAL)
         options.Add(self.field, 1, wx.EXPAND)
         options.Add(wx.StaticText(panel, label="Board order (comma separated):"), 0, wx.ALIGN_CENTER_VERTICAL)
         options.Add(self.boards, 1, wx.EXPAND)
+        options.Add(self.consolidate, 0, wx.ALIGN_CENTER_VERTICAL)
+        options.Add(self.probe_type, 1, wx.EXPAND)
         options.AddGrowableCol(1, 1)
         options_box.Add(options, 0, wx.EXPAND | wx.ALL, 8)
         root.Add(options_box, 0, wx.EXPAND | wx.ALL, 8)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.select_test_point)
+        self.list.Bind(wx.EVT_LIST_COL_CLICK, self.on_sort_column)
         columns = ("TP Reference", "Net Name", "Descriptor", "Type", "Connected IC", "IC Pin", "IC Pin Function", "Terminal Net", "Intermediate Components", "Trace Path", "Source Board", "Destination Board", "Signal", "Notes")
         for index, label in enumerate(columns):
             self.list.InsertColumn(index, label, width=145 if index not in (2, 7) else 210)
         root.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         row = wx.WrapSizer(wx.HORIZONTAL)
-        for label, handler in (("Extract Preview", self.extract), ("Export CSV", self.export_csv), ("Export Markdown", self.export_markdown), ("Export HTML", self.export_html)):
+        for label, handler in (("Extract Preview", self.extract), ("Export CSV", self.export_csv), ("Export Fixture Plan", self.export_fixture_plan), ("Generate Fixture PCB", self.generate_fixture_pcb), ("Export Markdown", self.export_markdown), ("Export HTML", self.export_html)):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             row.Add(button, 0, wx.ALL, 5)
@@ -263,7 +276,57 @@ class TestPointFrame(wx.Frame):
     def extract(self, _event: Any) -> None:
         board_order = [item.strip() for item in self.boards.GetValue().split(",") if item.strip()]
         self.rows = extract_test_points(self.board, self.field.GetValue().strip() or "TP_Descriptor", board_order)
+        if self.consolidate.GetValue():
+            unique = {}
+            for row in self.rows:
+                key = (row.get("TP Reference", ""), row.get("Pad", ""), row.get("Net Name", ""))
+                unique.setdefault(key, row)
+            self.rows = list(unique.values())
         self._refresh_list()
+
+    def on_sort_column(self, event: Any) -> None:
+        keys = ("TP Reference", "Net Name", "Descriptor", "Type", "Connected IC", "IC Pin", "IC Pin Function", "Terminal Net", "Intermediate Components", "Trace Path", "Source Board", "Destination Board", "Signal", "Notes")
+        column = event.GetColumn()
+        self.sort_ascending = not self.sort_ascending if column == self.sort_column else True
+        self.sort_column = column
+        key = keys[column]
+        self.rows.sort(key=lambda row: self._natural_key(row.get(key, "")), reverse=not self.sort_ascending)
+        self._refresh_list()
+
+    @staticmethod
+    def _natural_key(value: str) -> list[Any]:
+        return [int(part) if part.isdigit() else part.casefold() for part in re.split(r"(\d+)", str(value))]
+
+    def export_fixture_plan(self, _event: Any) -> None:
+        path = self._save_path("CSV files (*.csv)|*.csv")
+        if not path:
+            return
+        fields = ("Fixture Channel", "TP Reference", "TP Pad", "Net Name", "Probe Type", "Connected IC", "IC Pin", "IC Pin Function", "Trace Path")
+        with open(path, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader()
+            for channel, row in enumerate(self.rows, 1):
+                writer.writerow({"Fixture Channel": channel, "TP Reference": row.get("TP Reference", ""), "TP Pad": row.get("Pad", ""), "Net Name": row.get("Net Name", ""), "Probe Type": self.probe_type.GetValue(), "Connected IC": row.get("Connected IC", ""), "IC Pin": row.get("IC Pin", ""), "IC Pin Function": row.get("IC Pin Function", ""), "Trace Path": row.get("Trace Path", "")})
+        self.status.SetLabel(f"Wrote reviewed bed-of-nails channel assignment plan to {path}")
+
+    def generate_fixture_pcb(self, _event: Any) -> None:
+        points = collect_fixture_points(self.board, self.rows)
+        if not points:
+            wx.MessageBox("No extracted TP pads with PCB coordinates are available. Extract and review the table first.", "Fixture preview required", wx.OK | wx.ICON_INFORMATION)
+            return
+        message = (
+            f"Generate a separate fixture PCB for {len(points)} reviewed probe channels?\n\n"
+            "The source PCB is not modified. The generated escape routing is a manufacturing starting point: "
+            "assign the actual connector footprint, inspect mechanics, clean up routing, and run DRC before fabrication."
+        )
+        if wx.MessageBox(message, "Generate reviewed bed-of-nails fixture", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        with wx.FileDialog(self, "Write bed-of-nails fixture PCB", wildcard="KiCad PCB (*.kicad_pcb)|*.kicad_pcb", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as dialog:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            content = generate_fixture_board(points, self.probe_type.GetValue())
+            with open(dialog.GetPath(), "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(content)
+            self.status.SetLabel(f"Generated {len(points)}-channel fixture board at {dialog.GetPath()}; open it separately and run DRC.")
 
     def select_test_point(self, event: Any) -> None:
         index = event.GetIndex() if hasattr(event, "GetIndex") else self.list.GetFirstSelected()

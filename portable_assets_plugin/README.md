@@ -1,4 +1,4 @@
-# KiWay Portable Assets 0.2.2
+# KiWay Portable Assets 0.2.3
 
 A KiCad 10 ActionPlugin for making a project self-contained without depending on the original footprint, symbol, or 3D-model library installation. The menu action launches an isolated GUI process and passes the active board path directly.
 

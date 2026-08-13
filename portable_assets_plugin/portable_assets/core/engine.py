@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import time
 import urllib.request
+import zipfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable, Optional
@@ -344,6 +345,7 @@ class Transaction:
                 existing[target] = backup
             else:
                 existing[target] = None
+        self._create_kicad_backup(existing)
         written: list[Path] = []
         try:
             for target, data in writes.items():
@@ -368,6 +370,24 @@ class Transaction:
                     shutil.copy2(backup, target)
             raise
         return written
+
+    def _create_kicad_backup(self, existing: dict[Path, Optional[Path]]) -> Path:
+        """Create a conventional project-name-backups zip before replacement."""
+        stem = self.ctx.project_file.stem if self.ctx.project_file else self.ctx.board.stem
+        backup_root = self.ctx.project_dir / f"{stem}-backups"
+        backup_root.mkdir(parents=True, exist_ok=True)
+        stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+        archive = backup_root / f"{stem}-{stamp}.zip"
+        with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
+            for target, backup in existing.items():
+                if backup is None or not backup.exists():
+                    continue
+                try:
+                    name = target.resolve().relative_to(self.ctx.project_dir)
+                except ValueError:
+                    name = Path(target.name)
+                package.write(backup, str(name).replace("\\", "/"))
+        return archive
 
 
 def _table_upsert(text: str, root_head: str, nick: str, uri: str, descr: str) -> str:
