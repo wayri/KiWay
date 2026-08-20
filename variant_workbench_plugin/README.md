@@ -1,4 +1,4 @@
-# KiWay Design Variant Workbench 0.5.2
+# KiWay Design Variant Workbench 0.5.3
 
 A standalone Python/Tkinter application and KiCad 10 ActionPlugin for working with KiCad design variants safely. The menu action passes the active project to a detached Workbench process.
 

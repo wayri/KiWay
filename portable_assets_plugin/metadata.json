@@ -19,10 +19,10 @@
   },
   "versions": [
     {
-      "version": "0.2.3",
+      "version": "0.2.4",
       "status": "testing",
       "kicad_version": "10.0",
-      "runtime": "action-plugin"
+      "runtime": "swig"
     }
   ]
 }
