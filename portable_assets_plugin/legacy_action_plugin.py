@@ -72,6 +72,7 @@ class PortableAssetsActionPlugin(pcbnew.ActionPlugin):
         self.category = "Project Dependencies"
         self.description = "Snapshot project footprints, symbols, and 3D assets safely"
         self.icon_file_name = str(PLUGIN_ROOT / "icon.png")
+        self.dark_icon_file_name = self.icon_file_name
         self.show_toolbar_button = True
 
     def Run(self) -> None:

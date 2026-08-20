@@ -19,7 +19,8 @@
   },
   "license": "MIT",
   "resources": {
-    "homepage": "https://github.com/wayri/KiWay"
+    "homepage": "https://github.com/wayri/KiWay",
+    "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/kilo_plugin/icon.png"
   },
   "versions": [
     {

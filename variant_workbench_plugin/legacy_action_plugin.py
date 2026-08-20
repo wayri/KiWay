@@ -59,6 +59,7 @@ class VariantWorkbenchActionPlugin(pcbnew.ActionPlugin):
         self.category = "Project Configuration"
         self.description = "Review, edit, validate, and release KiCad design variants"
         self.icon_file_name = str(PLUGIN_ROOT / "icon.png")
+        self.dark_icon_file_name = self.icon_file_name
         self.show_toolbar_button = True
 
     def Run(self) -> None:

@@ -15,7 +15,8 @@
   },
   "license": "GPL-3.0",
   "resources": {
-    "homepage": "https://github.com/wayri/KiWay"
+    "homepage": "https://github.com/wayri/KiWay",
+    "icon": "https://raw.githubusercontent.com/wayri/KiWay/develop/variant_workbench_plugin/icon.png"
   },
   "versions": [
     {
