@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Kilo Help</title>
+<style>body{font:15px Segoe UI,Arial;max-width:1080px;margin:24px auto;color:#263744;line-height:1.5}h1,h2{color:#3d5f89}img{max-width:100%;border:1px solid #9aabb7}code,pre{background:#eef3f6;padding:2px 5px}pre{padding:10px}.warn{border-left:5px solid #d1495b;padding:10px;background:#fff3f3}</style></head>
+<body><h1>Kilo - KiCad Localizer</h1>
+<p>Kilo packages reusable design blocks and makes project footprint and 3D-model dependencies portable through previewed, reversible transactions.</p>
+<img src="help-workflow.png" alt="Actual Kilo application Help tab">
+<h2>Safe workflow</h2><ol><li>Save and close affected KiCad editors.</li><li>Select the project or design block.</li><li>Run Scan, then Dry Run.</li><li>Review dependency resolution, conflicts, planned writes, and warnings.</li><li>Execute only the reviewed plan, then reopen affected editors.</li></ol>
+<h2>Capabilities</h2><ul><li><b>Design Block Packager:</b> packages block schematics with footprint, model, attribution, and integrity metadata.</li><li><b>Design Block Installer:</b> verifies payload hashes, installs project-local libraries, and registers the block.</li><li><b>Localize Project:</b> collects resolvable assets into reversible project-local libraries.</li><li><b>Validate / Repair:</b> audits links, models, tables, transactions, and installed package hashes before offering repairs.</li><li><b>History / Restore:</b> supports links-only and guarded original-file restoration.</li></ul>
+<h2>Command line</h2><pre>kilo --help
+kilo scan-project &lt;project&gt;
+kilo localize-project &lt;project&gt; --dry-run
+kilo validate-project &lt;project&gt;
+kilo package-block &lt;block.kicad_block&gt; --dry-run</pre>
+<h2>Troubleshooting</h2><p>Use Export Log and keep the project <code>.kilo/backups</code>, <code>.kilo/reports</code>, and transaction manifests. Missing assets remain unresolved rather than being silently substituted.</p>
+<div class="warn"><b>Do not execute against files still open with unsaved edits.</b> An editor can overwrite on-disk changes when it later saves its older in-memory state.</div>
+</body></html>
