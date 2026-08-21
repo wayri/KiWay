@@ -1,4 +1,4 @@
-"""KiWay PCM entry point for Kilo — KiCad Localizer."""
+"""KiWay PCM entry point for Kilo -- KiCad Localizer."""
 
 from __future__ import annotations
 
@@ -9,9 +9,12 @@ _PLUGIN_ROOT = str(Path(__file__).resolve().parent)
 if _PLUGIN_ROOT not in sys.path:
     sys.path.insert(0, _PLUGIN_ROOT)
 
-import wx
+try:
+    import wx
+except ImportError:  # pragma: no cover - standalone inspection
+    wx = None
 
-if wx.GetApp() is not None:
+if wx is not None and wx.GetApp() is not None:
     from kilo.plugin.action_plugin import register
 
     register()
