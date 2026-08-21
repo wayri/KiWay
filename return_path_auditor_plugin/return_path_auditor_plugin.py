@@ -10,6 +10,9 @@ import wx
 
 from .analysis import CopperSegment, ReferenceRegion, ReturnPathAnalyzer, ViaPoint
 from .guided_ui import add_workflow, mark_primary, section
+from .preview_kit import PanZoomCanvas, add_zoom_toolbar
+
+SEVERITY_COLOURS={"PASS":"#3fa56b","WARN":"#d4a62a","FAIL":"#e34a43"}
 
 
 def mm(value): return float(pcbnew.ToMM(value))
@@ -22,30 +25,41 @@ def make_sortable(table):
     table.Bind(wx.EVT_LIST_COL_CLICK,sort)
 
 
-class BoardPreview(wx.Panel):
+class BoardPreview(PanZoomCanvas):
     def __init__(self, parent):
-        super().__init__(parent, style=wx.BORDER_SIMPLE); self.result = None
-        self.SetBackgroundStyle(wx.BG_STYLE_PAINT); self.SetMinSize((-1, 260)); self.Bind(wx.EVT_PAINT, self.paint)
-    def paint(self, _event):
-        dc=wx.AutoBufferedPaintDC(self); dc.SetBackground(wx.Brush("#f7f9fb")); dc.Clear(); w,h=self.GetClientSize()
-        if not self.result or not self.result.segments:
-            dc.SetTextForeground("#566573"); dc.DrawLabel("Analyze the board to preview routed geometry and findings.",wx.Rect(10,10,w-20,h-20),wx.ALIGN_CENTER); return
-        points=[point for segment in self.result.segments for point in (segment.start,segment.end)]
-        xs=[p[0] for p in points]; ys=[p[1] for p in points]; margin=28
-        scale=min((w-2*margin)/max(max(xs)-min(xs),1),(h-2*margin)/max(max(ys)-min(ys),1))
-        project=lambda p:(margin+int((p[0]-min(xs))*scale),h-margin-int((p[1]-min(ys))*scale))
-        colors={}; palette=("#1976d2","#2e7d32","#8e24aa","#ef6c00")
+        super().__init__(parent, empty_text="Analyze the board to preview routed geometry, return vias, and severity-ranked findings.")
+        self.result = None
+    def show_result(self,result):
+        self.result=result;self.set_legend([(SEVERITY_COLOURS[name],label) for name,label in (("FAIL","fail"),("WARN","warn"),("PASS","ok"))]+[("#f9a825","return via")])
+        self.Refresh()
+        if self.result is not None:self.fit()
+    def scene_bounds(self):
+        if not self.result or not self.result.segments:return None
+        xs=[p for s in self.result.segments for p in (s.start[0],s.end[0])];ys=[p for s in self.result.segments for p in (s.start[1],s.end[1])]
+        return (min(xs),min(ys),max(xs),max(ys))
+    def draw_scene(self,gc,project):
+        if not self.result or not self.result.segments:return
+        palette=("#1976d2","#2e7d32","#8e24aa","#ef6c00");colours={}
         for segment in self.result.segments:
-            colors.setdefault(segment.layer,palette[len(colors)%len(palette)]); dc.SetPen(wx.Pen(colors[segment.layer],max(2,int(segment.width_mm*scale)))); dc.DrawLine(*project(segment.start),*project(segment.end))
-        dc.SetBrush(wx.Brush("#f9a825")); dc.SetPen(wx.Pen("#7f6000"))
-        for via in self.result.vias: dc.DrawCircle(*project(via.position),4)
-        dc.SetBrush(wx.Brush("#c62828")); dc.SetPen(wx.Pen("#7f0000"))
-        for finding in self.result.findings: dc.DrawCircle(*project((finding.x_mm,finding.y_mm)),6)
+            colours.setdefault(segment.layer,palette[len(colours)%len(palette)])
+            gc.SetPen(wx.Pen(wx.Colour(colours[segment.layer]),max(2,min(int(segment.width_mm*self.scale),12))))
+            gc.StrokeLine(*project(segment.start),*project(segment.end))
+        gc.SetBrush(wx.Brush(wx.Colour("#f9a825")));gc.SetPen(wx.Pen(wx.Colour("#7f6000")))
+        for via in self.result.vias:
+            sx,sy=project(via.position);gc.DrawEllipse(sx-3,sy-3,6,6)
+        counts={"FAIL":0,"WARN":0,"PASS":0}
+        gc.SetFont(wx.Font(8,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL),"#aab7c4")
+        for finding in self.result.findings:
+            severity=finding.severity.upper()[:4];counts[severity if severity in counts else "WARN"]=counts.get(severity if severity in counts else "WARN",0)+1
+            colour=wx.Colour(SEVERITY_COLOURS.get("PASS" if severity.startswith("PASS") else ("FAIL" if severity.startswith("FAIL") else "WARN"),"#d4a62a"))
+            sx,sy=project((finding.x_mm,finding.y_mm));gc.SetPen(wx.Pen(colour,2));gc.SetBrush(wx.TRANSPARENT_BRUSH);gc.DrawEllipse(sx-7,sy-7,14,14)
+        total=len(self.result.findings)
+        if total:gc.DrawText(f"findings: {total} (fail {counts['FAIL']} / warn {counts['WARN']} / ok {counts['PASS']})",10,self.GetClientSize().height-44)
 
 
 class ReturnPathAuditorPlugin(pcbnew.ActionPlugin):
     def defaults(self):
-        self.name="KiWay Return-Path Auditor"; self.category="Analysis"; self.description="Find return-path discontinuities, unreferenced transitions, and routed stubs."; self.show_toolbar_button=True; self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png"); self.dark_icon_file_name=self.icon_file_name; self.version="0.1.0"
+        self.name="KiWay Return-Path Auditor"; self.category="Analysis"; self.description="Find return-path discontinuities, unreferenced transitions, and routed stubs."; self.show_toolbar_button=True; self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png"); self.dark_icon_file_name=self.icon_file_name; self.version="0.2.0"
     def Run(self):
         board=pcbnew.GetBoard()
         if board is None: wx.MessageBox("Open a PCB first.",self.name,wx.OK|wx.ICON_ERROR); return
@@ -69,7 +83,7 @@ class ReturnPathFrame(wx.Frame):
         for i,(name,width) in enumerate(columns):self.table.InsertColumn(i,name,width=width)
         make_sortable(self.table)
         self.table.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.select); ls.Add(self.table,1,wx.EXPAND);left.SetSizer(ls)
-        self.preview=BoardPreview(right);rs.Add(self.preview,1,wx.EXPAND);self.summary=wx.StaticText(right,label="No analysis yet.");rs.Add(self.summary,0,wx.EXPAND|wx.ALL,8);right.SetSizer(rs);split.SplitVertically(left,right,730);root.Add(split,1,wx.EXPAND|wx.ALL,8);p.SetSizer(root)
+        self.preview=BoardPreview(right);rs.Add(self.preview,1,wx.EXPAND);add_zoom_toolbar(right,self.preview,rs);self.summary=wx.StaticText(right,label="No analysis yet.");rs.Add(self.summary,0,wx.EXPAND|wx.ALL,8);right.SetSizer(rs);split.SplitVertically(left,right,730);root.Add(split,1,wx.EXPAND|wx.ALL,8);p.SetSizer(root)
     def collect(self):
         segments=[]; vias=[]
         for item in self.board.GetTracks():
@@ -88,7 +102,7 @@ class ReturnPathFrame(wx.Frame):
             analyzer=ReturnPathAnalyzer(self.ground.GetValue().split(","));segments,vias,regions=self.collect();self.result=analyzer.audit(segments,vias,regions,float(self.radius.GetValue()),float(self.stub.GetValue()),float(self.diff_gap.GetValue()),float(self.diff_skew.GetValue()));self.table.DeleteAllItems()
             for finding in self.result.findings:
                 row=(finding.severity,finding.check,finding.net,finding.layer,f"{finding.x_mm:.2f}, {finding.y_mm:.2f}",finding.detail,finding.remedy);index=self.table.InsertItem(self.table.GetItemCount(),row[0]);[self.table.SetItem(index,col,value) for col,value in enumerate(row[1:],1)]
-            self.preview.result=self.result;self.preview.Refresh();self.summary.SetLabel(f"{len(segments)} routed segments | {len(vias)} vias | {len(regions)} reference regions | {len(self.result.findings)} findings")
+            self.preview.show_result(self.result);self.summary.SetLabel(f"{len(segments)} routed segments | {len(vias)} vias | {len(regions)} reference regions | {len(self.result.findings)} findings")
             self.guide.set_step(2,"Review findings; double-click a row to cross-select its net.")
         except Exception as exc:wx.MessageBox(str(exc),"Audit failed",wx.OK|wx.ICON_ERROR)
     def select(self,event):
