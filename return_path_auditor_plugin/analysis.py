@@ -3,8 +3,19 @@
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass, field
 from typing import Iterable
+
+try:
+    from .diff_pairs import find_mate as _shared_find_mate
+except ImportError:  # Direct-file execution (automation) has no package parent.
+    import importlib.util as _ilu
+
+    _spec = _ilu.spec_from_file_location("_kiway_diff_pairs", os.path.join(os.path.dirname(os.path.abspath(__file__)), "diff_pairs.py"))
+    _diff_pairs = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_diff_pairs)
+    _shared_find_mate = _diff_pairs.find_mate
 
 
 @dataclass(frozen=True)
@@ -153,10 +164,15 @@ class ReturnPathAnalyzer:
 
 
 def differential_mate(net: str, available: Iterable[str]) -> str:
+    """Shared pattern detector with the legacy suffix fallbacks."""
+    names = list(available)
+    mate = _shared_find_mate(net, names)
+    if mate:
+        return mate
     candidates = []
     if net.endswith("_P"): candidates.append(net[:-2] + "_N")
     if net.endswith("_N"): candidates.append(net[:-2] + "_P")
     if net.endswith("+"): candidates.append(net[:-1] + "-")
     if net.endswith("-"): candidates.append(net[:-1] + "+")
-    lookup = {value.casefold(): value for value in available}
+    lookup = {value.casefold(): value for value in names}
     return next((lookup[value.casefold()] for value in candidates if value.casefold() in lookup), "")

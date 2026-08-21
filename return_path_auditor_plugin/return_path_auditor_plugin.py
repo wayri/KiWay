@@ -10,7 +10,7 @@ import wx
 
 from .analysis import CopperSegment, ReferenceRegion, ReturnPathAnalyzer, ViaPoint
 from .guided_ui import add_workflow, mark_primary, section
-from .preview_kit import PanZoomCanvas, add_zoom_toolbar
+from .preview_kit import PanZoomCanvas, add_zoom_toolbar, pcb_select_items, pcb_highlight_net
 
 SEVERITY_COLOURS={"PASS":"#3fa56b","WARN":"#d4a62a","FAIL":"#e34a43"}
 
@@ -30,7 +30,9 @@ class BoardPreview(PanZoomCanvas):
         super().__init__(parent, empty_text="Analyze the board to preview routed geometry, return vias, and severity-ranked findings.")
         self.result = None
     def show_result(self,result):
-        self.result=result;self.set_legend([(SEVERITY_COLOURS[name],label) for name,label in (("FAIL","fail"),("WARN","warn"),("PASS","ok"))]+[("#f9a825","return via")])
+        self.result=result;        picks=[{"x":f.x_mm,"y":f.y_mm,"r":1.2,"data":index} for index,f in enumerate(self.result.findings)] if self.result else []
+        self.set_picks(picks)
+        self.set_legend([(SEVERITY_COLOURS[name],label) for name,label in (("FAIL","fail"),("WARN","warn"),("PASS","ok"))]+[("#f9a825","return via")])
         self.Refresh()
         if self.result is not None:self.fit()
     def scene_bounds(self):
@@ -59,7 +61,7 @@ class BoardPreview(PanZoomCanvas):
 
 class ReturnPathAuditorPlugin(pcbnew.ActionPlugin):
     def defaults(self):
-        self.name="KiWay Return-Path Auditor"; self.category="Analysis"; self.description="Find return-path discontinuities, unreferenced transitions, and routed stubs."; self.show_toolbar_button=True; self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png"); self.dark_icon_file_name=self.icon_file_name; self.version="0.2.0"
+        self.name="KiWay Return-Path Auditor"; self.category="Analysis"; self.description="Find return-path discontinuities, unreferenced transitions, and routed stubs."; self.show_toolbar_button=True; self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png"); self.dark_icon_file_name=self.icon_file_name; self.version="0.3.0"
     def Run(self):
         board=pcbnew.GetBoard()
         if board is None: wx.MessageBox("Open a PCB first.",self.name,wx.OK|wx.ICON_ERROR); return
@@ -83,7 +85,16 @@ class ReturnPathFrame(wx.Frame):
         for i,(name,width) in enumerate(columns):self.table.InsertColumn(i,name,width=width)
         make_sortable(self.table)
         self.table.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.select); ls.Add(self.table,1,wx.EXPAND);left.SetSizer(ls)
-        self.preview=BoardPreview(right);rs.Add(self.preview,1,wx.EXPAND);add_zoom_toolbar(right,self.preview,rs);self.summary=wx.StaticText(right,label="No analysis yet.");rs.Add(self.summary,0,wx.EXPAND|wx.ALL,8);right.SetSizer(rs);split.SplitVertically(left,right,730);root.Add(split,1,wx.EXPAND|wx.ALL,8);p.SetSizer(root)
+        self.preview=BoardPreview(right);self.preview.on_pick=self.on_finding_pick;rs.Add(self.preview,1,wx.EXPAND);add_zoom_toolbar(right,self.preview,rs);self.summary=wx.StaticText(right,label="No analysis yet.");rs.Add(self.summary,0,wx.EXPAND|wx.ALL,8);right.SetSizer(rs);split.SplitVertically(left,right,730);root.Add(split,1,wx.EXPAND|wx.ALL,8);p.SetSizer(root)
+    def on_finding_pick(self,data):
+        """Click a finding marker in the preview: highlight it and cross-select its net."""
+        index=data if isinstance(data,int) else None
+        if index is None or not self.result or index>=len(self.result.findings):return
+        finding=self.result.findings[index]
+        for row in range(self.table.GetItemCount()):
+            if self.table.GetItemText(row,4).startswith(f"{finding.x_mm:.2f}, {finding.y_mm:.2f}"):
+                self.table.SetItemState(row,wx.LIST_STATE_SELECTED|wx.LIST_STATE_FOCUSED,wx.LIST_STATE_SELECTED|wx.LIST_STATE_FOCUSED);break
+        self.cross_select_net(finding.net,f"Preview click: selected and highlighted {finding.net}; finding {index+1} marked.")
     def collect(self):
         segments=[]; vias=[]
         for item in self.board.GetTracks():
@@ -106,11 +117,17 @@ class ReturnPathFrame(wx.Frame):
             self.guide.set_step(2,"Review findings; double-click a row to cross-select its net.")
         except Exception as exc:wx.MessageBox(str(exc),"Audit failed",wx.OK|wx.ICON_ERROR)
     def select(self,event):
-        net=self.table.GetItemText(event.GetIndex(),2)
+        index=event.GetIndex()
+        net=self.table.GetItemText(index,2)
+        self.preview.set_highlight(index)
+        self.cross_select_net(net,f"Selected and highlighted {net}; finding marked in preview.")
+    def cross_select_net(self,net,message):
         try:
-            for item in self.board.GetTracks():
-                if str(getattr(item,"GetNetname",lambda:"")())==net:getattr(item,"SetSelected",lambda:None)()
+            items=[item for item in self.board.GetTracks() if str(getattr(item,"GetNetname",lambda:"")())==net]
+            pcb_select_items(items)
+            pcb_highlight_net(self.board,net)
             pcbnew.Refresh()
+            self.summary.SetLabel(message)
         except Exception:pass
     def export(self,_event):
         if not self.result:return

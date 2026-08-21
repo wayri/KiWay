@@ -4,7 +4,7 @@ from pathlib import Path
 import pcbnew,wx
 from .analysis import PadNode,analyze_decoupling,infer_regulators
 from .guided_ui import add_workflow, mark_primary, section
-from .preview_kit import PanZoomCanvas, add_zoom_toolbar, severity_colour
+from .preview_kit import PanZoomCanvas, add_zoom_toolbar, severity_colour, pcb_select_items, pcb_highlight_net
 
 STATUS_COLOURS={"PASS":"#3fa56b","WARN":"#d4a62a","FAIL":"#e34a43","INFO":"#3399cc"}
 ROLE_COLOURS={"rail":"#3fa56b","ground":"#e34a43","load":"#d4a62a","capacitor":"#3399cc","other":"#8fa5b8"}
@@ -31,9 +31,10 @@ class PdnMapPreview(PanZoomCanvas):
             elif matches(net,rails):role="rail"
             elif fnmatch.fnmatch(p.reference,caps):role="capacitor"
             elif fnmatch.fnmatch(p.reference,loads):role="load"
-            self.nodes.append((role,(p.x_mm,p.y_mm),f"{p.reference}.{p.pad}"))
+            self.nodes.append((role,(p.x_mm,p.y_mm),f"{p.reference}.{p.pad}",p.net))
         self.flagged={item.load for item in findings if getattr(item,"severity","").upper()=="FAIL" and getattr(item,"load","")}
         self.set_legend([(ROLE_COLOURS[name],name) for name in ("rail","ground","load","capacitor")]+[(STATUS_COLOURS["FAIL"],"failed pin")])
+        self.set_picks([{"x":node[1][0],"y":node[1][1],"r":0.8,"data":(node[2],node[3])} for node in self.nodes])
         self.Refresh();self.fit()
     def scene_bounds(self):
         if not self.nodes:return None
@@ -41,7 +42,8 @@ class PdnMapPreview(PanZoomCanvas):
         return (min(xs),min(ys),max(xs),max(ys))
     def draw_scene(self,gc,project):
         gc.SetFont(wx.Font(8,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL),"#aab7c4")
-        for role,(x,y),label in self.nodes:
+        for node in self.nodes:
+            role,(x,y),label,_net=node
             sx,sy=project((x,y));colour=wx.Colour(ROLE_COLOURS.get(role,ROLE_COLOURS["other"]))
             gc.SetPen(wx.Pen(colour,1));gc.SetBrush(wx.Brush(colour))
             size=10 if role!="capacitor" else 7
@@ -51,7 +53,7 @@ class PdnMapPreview(PanZoomCanvas):
                 gc.SetPen(wx.Pen(wx.Colour(STATUS_COLOURS["FAIL"]),2));gc.SetBrush(wx.TRANSPARENT_BRUSH);gc.DrawEllipse(sx-9,sy-9,18,18)
 
 class PdnDecouplingPlugin(pcbnew.ActionPlugin):
-    def defaults(self):self.name="KiWay PDN and Decoupling Planner";self.category="Analysis";self.description="Audit power-rail topology and local decoupling placement.";self.show_toolbar_button=True;self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png");self.dark_icon_file_name=self.icon_file_name;self.version="0.2.0"
+    def defaults(self):self.name="KiWay PDN and Decoupling Planner";self.category="Analysis";self.description="Audit power-rail topology and local decoupling placement.";self.show_toolbar_button=True;self.icon_file_name=os.path.join(os.path.dirname(__file__),"icon.png");self.dark_icon_file_name=self.icon_file_name;self.version="0.3.0"
     def Run(self):
         board=pcbnew.GetBoard()
         if board is None:return
@@ -68,7 +70,7 @@ class PdnFrame(wx.Frame):
         a=mark_primary(wx.Button(settings_parent,label="Analyze PDN"),"Analyze power pins and nearby valid decoupling capacitors");a.Bind(wx.EVT_BUTTON,self.analyze);g.Add(a);self.summary=wx.StaticText(settings_parent,label="No analysis yet.");g.Add(self.summary,1,wx.ALIGN_CENTER_VERTICAL);        settings_box.Add(g,1,wx.EXPAND|wx.ALL,8);r.Add(settings_box,0,wx.EXPAND|wx.ALL,10)
         split=wx.SplitterWindow(p);left=wx.Panel(split);right=wx.Panel(split);ls=wx.BoxSizer(wx.VERTICAL);rs=wx.BoxSizer(wx.VERTICAL)
         self.table=wx.ListCtrl(left,style=wx.LC_REPORT);[(self.table.InsertColumn(i,name,width=width)) for i,(name,width) in enumerate((("Severity",90),("Rail",160),("Load pin",140),("Check",190),("Evidence",500)))];self.table.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.select);ls.Add(self.table,1,wx.EXPAND);left.SetSizer(ls)
-        self.preview=PdnMapPreview(right);rs.Add(self.preview,1,wx.EXPAND);add_zoom_toolbar(right,self.preview,rs);self.map_summary=wx.StaticText(right,label="Placement map appears after analysis.");rs.Add(self.map_summary,0,wx.EXPAND|wx.ALL,6);right.SetSizer(rs)
+        self.preview=PdnMapPreview(right);self.preview.on_pick=self.on_map_pick;rs.Add(self.preview,1,wx.EXPAND);add_zoom_toolbar(right,self.preview,rs);self.map_summary=wx.StaticText(right,label="Placement map appears after analysis.");rs.Add(self.map_summary,0,wx.EXPAND|wx.ALL,6);right.SetSizer(rs)
         split.SplitVertically(left,right,560);r.Add(split,1,wx.EXPAND|wx.ALL,8);ex=wx.Button(p,label="Export CSV");ex.Bind(wx.EVT_BUTTON,self.export);r.Add(ex,0,wx.ALIGN_RIGHT|wx.ALL,8);p.SetSizer(r)
         make_sortable(self.table)
     def pads(self):
@@ -85,11 +87,27 @@ class PdnFrame(wx.Frame):
         self.summary.SetLabel(f"{len(set(p.net for p in pads if p.net))} nets | {len(regs)} regulator candidates | {len(self.findings)} load-pin checks");self.guide.set_step(2,"Review findings and the placement map; double-click a load pin to cross-select its component.")
     def select(self,event):
         target=self.table.GetItemText(event.GetIndex(),2).split(".",1)[0]
+        self.preview.set_highlight(next((node[2] for node in self.preview.nodes if node[2].split(".",1)[0]==target),""))
         try:
             for fp in self.board.GetFootprints():
                 if str(fp.GetReference())==target:fp.SetSelected()
             pcbnew.Refresh()
         except Exception:pass
+    def on_map_pick(self,data):
+        """Click a preview pad: highlight it, cross-select its footprint, mark its net."""
+        if not isinstance(data,tuple) or not data:return
+        label,net=(list(data)+[""])[:2]
+        reference=label.split(".",1)[0]
+        self.preview.set_highlight(label)
+        try:
+            for fp in self.board.GetFootprints():
+                if str(fp.GetReference())==reference:fp.SetSelected()
+            pcb_select_items([])
+            pcb_highlight_net(self.board,self.board.FindFootprintByReference(reference).Pads()[0].GetNetname() if hasattr(self.board,"FindFootprintByReference") else net)
+            pcbnew.Refresh()
+            self.map_summary.SetLabel(f"Picked {label}" + (f" on {net}; net highlighted." if net else "."))
+        except Exception as exc:
+            self.map_summary.SetLabel(f"Picked {label} ({exc}).")
     def export(self,_event):
         if not self.findings:return
         with wx.FileDialog(self,"Export PDN audit",wildcard="CSV (*.csv)|*.csv",style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT) as d:
