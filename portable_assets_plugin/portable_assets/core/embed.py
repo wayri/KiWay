@@ -181,7 +181,7 @@ def classify(name: str) -> str:
     return "other"
 
 
-@dataclass(slots=True)
+@dataclass
 class EmbeddedBlob:
     name: str
     data: bytes

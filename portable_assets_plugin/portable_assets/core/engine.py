@@ -65,7 +65,7 @@ def _model_path(model: sexpr.Node) -> str:
     return model.atoms[1].value if len(model.atoms) >= 2 else ""
 
 
-@dataclass(slots=True)
+@dataclass
 class AssetStatus:
     reference: str
     kind: str
@@ -75,7 +75,7 @@ class AssetStatus:
     detail: str = ""
 
 
-@dataclass(slots=True)
+@dataclass
 class ScanReport:
     project_dir: str
     board: str
@@ -90,7 +90,7 @@ class ScanReport:
     warnings: list[str] = field(default_factory=list)
 
 
-@dataclass(slots=True)
+@dataclass
 class PortableOptions:
     embed_3d: bool = True
     snapshot_symbols: bool = True
@@ -100,7 +100,7 @@ class PortableOptions:
     model_search_roots: list[str] = field(default_factory=list)
 
 
-@dataclass(slots=True)
+@dataclass
 class ApplyResult:
     backup_dir: str
     files_written: list[str]

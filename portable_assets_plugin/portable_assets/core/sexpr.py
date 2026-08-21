@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Iterator, Optional
 
 
-@dataclass(slots=True)
+@dataclass
 class Atom:
     value: str
     start: int
@@ -18,7 +18,7 @@ class Atom:
     quoted: bool = False
 
 
-@dataclass(slots=True)
+@dataclass
 class Node:
     start: int
     end: int = -1
